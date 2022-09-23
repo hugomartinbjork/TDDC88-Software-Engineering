@@ -1,92 +1,128 @@
-# RDX Solutions Backend Project
+Process owner: Fredrik Hammarbäck (Development Manager), Oscar Söderlund (Technical Writer)
+
+Reviewer: Madeleine Jacobsson (Process Manager), Adam Åström (R&D Line Manager)
+
+Date: **TBA – THIS PROCESS IS NOT YET ACTIVE**
+
+Latest update: 2022-09-20
+
+
+# Git branching process: trunk-based development - Let’s git good
+
+**About trunk-based development:**
+
+Continuously integrating progress made by developers using this method is very similar to simple feature branching. The main difference is the frequency with which new branches are created, updated, integrated and closed. 
+<br>
+<br>
+
+**How will the git structure look?**
+
+
+![Skärmavbild 2022-09-23 kl. 18.56.15.png](./Skärmavbild 2022-09-23 kl. 18.56.15.png)
+
+The “Main Branch” will contain the absolute confirmed progress (version 1, version 2, etc.). This branch will be the least frequently updated branch.
+
+The “Developer Branch” will be the most frequently branch and will be the base for continuous updating and branching.
+
+The “Feature Branch”(es) will be temporary branches created for very specific tasks by each developer working on the task. Once tasks are completed, the branches will be terminated.
+<br>
+<br>
+**Why should we use this Git strategy?**
+
+If trunk-based development is used successfully, the developer branch will be continuously updated and the developers respective feature branches will most often contain the latest updates on the developer branch. Since all merge conflicts are solved by each developer on their working branch, no single person will be responsible for or approving all merges. This makes version handling very easy since the developers will handle conflicts that are related to what they themselves are working on at the moment.
+<br>
+<br>
+
+**How will the flow of version handling look?**
+![Skärmavbild 2022-09-21 kl. 14.39.07.png](./Skärmavbild 2022-09-21 kl. 14.39.07.png)
+
+Pulling and merging occurs frequently. Pulling before merging is crucial to solving and avoiding merge conflicts.
+
+<br>
+<br>
+**How does trunk-based development work for you, the developer?**
+<br>
+Whenever you are to continue or start working on a feature or any coding task, following these steps will ensure that you and your fellow developers maintain and work on the latest version of our product. 
+
+1. Before you start working on a task, branch out from the Developer Branch and name your new branch after your task. If, for example, you are to start working on a function that allows for editing of user information, simply name the branch “feature/edit-user-info”. Checking out using the command *git checkout -b “feature/edit-user-info”.*
+1. After some time of coding (about once an hour), update your branch with what has changed in the developer branch. This is done using the command *git pull origin dev* where “dev” is the name of the developer branch.
+1. Pulling from the developer branch will sometimes result in merge conflicts. As long as the different branches are working on different things, these conflicts are usually solved very quickly by simple clicking “accept incoming changes”. If there is some overlapping or conflicting code, further investigate and solve merge conflicts until none remain. 
+1. Whenever you feel it’s time to commit and save your progress, simply follow these steps:
+   1. Git pull origin dev (and solve for eventual merge conflicts)
+   1. Git status.
+   1. Git add <<files you have edited>>
+   1. Git commit -m ”<<descriptive comment>>”
+1. The commits you make during your work should be merged often (once a day or more depending on the amount of changes).
+1. When you have completed your task, repeat steps 1-5 and merge one final time and delete the branch. Performing a branch deletion while merging can be done by ticking the box asking if you wish to delete your source branch while merging.
+<br>
+<br>
+
+**How will simultaneous coding work in practice?:**
+
+![Skärmavbild 2022-09-23 kl. 19.36.38.png](./Skärmavbild 2022-09-23 kl. 19.36.38.png)
+
+Developing branches will continuously receive and submit progress from and to other branches. In the example case above, the second pull to branch A will contain merged changes made on branch B. Each pull that contains changes to the developer branch might cause conflicts. If the task division between developers is clear, conflicts rarely happen.
+
+# Instruction of how to use process 
+
+**We use the following GitLab repo for our code:**
+
+<https://gitlab.liu.se/tddc88-2022/c4/rdx-solutions-backend-project>
+
+**How to see our branches:** 
+
+For an overview of the branching structure of the repo, press Repository in the menu on the left-hand side. Press Graph (as seen in the below figure).
+
+![Skärmavbild 2022-09-23 kl. 19.38.22.png](./Skärmavbild 2022-09-23 kl. 19.38.22.png)
+
+
+You will be met with a graph of the current branches, where the latest commits are presented at the top, see the image below. Note that this image is taken from Stack Overflow, our graph will look a bit different.
+
+![Skärmavbild 2022-09-23 kl. 19.39.03.png](./Skärmavbild 2022-09-23 kl. 19.39.03.png)
+
+## Some useful commands:
+
+**You can propose changes** (add it to the Index) using the command: 
+
+*git add <filename>* 
+
+**You can add several files at once** if you want to by using one of the following commands:
+
+*git add <filename1> <filename2> ... <filenameN*>, several files separated by spaces
+
+*git add -A*, stages all changes
+
+*git add .*, stages new files and modifications, without deletions (on the current directory and its subdirectories).
+
+*git add -u*, stages modifications and deletions, excluding new files.
+
+**If something goes wrong.**
+
+If you are in need of comparison between your current branch and the developer branch, using the command *git checkout <<name of the developer branch>>* will move you to the developer branch. Make sure you commit the changes in your own feature branch before switching branch or else you will lose the progress you have made locally.  
+
+Should you be unable to resolve any eventual conflict in your branch or need help with version control, contact the configurations team and ask for help. Be sure to never merge any branch containing unresolved issues. 
 
 
 
-## Getting started
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+**Some other useful commands for resolving issues with your version handling are:**
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+_Git stash**,**_ **Your changes will then be “saved for later”** and can be fetched later to the active branch using:
 
-## Add your files
+*git stash apply,* the stored changes can then be deleted from the stash using:
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+*git stash drop*
 
-```
-cd existing_repo
-git remote add origin https://gitlab.liu.se/tddc88-2022/c4/rdx-solutions-backend-project.git
-git branch -M main
-git push -uf origin main
-```
+**If you mess up your versions big time**, it might be a good idea to revert your version to a specific commit by using
 
-## Integrate with your tools
+*git revert <commit id>*
 
-- [ ] [Set up project integrations](https://gitlab.liu.se/tddc88-2022/c4/rdx-solutions-backend-project/-/settings/integrations)
+**The commit id** can be found by using the command
 
-## Collaborate with your team
+*git log*
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+and find ex. “commit f668c5f186aeb35f0fff5049c847ef2056512290”, where the commit id is the long string of letters and numbers.
 
-## Test and Deploy
 
-Use the built-in continuous integration in GitLab.
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
 
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
