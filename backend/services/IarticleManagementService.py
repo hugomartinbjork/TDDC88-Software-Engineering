@@ -1,7 +1,4 @@
-from backend.Core.models import Article
-
-
-from core.models import Article
+from backend.models import Article
 
 class IarticleManagementService():
     def getArticleByLioId(lioId: str) -> Article:

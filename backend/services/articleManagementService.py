@@ -1,11 +1,13 @@
 from backend.services.IarticleManagementService import IarticleManagementService
-from core import IarticleModule, articleModule
-from core.models import Article
+from backend.models import Article
+from backend.__init__ import si 
 
+@si.register()
 class articleManagementService(IarticleManagementService):
-
-    def __init__(self, articleModule : IarticleModule):    
-        self._articleModule = articleModule
+    @si.inject
+    def __init__(self, _deps):  
+        articleModule = _deps['articleModule']
+        self._articleModule = articleModule()
 
     def getArticleByLioId(self, lioId: str) -> Article:
         return self._articleModule.getArticleByLioId(lioId)

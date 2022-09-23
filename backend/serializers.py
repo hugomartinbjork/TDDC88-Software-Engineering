@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from backend.core.models import Article, Storage, storageUnit
+from backend.models import Article, Storage, storageUnit
 
 class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
