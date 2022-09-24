@@ -2,7 +2,10 @@
 *.log
 *.pot
 *.pyc
-__pycache__
+ __pycache__
+__pycache__/
+*/__pycache__/
+*.py[cod]
 db.sqlite3
 media
 
@@ -13,3 +16,27 @@ media
 !.vscode/launch.json 
 !.vscode/extensions.json 
 .history
+
+# Environments 
+.env 
+.venv 
+env/ 
+venv/ 
+ENV/ 
+env.bak/ 
+venv.bak/ 
+
+# Distribution / packaging
+bin/
+build/
+develop-eggs/
+dist/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
