@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+from rdxSolutionsBackendProject import databaseConfig
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -85,9 +86,9 @@ WSGI_APPLICATION = 'rdxSolutionsBackendProject.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE' : 'django.db.backends.postgresql_psycopg2',
-        'NAME' : 'rdxSolutionsDatabase',
+        'NAME' : databaseConfig.my_Databaseparameters['NAME'],
         'USER' : 'postgres',
-        'PASSWORD' : 'Kebab100',
+        'PASSWORD' : databaseConfig.my_Databaseparameters['PASSWORD'],
         'HOST': 'localhost', 
         'PORT': '5432',
     }
