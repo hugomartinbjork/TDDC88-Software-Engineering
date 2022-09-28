@@ -9,6 +9,8 @@ from backend.__init__ import si
 from backend.coremodels.article import Article 
 from backend.coremodels.storage import Storage
 from backend.coremodels.storageComponent import storageUnit
+from ..services.userService import createToken
+
 
 # Create your views here.
 
@@ -26,3 +28,11 @@ class article(View):
             if serializer.is_valid:
                 return JsonResponse(serializer.data, status=200)
             return HttpResponseBadRequest
+
+
+def login_user(request):
+    id= request['id']
+    token=createToken(id)
+    return JsonResponse(token)
+
+    

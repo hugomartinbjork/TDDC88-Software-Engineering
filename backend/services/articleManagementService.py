@@ -10,3 +10,4 @@ class articleManagementService(IarticleManagementService):
             return article
         except:
             return None
+            
