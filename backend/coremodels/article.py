@@ -6,7 +6,7 @@ from backend.coremodels.group import Group
 class Article(models.Model):
     name = models.CharField(max_length=30)
     lioId = models.CharField(max_length=15, primary_key=True)
-    article_group = models.ManyToManyField(Group)
+    article_group = models.ManyToManyField('Group')
     image = models.ImageField(null=True, blank=True)
     description = models.CharField(max_length=100, null = True)
     std_cost = models.IntegerField(null = True)

@@ -8,6 +8,12 @@ from backend.coremodels.article import Group
 admin.site.register(Article)
 admin.site.register(Storage)
 admin.site.register(storageUnit)
-admin.site.register(Group)
 
+
+class ArticleAdminInline(admin.TabularInline):
+    model = Article.article_group.through
+
+class GroupAdmin(admin.ModelAdmin):
+    inlines = (ArticleAdminInline, )
+admin.site.register(Group, GroupAdmin)
 
