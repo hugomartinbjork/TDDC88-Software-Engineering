@@ -4,6 +4,7 @@ from backend.coremodels.article import Article
 from backend.coremodels.storage import Storage
 from backend.coremodels.storageComponent import storageUnit
 from backend.coremodels.cost_center import CostCenter
+from backend.coremodels.user_info import UserInfo
 
 class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -26,3 +27,8 @@ class CostCenterSerializer(serializers.ModelSerializer):
     class Meta:
         model = CostCenter
         fields = ('id', 'name', 'users')
+
+class UserInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserInfo
+        fields = ('user', 'cost_center')
