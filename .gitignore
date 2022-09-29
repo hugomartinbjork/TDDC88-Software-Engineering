@@ -40,3 +40,6 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+
+# database password and name
+rdxSolutionsBackendProject/databaseConfig.py
