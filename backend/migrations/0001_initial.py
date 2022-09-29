@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='storageUnit',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('qrId', models.CharField(max_length=15, primary_key=True, serialize=False)),
                 ('currentStock', models.PositiveSmallIntegerField(default=0)),
                 ('article', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='backend.article')),
                 ('storage', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='backend.storage')),
