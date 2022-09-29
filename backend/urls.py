@@ -4,6 +4,8 @@ from backend.views import views
 
 urlPatterns = [
     path('article/<str:articleId>/', views.article.as_view()),
+    path('group/<str:groupId>/', views.group.as_view()),
+    path('storage/<int:storageId>/', views.storage.as_view()),
 ]
 
 urlpatterns = format_suffix_patterns(urlPatterns)
