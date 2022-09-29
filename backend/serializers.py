@@ -2,7 +2,7 @@ from rest_framework import serializers
 from backend.coremodels.article import Article
 from backend.coremodels.article import Group
 from backend.coremodels.storage import Storage
-from backend.coremodels.storageComponent import storageUnit
+from backend.coremodels.storageComponent import storageComponent
 
 
 class ArticleSerializer(serializers.ModelSerializer):
@@ -16,12 +16,13 @@ class StorageSerializer(serializers.ModelSerializer):
         model = Storage
         fields = ('name',)
 
-class StorageUnitSerializer(serializers.ModelSerializer):
+class StorageComponentSerializer(serializers.ModelSerializer):
     class Meta:
-        model = storageUnit
-        fields = ('currentStock', 'article', 'storage',)
+        model = storageComponent
+        fields = ('qrId', 'article', 'storage', 'amount', 'standardOrderAmount', 'orderpoint',)
 
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = ('id', 'group_name')
+        
