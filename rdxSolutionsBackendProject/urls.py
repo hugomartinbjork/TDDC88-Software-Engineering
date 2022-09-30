@@ -24,6 +24,5 @@ admin.site.index_title = "Welcome to Region Östergötland"
 urlpatterns = [
     path("accounts/", include("django.contrib.auth.urls")),
     path('admin/', admin.site.urls),
-    
     path('', include('backend.urls')),
 ]

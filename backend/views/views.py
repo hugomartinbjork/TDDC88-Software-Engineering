@@ -1,4 +1,6 @@
-from tokenize import Token
+from http.client import OK
+import pkgutil
+from urllib import request
 from django.shortcuts import render
 from rest_framework import generics
 from django.http import Http404, JsonResponse, HttpResponseBadRequest
@@ -12,7 +14,13 @@ from backend.__init__ import si
 from backend.coremodels.article import Article
 from backend.coremodels.storage import Storage
 from backend.coremodels.storageComponent import storageUnit
-#from ..services.userService import createToken
+from rest_framework.authtoken.models import Token
+from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.authtoken.views import ObtainAuthToken
+from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
 
 
 # Create your views here.
@@ -37,29 +45,69 @@ class article(View):
             return HttpResponseBadRequest
 
 
-class login_user_with_id(View):
+class Login(APIView):
+
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        if not username or not password:
+            return Response({'error': 'Please fill in all fields'}, status=status.HTTP_400_BAD_REQUEST)
+
+        check_user = User.objects.filter(username=username).exists()
+        if check_user == False:
+            return Response({'error': 'Username does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            return self._userService.createAuthToken(request, user)
+        else:
+            return Response({'error': 'invalid details'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LoginWithId(APIView):
     @si.inject
     def __init__(self, _deps):
         userService = _deps['userService']
         self._userService = userService()
 
-    def get(self, request, userId):
-        if request.method == 'GET':
-            token = self._userService.getAuthtokenId(userId)
-        if token is None:
-            raise Http404('Could not find user')
-        return JsonResponse({'token': token}, status=200)
+    def post(self, request):
+        user_id = request.data.get('id')
+
+        check_user = User.objects.filter(id=user_id).exists()
+        if check_user == False:
+            return Response({'error': 'User ID does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+        user = self._userService.authenticatewithid(id=user_id)
+        if user is not None:
+            return self._userService.createAuthToken(request, user)
+        else:
+            return Response({'error': 'invalid details'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class login_user(View):
-    @si.inject
-    def __init__(self, _deps):
-        userService = _deps['userService']
-        self._userService = userService()
+# class login_user_with_id(View):
+#     @si.inject
+#     def __init__(self, _deps):
+#         userService = _deps['userService']
+#         self._userService = userService()
 
-    def get(self, request, username, password):
-        if request.method == 'GET':
-            token = self._userService.getAuthtoken(username, password)
-        if token is None:
-            raise Http404('Could not find user')
-        return JsonResponse({'token': token}, status=200)
+#     def get(self, request, userId):
+#         if request.method == 'GET':
+#             token = self._userService.getAuthtokenId(userId)
+#         if token is None:
+#             raise Http404('Could not find user')
+#         return JsonResponse({'token': token}, status=200)
+
+
+# class login_user(View):
+#     @si.inject
+#     def __init__(self, _deps):
+#         userService = _deps['userService']
+#         self._userService = userService()
+
+#     def get(self, request, username, password):
+#         if request.method == 'GET':
+#             token = self._userService.getAuthtoken(username, password)
+#         if token is None:
+#             raise Http404('Could not find user')
+#         return JsonResponse({'token': token}, status=200)
