@@ -6,7 +6,8 @@ from backend.coremodels.cost_center import CostCenter
 from backend.coremodels.user_info import UserInfo
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
-from backend.coremodels.article import Group
+from backend.coremodels.article import GroupInfo
+from django.contrib.auth.models import Group
 from backend.coremodels.storageComponent import storageComponent
 
 # Register your models here.
@@ -17,6 +18,10 @@ admin.site.register(CostCenter)
 # Displays cost center as an option in the user class
 class UserInfoInLine(admin.StackedInline):
     model = UserInfo
+
+class UserGroupInLine(admin.StackedInline):
+        model = Group
+
 
 
 class UserAdmin(BaseUserAdmin):
@@ -42,7 +47,7 @@ class GroupAdmin(admin.ModelAdmin):
     inlines = (ArticleAdminInline, )
 
 
-admin.site.register(Group, GroupAdmin)
+admin.site.register(GroupInfo, GroupAdmin)
 #######################################################
 
 
