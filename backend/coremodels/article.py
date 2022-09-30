@@ -1,7 +1,7 @@
 from tkinter import CASCADE
 from unittest.util import _MAX_LENGTH
 from django.db import models
-from backend.coremodels.group import Group
+from backend.coremodels.group import GroupInfo
 #from backend.coremodels.storageComponent import storageComponent
 
 
@@ -9,7 +9,7 @@ from backend.coremodels.group import Group
 class Article(models.Model):
     name = models.CharField(max_length=30)
     lioId = models.CharField(max_length=15, primary_key=True)
-    article_group = models.ManyToManyField('Group')
+    article_group = models.ManyToManyField(GroupInfo)
     image = models.ImageField(null=True, blank=True)
     description = models.CharField(max_length=100, null = True)
     std_cost = models.IntegerField(null = True)

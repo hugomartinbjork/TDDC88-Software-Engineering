@@ -1,7 +1,7 @@
 from backend.coremodels.cost_center import CostCenter
 from rest_framework import serializers
 from backend.coremodels.article import Article
-from backend.coremodels.article import Group
+from backend.coremodels.article import GroupInfo
 from backend.coremodels.storage import Storage
 # from backend.coremodels.storageComponent import storageUnit
 from backend.coremodels.cost_center import CostCenter
@@ -48,5 +48,5 @@ class StorageComponentSerializer(serializers.ModelSerializer):
 
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Group
+        model = GroupInfo
         fields = ('id', 'group_name')
