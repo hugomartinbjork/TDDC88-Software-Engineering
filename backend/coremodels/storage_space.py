@@ -12,4 +12,4 @@ class StorageSpace(models.Model):
     amount = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
-        return str(self.storageUnit) + " " + str(self.article)
+        return str(self.storage_unit) + " " + str(self.article)
