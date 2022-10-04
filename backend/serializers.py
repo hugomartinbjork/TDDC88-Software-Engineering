@@ -2,11 +2,11 @@ from backend.coremodels.cost_center import CostCenter
 from rest_framework import serializers
 from backend.coremodels.article import Article
 from backend.coremodels.article import GroupInfo
-from backend.coremodels.storage import Storage
+from backend.coremodels.storage_unit import StorageUnit
 # from backend.coremodels.storageComponent import storageUnit
 from backend.coremodels.cost_center import CostCenter
 from backend.coremodels.user_info import UserInfo
-from backend.coremodels.storageComponent import storageComponent
+from backend.coremodels.storage_space import StorageSpace
 
 
 class ArticleSerializer(serializers.ModelSerializer):
@@ -18,7 +18,7 @@ class ArticleSerializer(serializers.ModelSerializer):
 
 class StorageSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Storage
+        model = StorageUnit
         fields = ('name',)
 
 
@@ -41,9 +41,9 @@ class UserInfoSerializer(serializers.ModelSerializer):
 
 class StorageComponentSerializer(serializers.ModelSerializer):
     class Meta:
-        model = storageComponent
-        fields = ('qrId', 'article', 'storage', 'amount',
-                  'standardOrderAmount', 'orderpoint',)
+        model = StorageSpace
+        fields = ('id', 'storage_unit', 'article', 'orderpoint', 'standard_order_amount',
+                    'maximal_capacity', 'amount')
 
 
 class GroupSerializer(serializers.ModelSerializer):

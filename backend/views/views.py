@@ -9,8 +9,8 @@ from backend.services.storageManagementService import storageManagementService #
 from django.views import View
 from backend.__init__ import si
 from backend.coremodels.article import Article 
-from backend.coremodels.storage import Storage
-from backend.coremodels.storageComponent import storageComponent
+from backend.coremodels.storage_unit import StorageUnit
+from backend.coremodels.storage_space import StorageSpace
 
 # Create your views here.
 

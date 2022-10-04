@@ -1,12 +1,12 @@
 from backend.services.IstorageManagementService import IstorageManagementService
-from backend.coremodels.storage import Storage
+from backend.coremodels.storage_unit import StorageUnit
 from backend.__init__ import si 
 
 @si.register(name = 'storageManagementService')
 class storageManagementService(IstorageManagementService):
-    def getStorageById(self, id: str) -> Storage:
+    def getStorageById(self, id: str) -> StorageUnit:
         try:
-            storage = Storage.objects.get(id=id)
+            storage = StorageUnit.objects.get(id=id)
             return storage
         except:
             return None
