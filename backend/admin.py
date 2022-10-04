@@ -1,5 +1,6 @@
 from django.contrib import admin
 from backend.coremodels.article import Article
+from backend.coremodels.qr_code import QRCode
 from backend.coremodels.storage_unit import StorageUnit
 # from backend.coremodels.storageComponent import storageUnit
 from backend.coremodels.cost_center import CostCenter
@@ -9,6 +10,7 @@ from django.contrib.auth.models import User
 from backend.coremodels.article import GroupInfo
 from django.contrib.auth.models import Group
 from backend.coremodels.storage_space import StorageSpace
+from backend.coremodels.qr_code import QRCode
 
 # Register your models here.
 # admin.site.register(storageUnit)
@@ -55,7 +57,6 @@ admin.site.register(GroupInfo, GroupAdmin)
 class StorageSpaceInline(admin.TabularInline):
     model = StorageSpace
 
-
 class ArticleAdmin(admin.ModelAdmin):
     inlines = (StorageSpaceInline, )
 
@@ -69,3 +70,6 @@ class StorageAdmin(admin.ModelAdmin):
 
 
 admin.site.register(StorageUnit, StorageAdmin)
+
+# Display QRCode in Backend
+admin.site.register(QRCode)
