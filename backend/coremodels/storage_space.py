@@ -10,6 +10,8 @@ class StorageSpace(models.Model):
     standard_order_amount = models.PositiveSmallIntegerField(default=0)
     maximal_capacity = models.PositiveSmallIntegerField(default=0, null = False)
     amount = models.PositiveSmallIntegerField(default=0)
+    
+
 
     def __str__(self):
         return str(self.storage_unit) + " " + str(self.article)
