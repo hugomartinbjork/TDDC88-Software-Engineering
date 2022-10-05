@@ -14,8 +14,10 @@ from backend.coremodels.qr_code import QRCode
 class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
-        fields = ('name', 'lioId', 'article_group', 'image', 'description', 'std_cost', 'minimal_order_qt', 'price', 'refill_unit', 'take_out_unit', 'alternative_names',
-                  'alternative_articles', 'supplier', 'sup_ordernr')
+        fields = ('name', 'lioId', 'description', 'article_group', 'image', 'sanitation_level', 'price', 'alternative_names',
+                  'alternative_articles')
+
+        
 
 
 class StorageUnitSerializer(serializers.ModelSerializer):

@@ -1,6 +1,6 @@
 from django.db import models
 from backend.coremodels.article import Article
-from backend.coremodels.storage import Storage
+#from backend.coremodels.storage import Storage
 from backend.Order_text_files.utils import *
 
 class storageComponent(models.Model):
