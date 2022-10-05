@@ -3,10 +3,10 @@ FROM python:3
 
 # Edit with mysql-client, postgresql-client, sqlite3, etc. for your needs.
 # Or delete entirely if not needed.
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        postgresql-client \
-    && rm -rf /var/lib/apt/lists/*
+# RUN apt-get update \
+#    && apt-get install -y --no-install-recommends \
+#        postgresql-client \
+#    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /usr/src/app
 
