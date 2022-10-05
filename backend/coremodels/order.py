@@ -13,4 +13,4 @@ class Order(models.Model):
     expectedWait = models.PositiveSmallIntegerField(default=0)
     orderTime = models.DateTimeField(default=datetime.now)
     def __str__(self):
-        return self.id +": " + self.ofArticle + " " + self.toStorageUnit
+        return str(self.id) +": " + str(self.ofArticle) + " " + str(self.toStorageUnit)

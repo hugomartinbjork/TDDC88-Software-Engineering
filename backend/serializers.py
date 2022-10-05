@@ -9,6 +9,7 @@ from backend.coremodels.cost_center import CostCenter
 from backend.coremodels.user_info import UserInfo
 from backend.coremodels.storage_space import StorageSpace
 from backend.coremodels.qr_code import QRCode
+from backend.coremodels.order import Order
 
 
 class ArticleSerializer(serializers.ModelSerializer):
@@ -59,3 +60,8 @@ class QRCodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = QRCode
         fields = ('id', 'storage_space')
+
+class OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ('id', 'ofArticle', 'toStorageUnit', 'expectedWait', 'orderTime')

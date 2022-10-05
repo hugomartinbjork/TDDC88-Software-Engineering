@@ -13,6 +13,9 @@ from django.contrib.auth.models import Group
 from backend.coremodels.qr_code import QRCode
 from backend.coremodels.storage_space import StorageSpace
 from backend.coremodels.order import Order
+from django.utils.html import format_html
+
+from backend.services.orderManagementService import orderManagementService
 
 # Register your models here.
 # admin.site.register(storageUnit)
@@ -69,8 +72,6 @@ admin.site.register(Article, ArticleAdmin)
 
 class StorageAdmin(admin.ModelAdmin):
     inlines = (StorageSpaceInline, )
-
-
 
 
 # Display QRCode in Backend

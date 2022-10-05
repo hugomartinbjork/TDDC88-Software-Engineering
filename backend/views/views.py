@@ -1,11 +1,12 @@
 from django.shortcuts import render
 from rest_framework import generics
 from django.http import Http404, JsonResponse, HttpResponseBadRequest
-from ..serializers import StorageUnitSerializer, ArticleSerializer, GroupSerializer, QRCodeSerializer
+from ..serializers import StorageUnitSerializer, ArticleSerializer, GroupSerializer, QRCodeSerializer, OrderSerializer
 #This import is important for now, since the dependency in articlemanagmentservice will not be stored in the serviceInjector otherwise however, I'm
 from backend.services.articleManagementService import articleManagementService #hoping to be able to change this since it looks kind of trashy
 from backend.services.groupManagementService import groupManagementService
 from backend.services.storageManagementService import storageManagementService #hoping to be able to change this since it looks kind of trashy
+from backend.services.orderManagementService import orderManagementService
 from django.views import View
 from backend.__init__ import si
 from backend.coremodels.article import Article 
@@ -40,8 +41,9 @@ class group(View):
         if request.method == 'GET':
             group = self._groupManagementService.getGroupById(groupId)
             if group is None:
-                raise Http404("Could not find article")
+                raise Http404("Could not find group")
             serializer = GroupSerializer(group)
+
 class storage(View): 
     @si.inject #Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing 
     def __init__(self, _deps):
@@ -53,6 +55,21 @@ class storage(View):
             if storage is None:
                 raise Http404("Could not find storage")
             serializer = StorageUnitSerializer(storage)
+            if serializer.is_valid:
+                return JsonResponse(serializer.data, status=200)
+            return HttpResponseBadRequest
+
+class order(View): 
+    @si.inject #Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing 
+    def __init__(self, _deps):
+        orderManagementService = _deps['orderManagementService']
+        self._orderManagementService = orderManagementService() #Instance of dependency is created in constructor
+    def get(self, request, id): 
+        if request.method == 'GET':
+            order = self._orderManagementService.getOrderById(id)
+            if order is None:
+                raise Http404("Could not find order")
+            serializer = OrderSerializer(order)
             if serializer.is_valid:
                 return JsonResponse(serializer.data, status=200)
             return HttpResponseBadRequest
