@@ -1,6 +1,6 @@
 from backend.coremodels.order import Order
-from backend.coremodels.storageUnit import StorageUnit
-from backend.coremodels.storageSpace import StorageSpace
+from backend.coremodels.storage_unit import StorageUnit
+from backend.coremodels.storage_space import StorageSpace
 from backend.coremodels.centralStorageSpace import CentralStorageSpace
 from backend.__init__ import si
 

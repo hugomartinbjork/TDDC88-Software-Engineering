@@ -1,8 +1,9 @@
 from backend.services.IstorageManagementService import IstorageManagementService
-from backend.coremodels.storageUnit import StorageUnit
-from backend.__init__ import si 
+from backend.coremodels.storage_unit import StorageUnit
+from backend.__init__ import si
 
-@si.register(name = 'storageManagementService')
+
+@si.register(name='storageManagementService')
 class storageManagementService(IstorageManagementService):
     def getStorageById(self, id: str) -> StorageUnit:
         try:

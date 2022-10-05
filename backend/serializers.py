@@ -2,11 +2,12 @@ from backend.coremodels.cost_center import CostCenter
 from rest_framework import serializers
 from backend.coremodels.article import Article
 from backend.coremodels.article import GroupInfo
-from backend.coremodels.storageUnit import StorageUnit
+from backend.coremodels.qr_code import QRCode
+from backend.coremodels.storage_unit import StorageUnit
 # from backend.coremodels.storageComponent import storageUnit
 from backend.coremodels.cost_center import CostCenter
 from backend.coremodels.user_info import UserInfo
-from backend.coremodels.storageSpace import StorageSpace
+from backend.coremodels.storage_space import StorageSpace
 
 
 class ArticleSerializer(serializers.ModelSerializer):
@@ -16,7 +17,7 @@ class ArticleSerializer(serializers.ModelSerializer):
                   'alternative_articles', 'supplier', 'sup_ordernr')
 
 
-class StorageSerializer(serializers.ModelSerializer):
+class StorageUnitSerializer(serializers.ModelSerializer):
     class Meta:
         model = StorageUnit
         fields = ('name',)
@@ -39,14 +40,20 @@ class UserInfoSerializer(serializers.ModelSerializer):
         fields = ('user', 'cost_center')
 
 
-class StorageComponentSerializer(serializers.ModelSerializer):
+class StorageSpaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = StorageSpace
-        fields = ('qrId', 'article', 'storage', 'amount',
-                  'standardOrderAmount', 'orderpoint',)
+        fields = ('id', 'storage_unit', 'article', 'orderpoint', 'standard_order_amount',
+                  'maximal_capacity', 'amount')
 
 
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = GroupInfo
         fields = ('id', 'group_name')
+
+
+class QRCodeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QRCode
+        fields = ('id', 'storage_space')
