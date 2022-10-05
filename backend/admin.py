@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from backend.coremodels.article import GroupInfo
 from django.contrib.auth.models import Group
 from backend.coremodels.storageComponent import storageComponent
+from backend.views.views import storage
 
 # Register your models here.
 # admin.site.register(storageUnit)

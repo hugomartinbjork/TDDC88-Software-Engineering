@@ -21,7 +21,6 @@ class Article(models.Model):
     alternative_articles = models.ManyToManyField('self', blank = True)
     supplier = models.CharField(max_length=30, null = True)
     sup_ordernr = models.IntegerField(null = True)
-   # storageComponent = models.CharField(max_length=15, null = True)
 
     def __str__(self):
         return self.name
