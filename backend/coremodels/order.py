@@ -1,7 +1,7 @@
 from datetime import datetime
 from django.db import models
 from backend.coremodels.article import Article
-from backend.coremodels.storageUnit import StorageUnit
+from backend.coremodels.storage_unit import StorageUnit
 
 
 class Order(models.Model):
