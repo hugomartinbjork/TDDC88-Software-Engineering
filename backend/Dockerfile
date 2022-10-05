@@ -15,7 +15,7 @@ WORKDIR /code
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-COPY . .
+COPY . /
 
 ENTRYPOINT ["python", "manage.py"]
 CMD ["runserver", "0.0.0.0:8000"]
