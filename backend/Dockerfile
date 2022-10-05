@@ -8,14 +8,12 @@ RUN apt-get update && apt-get install -y \
 && rm -rf /var/lib/apt/lists/*
 
 
-
-RUN mkdir /code
-WORKDIR /code
+WORKDIR /app
 
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-COPY . /
+COPY . /app
 
 ENTRYPOINT ["python", "manage.py"]
 CMD ["runserver", "0.0.0.0:8000"]
