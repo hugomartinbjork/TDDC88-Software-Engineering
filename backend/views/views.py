@@ -52,7 +52,7 @@ class storage(View):
             storage = self._storageManagementService.getStorageById(storageId)
             if storage is None:
                 raise Http404("Could not find storage")
-            serializer = StorageSerializer(storage)
+            serializer = StorageUnitSerializer(storage)
             if serializer.is_valid:
                 return JsonResponse(serializer.data, status=200)
             return HttpResponseBadRequest
