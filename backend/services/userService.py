@@ -24,16 +24,3 @@ class userService(BaseBackend):
             'token': token.key,
         }
         return Response({'success': 'successfull login', 'data': data}, status=status.HTTP_200_OK)
-
-
-#     def getAuthtokenId(self, id):
-#         token = Token.objects.create(user=id).key
-#         return token
-
-#     def getAuthtoken(self, username, password):
-#         user = User.objects.get(username=username)
-#         if user.check_password(password):
-#             token = Token.objects.create(user=user.id).key
-#             return token
-#         else:
-#             return None
