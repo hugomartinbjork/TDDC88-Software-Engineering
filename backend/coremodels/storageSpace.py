@@ -2,7 +2,8 @@ from django.db import models
 from backend.coremodels.article import Article
 from backend.coremodels.storageUnit import StorageUnit
 
-class storageSpace(models.Model):
+
+class StorageSpace(models.Model):
     qrId = models.CharField(max_length=15, primary_key=True, default='0')
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     storage = models.ForeignKey(StorageUnit, on_delete=models.CASCADE)

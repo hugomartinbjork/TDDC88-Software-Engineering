@@ -1,45 +1,67 @@
 from backend.coremodels.order import Order
 from backend.coremodels.storageUnit import StorageUnit
-import storageManagementService
-from datetime import timedelta, datetime
+from backend.coremodels.storageSpace import StorageSpace
+from backend.coremodels.centralStorageSpace import CentralStorageSpace
 from backend.__init__ import si
 
 
 @si.register(name='OrderService')
 class OrderService():
 
+    # Returns None if the order does not exist. Otherwise returns the order.
     def has_order(self, storage_unit_id, article_id) -> Order:
-        order = Order.objects.get(
-            toStorageUnit=storage_unit_id, ofArticle=article_id)
+        order = Order.objects.filter(
+            toStorageUnit=storage_unit_id, ofArticle=article_id).first()
         return order
 
-    def order_arrived(self, order_id):
-        try:
-            order = Order.objects.get(id=order_id)
-            # Storage.addToStorage() We'll implement this when we can.
-        except:
-            print("Order has not arrived")
+    # Updates the storage space amount with the amount in the order.
+    # If order_arrived returns None, return error 404 in view.
+    def order_arrived(self, order_id) -> Order:
+        order = Order.objects.filter(id=order_id).first()
 
-    # Talk with elias for clarification
-    def get_expected_wait(self, storage_unit_id, article_id, amount) -> Order.expectedWait:
-        amount = StorageUnit.objects.get()
-        if amount == 0:
-            # Should it be a timedelta or just an integer?
-            expected_wait = timedelta.days(14)
+        if order is None:
+            return None
+
+        # Checks if the order is already processesed so we dont process the same order twice.
+        if order.hasArrived == False:
+            return None
+
+        storage_unit = StorageUnit.objects.get(id=order.toStorageUnit)
+        storage_space = StorageSpace.objects.get(storage=storage_unit)
+
+        storage_space.amount = + order.amount
+        storage_space.save()
+
+        order.hasArrived = True
+        order.save()
+        return order
+
+    # Gets expected time for order to arrive from central storage. Returns 14 days if the article does not exist.
+    def get_expected_wait(self, article_id, amount) -> int:
+        central_storage_stock = self.has_stock(article_id)
+
+        if central_storage_stock is None:
+            central_storage_stock = 0
+
+        if central_storage_stock > amount:
+            return 2
         else:
-            expected_wait = timedelta.days(2)
-        return expected_wait
+            return 14
 
-    # We need some clarification here as well
+    # Creates an order, saves in in the database and then returns said order.
+    # If the order can't be created None is returned.
     def place_order(self, storage_unit_id, article_id, amount):
-        # Should we query the amount from a particular storage unit? Where does the amount come from?
-        if amount == 0:
-            Order.objects.create(
-                article_id, storage_unit_id, timedelta.days(14), datetime.now())
-        else:
-            Order.objects.create(
-                article_id, storage_unit_id, timedelta.days(2), datetime.now())
+        try:
+            order = Order.objects.create(ofArticle=article_id, toStorageUnit=storage_unit_id,
+                                         amount=amount, expectedWait=self.get_expected_wait())
+            order.save()
+        except:
+            return None
 
-    # Should be storage service and not order service
-    def has_stock(self):
-        pass
+        return order
+
+    # Helper function to get amount from centralstorage. returns amount or None if the article does not exist.
+    def has_stock(self, article_id):
+        central_storage_space = CentralStorageSpace.objects.filter(
+            id=article_id).first()
+        return central_storage_space.amount

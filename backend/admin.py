@@ -9,7 +9,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
 from backend.coremodels.article import GroupInfo
 from django.contrib.auth.models import Group
-from backend.coremodels.storageSpace import storageSpace
+from backend.coremodels.storageSpace import StorageSpace
 from backend.coremodels.order import Order
 
 # Register your models here.
@@ -21,9 +21,9 @@ admin.site.register(CostCenter)
 class UserInfoInLine(admin.StackedInline):
     model = UserInfo
 
-class UserGroupInLine(admin.StackedInline):
-        model = Group
 
+class UserGroupInLine(admin.StackedInline):
+    model = Group
 
 
 class UserAdmin(BaseUserAdmin):
@@ -37,7 +37,7 @@ admin.site.register(User, UserAdmin)
 # Register your models here.
 # admin.site.register(Article)
 
-admin.site.register(storageSpace)
+admin.site.register(StorageSpace)
 
 
 # Displays all articles in the group
@@ -55,7 +55,7 @@ admin.site.register(GroupInfo, GroupAdmin)
 
 # Displays which storage components that the articles are in
 class StorageComponentInline(admin.TabularInline):
-    model = storageSpace
+    model = StorageSpace
 
 
 class ArticleAdmin(admin.ModelAdmin):

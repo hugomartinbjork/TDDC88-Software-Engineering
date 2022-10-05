@@ -6,7 +6,7 @@ from backend.coremodels.storageUnit import StorageUnit
 # from backend.coremodels.storageComponent import storageUnit
 from backend.coremodels.cost_center import CostCenter
 from backend.coremodels.user_info import UserInfo
-from backend.coremodels.storageSpace import storageSpace
+from backend.coremodels.storageSpace import StorageSpace
 
 
 class ArticleSerializer(serializers.ModelSerializer):
@@ -41,7 +41,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
 
 class StorageComponentSerializer(serializers.ModelSerializer):
     class Meta:
-        model = storageSpace
+        model = StorageSpace
         fields = ('qrId', 'article', 'storage', 'amount',
                   'standardOrderAmount', 'orderpoint',)
 
