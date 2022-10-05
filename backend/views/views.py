@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import generics
 from django.http import Http404, JsonResponse, HttpResponseBadRequest
-from ..serializers import StorageSerializer, ArticleSerializer, GroupSerializer
+from ..serializers import StorageUnitSerializer, ArticleSerializer, GroupSerializer, QRCodeSerializer
 #This import is important for now, since the dependency in articlemanagmentservice will not be stored in the serviceInjector otherwise however, I'm
 from backend.services.articleManagementService import articleManagementService #hoping to be able to change this since it looks kind of trashy
 from backend.services.groupManagementService import groupManagementService
@@ -9,8 +9,9 @@ from backend.services.storageManagementService import storageManagementService #
 from django.views import View
 from backend.__init__ import si
 from backend.coremodels.article import Article 
-from backend.coremodels.storage import Storage
-from backend.coremodels.storageComponent import storageComponent
+from backend.coremodels.storage_unit import StorageUnit
+from backend.coremodels.storage_space import StorageSpace
+from backend.coremodels.qr_code import QRCode
 
 # Create your views here.
 

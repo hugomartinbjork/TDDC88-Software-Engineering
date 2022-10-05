@@ -1,5 +1,5 @@
-from backend.coremodels.storage import Storage
+from backend.coremodels.storage_unit import StorageUnit
 
 class IstorageManagementService():
-    def getStorageById(id: int) -> Storage:
+    def getStorageById(id: int) -> StorageUnit:
         pass
