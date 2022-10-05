@@ -1,6 +1,8 @@
 from django.contrib import admin
 from backend.coremodels.article import Article
 from backend.coremodels.qr_code import QRCode
+from backend.coremodels.centralStorageSpace import CentralStorageSpace
+from backend.coremodels.order import Order
 from backend.coremodels.storage_unit import StorageUnit
 from backend.coremodels.centralStorageSpace import CentralStorageSpace
 # from backend.coremodels.storageComponent import storageUnit
@@ -26,9 +28,9 @@ admin.site.register(CostCenter)
 class UserInfoInLine(admin.StackedInline):
     model = UserInfo
 
-class UserGroupInLine(admin.StackedInline):
-        model = Group
 
+class UserGroupInLine(admin.StackedInline):
+    model = Group
 
 
 class UserAdmin(BaseUserAdmin):
