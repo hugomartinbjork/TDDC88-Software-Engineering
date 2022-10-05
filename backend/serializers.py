@@ -48,13 +48,14 @@ class StorageSpaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = StorageSpace
         fields = ('id', 'storage_unit', 'article', 'orderpoint', 'standard_order_amount',
-                    'maximal_capacity', 'amount')
+                  'maximal_capacity', 'amount')
 
 
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = GroupInfo
         fields = ('id', 'group_name')
+
 
 class QRCodeSerializer(serializers.ModelSerializer):
     class Meta:

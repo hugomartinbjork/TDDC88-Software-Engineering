@@ -1,23 +1,19 @@
-# This file is a template, and might need editing before it works on your project.
 FROM python:3
 
-# Edit with mysql-client, postgresql-client, sqlite3, etc. for your needs.
-# Or delete entirely if not needed.
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        postgresql-client \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get upgrade -y && apt-get install \
+  -y --no-install-recommends python3
 
-WORKDIR /usr/src/app
+RUN apt-get update && apt-get install -y \
+    libsqlite3-dev \
+&& rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt /usr/src/app/
-RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . /usr/src/app
+WORKDIR /app
 
-# For Django
-EXPOSE 8000
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+COPY requirements.txt .
+RUN pip install -r requirements.txt
 
-# For some other command
-# CMD ["python", "app.py"]
+COPY . /app
+
+ENTRYPOINT ["python", "manage.py"]
+CMD ["runserver", "0.0.0.0:8000"]
