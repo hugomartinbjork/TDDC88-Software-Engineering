@@ -11,14 +11,16 @@ class Article(models.Model):
     description = models.CharField(max_length=100, null = True)
     price = models.IntegerField(null = True)
     name = models.CharField(max_length=30)
-    sanitation_level = models.CharField(max_length=30, default=0)
+    sanitation_level = models.CharField(max_length=30, default=0, null = True)
     image = models.ImageField(null=True, blank=True)
-    
+    article_group = models.ManyToManyField(GroupInfo)
+    alternative_names = models.TextField(null=True, blank=True)
+    alternative_articles = models.ManyToManyField('self', blank = True)
 
     ## Should these attributes below really be included, they are not
     # included in the database schema??
 
-    article_group = models.ManyToManyField(GroupInfo)
+    
 
 
 #     std_cost = models.IntegerField(null = True)
