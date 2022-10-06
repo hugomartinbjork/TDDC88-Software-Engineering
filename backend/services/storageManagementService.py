@@ -3,12 +3,18 @@ from backend.coremodels.storage_unit import StorageUnit
 from backend.coremodels.storage_space import StorageSpace
 from backend.__init__ import si
 
-
 @si.register(name='storageManagementService')
 class storageManagementService(IstorageManagementService):
-    def getStorageById(self, id: str) -> StorageUnit:
+    def getStorageUnitById(self, id: str) -> StorageUnit:
         try:
             storage = StorageUnit.objects.get(id=id)
+            return storage
+        except:
+            return None
+
+    def getStorageSpaceById(self, id: str) -> StorageSpace:
+        try:
+            storage = StorageSpace.objects.get(id=id)
             return storage
         except:
             return None
