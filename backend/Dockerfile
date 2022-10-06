@@ -7,6 +7,8 @@ RUN apt-get update && apt-get install -y \
     libsqlite3-dev \
 && rm -rf /var/lib/apt/lists/*
 
+EXPOSE 8000
+
 RUN mkdir /app
 WORKDIR /app
 
