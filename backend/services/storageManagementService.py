@@ -3,6 +3,7 @@ from backend.coremodels.storage_unit import StorageUnit
 from backend.coremodels.storage_space import StorageSpace
 from backend.__init__ import si
 
+
 @si.register(name='storageManagementService')
 class storageManagementService(IstorageManagementService):
     def getStorageUnitById(self, id: str) -> StorageUnit:
@@ -19,12 +20,12 @@ class storageManagementService(IstorageManagementService):
         except:
             return None
 
-     def setStorage(id: str, amount: int) -> int:
+    def setStorage(id: str, amount: int) -> int:
         try:
             newAmount = amount
             return StorageSpace.objects.update(**{amount: newAmount})
         except:
-            return None           
+            return None
 
     def addToStorage(id: str, amount: int) -> int:
         try:
@@ -35,7 +36,8 @@ class storageManagementService(IstorageManagementService):
 
     def getStock(id: str, article_id: str) -> int:
         try:
-            stock = int(StorageSpace.objects.get(id=id, article=article_id).amount)
+            stock = int(StorageSpace.objects.get(
+                id=id, article=article_id).amount)
             return stock
         except:
             return None
