@@ -1,4 +1,0 @@
-Article: 1
-Storage unit: 1
-Estimated time of arrival: 3
-Time of order: 2020
