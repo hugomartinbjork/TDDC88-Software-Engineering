@@ -1,6 +1,7 @@
 from http.client import OK
 import pkgutil
 from urllib import request
+import json
 from django.shortcuts import render
 from rest_framework import generics
 from django.http import Http404, JsonResponse, HttpResponseBadRequest
@@ -107,13 +108,13 @@ class order(View):
     
     def post(self, request, id):
         if request.method == 'POST':
-            article = request.POST.get('ofArticle')
-            print(article)
-            storageUnit = request.POST.get('toStorageUnit')
-            amount = request.POST.get('amount')
-            if(self._orderService.has_order(storageUnit, article)):
-                eta = self._orderService.get_expected_wait(self, article, amount)
-                return eta
+            json_body = json.loads(request.body)
+            article = json_body['ofArticle']
+            storageUnit = json_body['toStorageUnit']
+            amount = json_body['amount']
+            if(OrderService.has_order(self, storageUnit, article) is not None):
+                eta = {"Expected arrival: " : OrderService.get_expected_wait(self, article, amount)}
+                return JsonResponse(eta, status=200)
             else:
                 order =OrderService.place_order(self, storageUnit, article, amount)
                 serializer = OrderSerializer(order)

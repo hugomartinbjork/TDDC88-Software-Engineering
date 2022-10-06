@@ -1,8 +1,10 @@
 from datetime import timedelta
+from datetime import datetime
 from backend.coremodels.order import Order
 from backend.coremodels.storage_unit import StorageUnit
 from backend.coremodels.storage_space import StorageSpace
 from backend.coremodels.centralStorageSpace import CentralStorageSpace
+from backend.coremodels.article import Article
 from backend.__init__ import si
 from backend.Order_text_files.utils import makeTextFile
 
@@ -41,7 +43,8 @@ class OrderService():
 
     # Gets expected time for order to arrive from central storage. Returns 14 days if the article does not exist.
     def get_expected_wait(self, article_id, amount) -> int:
-        central_storage_stock = self.has_stock(article_id)
+        central_storage_stock = OrderService.has_stock(self, article_id)
+        
 
         if central_storage_stock is None:
             central_storage_stock = 0
@@ -62,12 +65,15 @@ class OrderService():
     # Creates an order, saves in in the database and then returns said order.
     # If the order can't be created None is returned.
     def place_order(self, storage_unit_id, article_id, amount):
-        print(storage_unit_id)
+        article = Article.objects.filter(lioId=article_id).first()
+        storageUnit = StorageUnit.objects.filter(id = storage_unit_id).first()
+
         try:
-            order = Order.objects.create(ofArticle=article_id, toStorageUnit=storage_unit_id,
-                                         amount=amount, expectedWait=self.get_expected_wait(article_id=article_id, amount=amount))
+            order = Order(ofArticle=article, toStorageUnit=storageUnit,
+                                         amount=amount, expectedWait=OrderService.get_expected_wait(self, article_id=article_id, amount = amount))
+            print(order)
             order.save()
-            makeTextFile(order.id, article_id, storage_unit_id, self.get_expected_wait(self, article_id, amount), order.orderTime)
+            #makeTextFile(order.id, article_id, storage_unit_id, self.get_expected_wait(self, article_id, amount), order.orderTime)
         except:
             return None
 
@@ -75,6 +81,11 @@ class OrderService():
 
     # Helper function to get amount from centralstorage. returns amount or None if the article does not exist.
     def has_stock(self, article_id):
-        central_storage_space = CentralStorageSpace.objects.filter(
-            id=article_id).first()
-        return central_storage_space.amount
+        article = Article.objects.filter(lioId=article_id).first()
+        if CentralStorageSpace.objects.filter(article=article).first() is not None:
+            amount = CentralStorageSpace.objects.filter(article=article).first().amount
+            return amount
+        else:
+            return None
+        
+        
