@@ -13,6 +13,13 @@ class storageManagementService(IstorageManagementService):
         except:
             return None
 
+     def setStorage(id: str, amount: int) -> int:
+        try:
+            newAmount = amount
+            return StorageSpace.objects.update(**{amount: newAmount})
+        except:
+            return None           
+
     def addToStorage(id: str, amount: int) -> int:
         try:
             newAmount = StorageSpace.objects.get(id=id).amount + amount
