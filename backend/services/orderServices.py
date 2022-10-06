@@ -3,6 +3,7 @@ from backend.coremodels.storage_unit import StorageUnit
 from backend.coremodels.storage_space import StorageSpace
 from backend.coremodels.centralStorageSpace import CentralStorageSpace
 from backend.__init__ import si
+from backend.Order_text_files.utils import makeTextFile
 
 
 @si.register(name='OrderService')
@@ -55,6 +56,7 @@ class OrderService():
             order = Order.objects.create(ofArticle=article_id, toStorageUnit=storage_unit_id,
                                          amount=amount, expectedWait=self.get_expected_wait())
             order.save()
+            makeTextFile(order.id, article_id, storage_unit_id, self.get_expected_wait(self, article_id, amount), order.orderTime)
         except:
             return None
 

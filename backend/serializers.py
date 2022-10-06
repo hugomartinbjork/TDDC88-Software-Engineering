@@ -2,21 +2,14 @@ from backend.coremodels.cost_center import CostCenter
 from rest_framework import serializers
 from backend.coremodels.article import Article
 from backend.coremodels.article import GroupInfo
-<<<<<<< HEAD
-
-=======
 from backend.coremodels.qr_code import QRCode
->>>>>>> 302e67655bc84241798ea3dbbe9f8751aa353bb0
 from backend.coremodels.storage_unit import StorageUnit
 # from backend.coremodels.storageComponent import storageUnit
 from backend.coremodels.cost_center import CostCenter
 from backend.coremodels.user_info import UserInfo
 from backend.coremodels.storage_space import StorageSpace
-<<<<<<< HEAD
 from backend.coremodels.qr_code import QRCode
 from backend.coremodels.order import Order
-=======
->>>>>>> 302e67655bc84241798ea3dbbe9f8751aa353bb0
 
 
 class ArticleSerializer(serializers.ModelSerializer):
@@ -72,4 +65,4 @@ class QRCodeSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ('id', 'ofArticle', 'toStorageUnit', 'expectedWait', 'orderTime')
+        fields = ('id', 'ofArticle', 'amount', 'toStorageUnit', 'expectedWait', 'orderTime')

@@ -4,7 +4,6 @@ from backend.coremodels.qr_code import QRCode
 from backend.coremodels.centralStorageSpace import CentralStorageSpace
 from backend.coremodels.order import Order
 from backend.coremodels.storage_unit import StorageUnit
-from backend.coremodels.centralStorageSpace import CentralStorageSpace
 # from backend.coremodels.storageComponent import storageUnit
 from backend.coremodels.cost_center import CostCenter
 from backend.coremodels.user_info import UserInfo

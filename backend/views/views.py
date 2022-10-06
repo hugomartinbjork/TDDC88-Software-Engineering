@@ -12,12 +12,14 @@ from backend.services.articleManagementService import articleManagementService
 from backend.services.userService import userService
 from backend.services.groupManagementService import groupManagementService
 from backend.services.storageManagementService import storageManagementService
+from backend.services.orderServices import OrderService
 from django.views import View
 from backend.__init__ import si
 from backend.coremodels.article import Article
 from backend.coremodels.storage_unit import StorageUnit
 from backend.coremodels.storage_space import StorageSpace
 from backend.coremodels.qr_code import QRCode
+from backend.coremodels.order import Order
 from rest_framework.authtoken.models import Token
 from rest_framework import status
 from rest_framework.views import APIView
@@ -97,6 +99,19 @@ class order(View):
             if serializer.is_valid:
                 return JsonResponse(serializer.data, status=200)
             return HttpResponseBadRequest
+        
+    def put(self, request, id):
+        if request.method == 'PUT':
+            article = self._orderManagementService.getArticleIdById(id)
+            storageSpace = self._orderManagementService.getStorageSpaceIdById(id)
+            amount = self._orderManagementService.getAmountIdById(id)
+            if(OrderService.has_order(self, storageSpace, article)):
+                eta = OrderService.get_expected_wait(self, article, amount)
+                return eta
+            else:
+                OrderService.place_order(self, storageSpace, article, amount)
+
+
 
 
 class Login(APIView):
