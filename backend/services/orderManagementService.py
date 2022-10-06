@@ -18,10 +18,10 @@ class orderManagementService():
         except:
             return None
 
-    def getstorageSpaceIdById(self, id: int) -> Order:
+    def getStorageUnitIdById(self, id: int) -> Order:
         try:
-            storageSpace = Order.objects.get(id=id).toStorageUnit
-            return storageSpace
+            storageUnit = Order.objects.get(id=id).toStorageUnit
+            return storageUnit
         except:
             return None
 

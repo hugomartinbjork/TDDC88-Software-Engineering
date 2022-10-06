@@ -1,9 +1,11 @@
+from datetime import timedelta
 from backend.coremodels.order import Order
 from backend.coremodels.storage_unit import StorageUnit
 from backend.coremodels.storage_space import StorageSpace
 from backend.coremodels.centralStorageSpace import CentralStorageSpace
 from backend.__init__ import si
 from backend.Order_text_files.utils import makeTextFile
+
 
 
 @si.register(name='OrderService')
@@ -49,12 +51,21 @@ class OrderService():
         else:
             return 14
 
+    # Gets the estimated time of arrival by adding the expected wait to the date the order was ordered
+    def getETA(self, orderId):
+        order = Order.objects.filter(id=orderId).first()
+        orderDate = order.orderTime
+        days = order.expectedWait
+        orderDate = orderDate + timedelta(days)
+        return orderDate
+
     # Creates an order, saves in in the database and then returns said order.
     # If the order can't be created None is returned.
     def place_order(self, storage_unit_id, article_id, amount):
+        print(storage_unit_id)
         try:
             order = Order.objects.create(ofArticle=article_id, toStorageUnit=storage_unit_id,
-                                         amount=amount, expectedWait=self.get_expected_wait())
+                                         amount=amount, expectedWait=self.get_expected_wait(article_id=article_id, amount=amount))
             order.save()
             makeTextFile(order.id, article_id, storage_unit_id, self.get_expected_wait(self, article_id, amount), order.orderTime)
         except:
