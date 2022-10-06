@@ -22,7 +22,7 @@ class storageManagementService(IstorageManagementService):
 
     def getStock(id: str, article_id: str) -> int:
         try:
-            stock = StorageSpace.objects.get(id=id, article=article_id).amount
+            stock = int(StorageSpace.objects.get(id=id, article=article_id).amount)
             return stock
         except:
             return None
