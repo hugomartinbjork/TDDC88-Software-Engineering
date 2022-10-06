@@ -20,15 +20,15 @@ class storageManagementService(IstorageManagementService):
         except:
             return None
 
-    def getStock(id: str, article: str) -> int:
+    def getStock(id: str, article_id: str) -> int:
         try:
-            stock = StorageSpace.objects.get(id=id, article=article).amount
+            stock = StorageSpace.objects.get(id=id, article=article_id).amount
             return stock
         except:
             return None
 
     def getStorageUnitStock(id: str) -> dict:
         try:
-            pass
+            return "article: {} amount: {}".format(StorageSpace.objects.get(id=id).article, StorageSpace.objects.get(id=id).amount)
         except:
             return None
