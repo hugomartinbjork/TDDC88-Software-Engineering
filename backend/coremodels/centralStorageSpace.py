@@ -11,4 +11,4 @@ class CentralStorageSpace(models.Model):
     amount = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
-        return self.id +": " + self.article + " " + self.amount
+        return str(self.id) +": " + str(self.article) + " " + str(self.amount)
