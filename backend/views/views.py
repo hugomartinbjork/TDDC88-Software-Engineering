@@ -113,7 +113,8 @@ class order(View):
             storageUnit = json_body['toStorageUnit']
             amount = json_body['amount']
             if(OrderService.has_order(self, storageUnit, article) is not None):
-                eta = {"Expected arrival: " : OrderService.get_expected_wait(self, article, amount)}
+                order = OrderService.has_order(self, storageUnit, article)
+                eta = {"Expected arrival: " : OrderService.getETA(self, order.id)}
                 return JsonResponse(eta, status=200)
             else:
                 order =OrderService.place_order(self, storageUnit, article, amount)

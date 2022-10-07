@@ -71,9 +71,8 @@ class OrderService():
         try:
             order = Order(ofArticle=article, toStorageUnit=storageUnit,
                                          amount=amount, expectedWait=OrderService.get_expected_wait(self, article_id=article_id, amount = amount))
-            print(order)
             order.save()
-            #makeTextFile(order.id, article_id, storage_unit_id, self.get_expected_wait(self, article_id, amount), order.orderTime)
+            makeTextFile(order.id, article_id, storage_unit_id, order.expectedWait, order.orderTime)
         except:
             return None
 
