@@ -16,7 +16,6 @@ from backend.coremodels.storage_space import StorageSpace
 from backend.coremodels.order import Order
 from django.utils.html import format_html
 
-from backend.services.orderManagementService import orderManagementService
 
 # Register your models here.
 # admin.site.register(storageUnit)

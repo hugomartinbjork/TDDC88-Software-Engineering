@@ -4,7 +4,6 @@ from urllib import request
 from django.shortcuts import render
 from rest_framework import generics
 from django.http import Http404, JsonResponse, HttpResponseBadRequest
-from backend.services.orderManagementService import orderManagementService
 from ..serializers import StorageUnitSerializer, ArticleSerializer, GroupSerializer, QRCodeSerializer, OrderSerializer
 # This import is important for now, since the dependency in articlemanagmentservice will not be stored in the serviceInjector otherwise however, I'm
 # hoping to be able to change this since it looks kind of trashy
@@ -90,13 +89,11 @@ class storage(View):
 class order(View): 
     @si.inject #Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing 
     def __init__(self, _deps):
-        orderManagementService = _deps['orderManagementService']
         OrderService = _deps['OrderService']
-        self._orderManagementService = orderManagementService()
         self._orderService = OrderService() #Instance of dependency is created in constructor
     def get(self, request, id): 
         if request.method == 'GET':
-            order = self._orderManagementService.getOrderById(id)
+            order = self._orderService.getOrderById(id)
             if order is None:
                 raise Http404("Could not find order")
             serializer = OrderSerializer(order)
@@ -106,19 +103,18 @@ class order(View):
 
     
     def post(self, request, id):
-        if request.method == 'POST':
-            article = request.POST.get('ofArticle')
-            print(article)
-            storageUnit = request.POST.get('toStorageUnit')
-            amount = request.POST.get('amount')
-            if(self._orderService.has_order(storageUnit, article)):
-                eta = self._orderService.get_expected_wait(self, article, amount)
-                return eta
-            else:
-                order =OrderService.place_order(self, storageUnit, article, amount)
-                serializer = OrderSerializer(order)
-                if serializer.is_valid:
-                    return JsonResponse(serializer.data, status=200)
+        article = request.POST['ofArticle']
+        print(article)
+        storageUnit = request.POST['toStorageUnit']
+        amount = request.POST.get['amount']
+        if(self._orderService.has_order(storageUnit, article)):
+            eta = self._orderService.get_expected_wait(self, article, amount)
+            return eta
+        else:
+            order =OrderService.place_order(self, storageUnit, article, amount)
+            serializer = OrderSerializer(order)
+            if serializer.is_valid:
+                return JsonResponse(serializer.data, status=200)
 
 
 
