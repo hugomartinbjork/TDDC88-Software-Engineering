@@ -1,4 +1,4 @@
-FROM python:3.8
+FROM python:3
 
 RUN apt-get update && apt-get upgrade -y && apt-get install \
   -y --no-install-recommends python3
@@ -17,5 +17,5 @@ RUN pip install -r requirements.txt
 
 COPY . /app/
 
-ENTRYPOINT ["python", "manage.py"]
+ENTRYPOINT ["python3", "manage.py"]
 CMD ["runserver", "0.0.0.0:8000"]
