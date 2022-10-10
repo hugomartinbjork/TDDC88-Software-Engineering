@@ -33,9 +33,10 @@ image-rdx-backend:
   # to reuse this pipeline step for something else
   stage: image
   image: docker.io/buildah/buildah
-  #only:
-  #  - master
-  #  - main
+  only:
+     - master
+     - main
+     - dev
   # needs:
   #   - test-backend
 
@@ -59,9 +60,10 @@ deploy-test-k8s-connection:
   stage: deploy
   image: bitnami/kubectl
   needs: []
- # only:
- #   - master
- #   - main
+  only:
+    - master
+    - main
+    - dev
   script:
     - kubectl get all
 
@@ -78,9 +80,10 @@ deploy-k8s-regcred:
   image: bitnami/kubectl
   needs:
     - deploy-test-k8s-connection
- # only:
- #   - master
- #   - main
+  only:
+    - master
+    - main
+    - dev
   script:
     # Check if the secret already exists, if so, no need to create it, so we just exit cleanly in that case
     - kubectl get secrets | grep liu-gitlab-regcred && exit 0
@@ -97,10 +100,10 @@ deploy-rdx-backend:
   image: bitnami/kubectl
 
   # Only deploy when on main/master
-#  only:
-#    - master
-#    - main
-
+  only:
+    - master
+    - main
+    - dev
   # And wait for all dependencies to build
   needs:
     - deploy-test-k8s-connection
