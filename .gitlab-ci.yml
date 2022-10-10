@@ -24,7 +24,7 @@ yamllint:
   image: pipelinecomponents/yamllint
   allow_failure: false # Change to true if you want to treat failure as a warning
   script:
-    - yamllint ./backend
+    - yamllint ./k8
 
 #Here we are building a docker image of our back end and pushing it to our internal
 #registry
