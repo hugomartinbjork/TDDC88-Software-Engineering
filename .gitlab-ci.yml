@@ -41,8 +41,8 @@ image-rdx-backend:
 
   script:
     # Set up our build
-    - cd backend
-    - export DIR= "backend"
+    - cd Web
+    - export DIR= "Web"
     - export NAME="rdx-backend"
 
     # Build the image
