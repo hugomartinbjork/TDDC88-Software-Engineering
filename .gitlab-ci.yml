@@ -112,7 +112,7 @@ deploy-rdx-backend:
     # However, unless the configuration is changed, it won't actually restart
     # any existing pods. That means the following line *won't* ensure that all
     # pods run the latest container images.
-    - kubectl apply -f backend/backend.yaml
+    - kubectl apply -f k8/backend.yaml
 
     # Now, start a rollout to make sure we are running the latest versions of
     # our container images. This will make sure we use the newly built docker
