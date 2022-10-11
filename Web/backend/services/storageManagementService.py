@@ -47,3 +47,12 @@ class storageManagementService(IstorageManagementService):
             return "article: {} amount: {}".format(StorageSpace.objects.get(id=id).article, StorageSpace.objects.get(id=id).amount)
         except:
             return None
+    
+    def getAllStorageUnits() -> dict:
+        print("tjeba")
+        try:
+            
+            allStorageUnits = StorageUnit.objects.get.all()  
+            return allStorageUnits
+        except:
+            return None

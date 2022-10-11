@@ -141,3 +141,24 @@ class LoginWithId(APIView):
             return self._userService.createAuthToken(request, user)
         else:
             return Response({'error': 'invalid details'}, status=status.HTTP_400_BAD_REQUEST)
+
+class seeAllStorageUnits(View):
+    @si.inject
+    def __init__(self, _deps):
+        storageManagementService = _deps['storageManagementService']
+        # Instance of dependency is created in constructor
+        self._storageManagementService = storageManagementService()
+
+
+    def get(self, request):
+        print("hej")
+        allStorages =  self._storageManagementService.getAllStorageUnits()
+        print("hej2")
+        if allStorages is None:
+            raise Http404("Could not find any storage units")
+        else:
+            serializer = StorageUnitSerializer(allStorages)
+            if serializer.is_valid:
+                return JsonResponse("123")
+            else:
+               return Response({'error': 'invalid storages'}, status=status.HTTP_400_BAD_REQUEST) 
