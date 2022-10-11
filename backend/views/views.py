@@ -126,6 +126,10 @@ class order(View):
 
 
 class Login(APIView):
+    @si.inject #Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing 
+    def __init__(self, _deps):
+        userService = _deps['userService']
+        self._userService = userService()
 
     def post(self, request):
         username = request.data.get('username')
