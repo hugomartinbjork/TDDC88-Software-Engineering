@@ -95,14 +95,14 @@ spec:
           # socket. For the pods in this deployment, we'll use an http probe,
           # and further down in this file you will find an example of probing by
           # TCP.
-          readinessProbe:
-            httpGet:
-              port: web
-              path: "/api/hello_world"
-          livenessProbe:
-            httpGet:
-              port: web
-              path: "/api/hello_world"
+         # readinessProbe:
+          #  httpGet:
+           #   port: web
+            #  path: "/api/hello_world"
+         # livenessProbe:
+          #  httpGet:
+            #  port: web
+             # path: "/api/hello_world"
 
 
 # That's it, now our container is running on the cluster!

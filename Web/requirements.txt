@@ -9,7 +9,6 @@ colorama==0.4.5
 cryptography==38.0.1
 decorator==5.1.1
 Django==4.1.1
-django-rest-knox==4.2.0
 djangorestframework==3.14.0
 dynaconf==3.1.11
 hvac==1.0.2
@@ -19,7 +18,6 @@ jmespath==1.0.1
 knox==0.1.14
 loguru==0.6.0
 MarkupSafe==2.1.1
-Pillow==9.2.0
 psycopg2==2.9.3
 pycparser==2.21
 pyhcl==0.4.4
@@ -34,3 +32,5 @@ tzdata==2022.2
 urllib3==1.26.12
 validators==0.20.0
 win32-setctime==1.1.0
+Pillow==9.2.0
+django-rest-knox

@@ -18,8 +18,6 @@ class ArticleSerializer(serializers.ModelSerializer):
         fields = ('name', 'lioId', 'description', 'article_group', 'image', 'sanitation_level', 'price', 'alternative_names',
                   'alternative_articles')
 
-        
-
 
 class StorageUnitSerializer(serializers.ModelSerializer):
     class Meta:
@@ -62,7 +60,9 @@ class QRCodeSerializer(serializers.ModelSerializer):
         model = QRCode
         fields = ('id', 'storage_space')
 
+
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ('id', 'ofArticle', 'amount', 'toStorageUnit', 'expectedWait', 'orderTime')
+        fields = ('id', 'ofArticle', 'toStorageUnit',
+                  'expectedWait', 'orderTime')

@@ -1,8 +1,6 @@
 from django.contrib import admin
 from backend.coremodels.article import Article
-from backend.coremodels.qr_code import QRCode
 from backend.coremodels.centralStorageSpace import CentralStorageSpace
-from backend.coremodels.order import Order
 from backend.coremodels.storage_unit import StorageUnit
 # from backend.coremodels.storageComponent import storageUnit
 from backend.coremodels.cost_center import CostCenter
@@ -61,6 +59,7 @@ admin.site.register(GroupInfo, GroupAdmin)
 # Displays which storage components that the articles are in
 class StorageSpaceInline(admin.TabularInline):
     model = StorageSpace
+
 
 class ArticleAdmin(admin.ModelAdmin):
     inlines = (StorageSpaceInline, )
