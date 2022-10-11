@@ -75,7 +75,7 @@ class storage(View):
 
     def get(self, request, storageId):
         if request.method == 'GET':
-            storage = self._storageManagementService.getStorageById(storageId)
+            storage = self._storageManagementService.getStorageUnitById(storageId)
             if storage is None:
                 raise Http404("Could not find storage")
             serializer = StorageUnitSerializer(storage)
@@ -151,14 +151,26 @@ class seeAllStorageUnits(View):
 
 
     def get(self, request):
-        print("hej")
-        allStorages =  self._storageManagementService.getAllStorageUnits()
-        print("hej2")
-        if allStorages is None:
-            raise Http404("Could not find any storage units")
-        else:
-            serializer = StorageUnitSerializer(allStorages)
-            if serializer.is_valid:
-                return JsonResponse("123")
+        if request.method == 'GET':
+            print("hej")
+            allStorages =  self._storageManagementService.getAllStorageUnits()
+            print("hej2")
+            for storage in allStorages:
+                print(storage['name'])
+            print(allStorages)
+            if allStorages is None:
+                raise Http404("Could not find any storage units")
             else:
-               return Response({'error': 'invalid storages'}, status=status.HTTP_400_BAD_REQUEST) 
+                serializer = {}
+                print(serializer)
+                key = 1
+                for storage in allStorages:
+                    serializer.update({'key' : 'storage["name"]'})
+                    key = key + 1
+                    print(StorageUnitSerializer(storage))
+                print(serializer)
+                if serializer.is_valid:
+                    print(serializer)
+                    return JsonResponse(serializer.data, status = 200)
+                else:
+                    return Response({'error': 'invalid storages'}, status=status.HTTP_400_BAD_REQUEST) 
