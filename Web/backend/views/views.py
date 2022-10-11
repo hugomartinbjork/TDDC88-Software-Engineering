@@ -5,7 +5,7 @@ import json
 from django.shortcuts import render
 from rest_framework import generics
 from django.http import Http404, JsonResponse, HttpResponseBadRequest
-from ..serializers import StorageUnitSerializer, ArticleSerializer, GroupSerializer, QRCodeSerializer, OrderSerializer
+from ..serializers import StorageUnitSerializer, ArticleSerializer, GroupSerializer, QRCodeSerializer, OrderSerializer, StorageSpaceSerializer
 # This import is important for now, since the dependency in articlemanagmentservice will not be stored in the serviceInjector otherwise however, I'm
 # hoping to be able to change this since it looks kind of trashy
 from backend.services.articleManagementService import articleManagementService
@@ -86,6 +86,43 @@ class storage(View):
             return HttpResponseBadRequest
 
 
+class storageSpace(View):
+    # Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing
+    @si.inject
+    def __init__(self, _deps):
+        storageManagementService = _deps['storageManagementService']
+        # Instance of dependency is created in constructor
+        self._storageManagementService = storageManagementService()
+    
+    def get(self, request, storageSpaceId):
+        if request.method == 'GET':
+            storageSpace = self._storageManagementService.getStorageSpaceById(storageSpaceId)
+            if storageSpace is None:
+                return Http404("Could not find storage space")
+            if storageSpace.amount == 0:
+                if OrderService.has_order(self, storageSpace.storage_unit, storageSpace.article) is not None:
+                    order = OrderService.has_order(self, storageSpace.storage_unit, storageSpace.article)
+                    eta = OrderService.getETA(self, order.id)
+                    serializer = StorageSpaceSerializer(storageSpace)
+                    if serializer.is_valid:
+                        alteredDict = {}
+                        alteredDict.update(serializer.data)
+                        alteredDict['ETA: '] = eta
+                        return JsonResponse(alteredDict, status=200)
+                    return HttpResponseBadRequest
+                else:
+                    serializer = StorageSpaceSerializer(storageSpace)
+                    if serializer.is_valid:
+                        alteredDict = {}
+                        alteredDict.update(serializer.data)
+                        alteredDict['ETA: '] = "No order done"
+                        return JsonResponse(alteredDict, status=200)
+                    return HttpResponseBadRequest
+            else:
+                serializer = StorageSpaceSerializer(storageSpace)
+                if serializer.is_valid:
+                    return JsonResponse(serializer.data, status=200)
+                return HttpResponseBadRequest
 
 class order(View): 
     @si.inject #Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing 
