@@ -2,6 +2,7 @@ from django.test import TestCase
 from backend.coremodels.article import * 
 from backend.services.articleManagementService import *
 
+# Testing FR4.1
 class ArticleIdentificationTest(TestCase):    
      def setUp(self):                     
          Article.objects.create(lioId="1")         
