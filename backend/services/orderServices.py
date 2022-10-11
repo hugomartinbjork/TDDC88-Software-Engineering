@@ -7,7 +7,7 @@ from backend.coremodels.centralStorageSpace import CentralStorageSpace
 from backend.coremodels.article import Article
 from backend.__init__ import si
 from backend.Order_text_files.utils import makeTextFile
-
+from backend.Order_text_files import utils
 
 
 @si.register(name='OrderService')
@@ -80,6 +80,40 @@ class OrderService():
 
     # Helper function to get amount from centralstorage. returns amount or None if the article does not exist.
     def has_stock(self, article_id):
+        central_storage_space = CentralStorageSpace.objects.filter(
+            id=article_id).first()
+        return central_storage_space.amount
+
+    def getOrderById(self, id: int) -> Order:
+        try:
+            article = Order.objects.get(id=id)  
+            return article
+        except:
+            return None
+
+    def getArticleIdById(self, id: int) -> Order:
+        try:
+            article = Order.objects.get(id=id).ofArticle
+            return article
+        except:
+            return None
+
+    def getStorageUnitIdById(self, id: int) -> Order:
+        try:
+            storageUnit = Order.objects.get(id=id).toStorageUnit
+            return storageUnit
+        except:
+            return None
+
+    def getAmountIdById(self, id: int) -> Order:
+        try:
+            amount = Order.objects.get(id=id).amount
+            return amount
+        except:
+            return None
+
+    def textFile(orderName, article_id, storage_unit, eta, timeOfArrival):
+        utils.makeTextFile(orderName, article_id, storage_unit, eta, timeOfArrival)
         article = Article.objects.filter(lioId=article_id).first()
         if CentralStorageSpace.objects.filter(article=article).first() is not None:
             amount = CentralStorageSpace.objects.filter(article=article).first().amount
