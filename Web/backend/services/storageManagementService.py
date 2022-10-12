@@ -30,13 +30,6 @@ class storageManagementService(IstorageManagementService):
         except:
             return None
 
-    def addToStorage(id: str, amount: int) -> int:
-        try:
-            newAmount = StorageSpace.objects.get(id=id).amount + amount
-            return StorageSpace.objects.update(**{amount: newAmount})
-        except:
-            return None
-
     def getStock(id: str, article_id: str) -> int:
         try:
             stock = int(StorageSpace.objects.get(
@@ -55,7 +48,7 @@ class storageManagementService(IstorageManagementService):
 
 
 ##alltid takeout/takein
-    def addToStorage2(id: str, amount: int,user, addOutputUnit: bool) -> Transaction:
+    def addToStorage(id: str, amount: int,user, addOutputUnit: bool) -> Transaction:
         storage_space = StorageSpace.objects.get(id=id)
         storage_unit_id= storage_space.storage_unit
         article = Article.objects.get(id=storage_space.article)

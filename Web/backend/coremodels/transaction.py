@@ -1,8 +1,5 @@
-from email.policy import default
-from multiprocessing.sharedctypes import Value
-from random import choices
-from unittest.mock import DEFAULT
 from django.db import models
+from datetime import datetime
 from backend.coremodels.storage_unit import StorageUnit
 from django.contrib.auth.models import User
 from backend.coremodels.article import Article
@@ -15,8 +12,9 @@ class Transaction(models.Model):
     by_user = models.ForeignKey(User, on_delete=models.CASCADE)
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     amount = models.PositiveSmallIntegerField(default=0)
-    time_of_transaction = models.DateTimeField(auto_now_add=True)
-    operation = models.IntegerField(choices=TransactionOperator.choices)
+    time_of_transaction = models.DateTimeField(auto_now_add=True, null = False)
+    operation = models.IntegerField(choices=TransactionOperator.choices,default=0, null = False)
+
     
     def __str__(self):
         return str(self.id)
