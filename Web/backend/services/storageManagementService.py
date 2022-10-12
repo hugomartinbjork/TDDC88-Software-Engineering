@@ -1,5 +1,4 @@
-from Web.backend.coremodels.article import Article
-from Web.backend.views.views import article
+from backend.coremodels.article import Article
 from backend.services.IstorageManagementService import IstorageManagementService
 from backend.coremodels.storage_unit import StorageUnit
 from backend.coremodels.storage_space import StorageSpace

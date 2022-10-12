@@ -7,7 +7,7 @@ from backend.coremodels.storage_unit import StorageUnit
 
 class InputOutput(models.Model):
     id = models.AutoField(primary_key=True)
-    article = models.ForeignKey(Article.lioId, on_delete=models.CASCADE)
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
     inputUnitName=models.CharField(max_length=30)
     outputUnitName = models.CharField(max_length=30)
     outputUnitPerInputUnit = models.PositiveIntegerField(default=0)
