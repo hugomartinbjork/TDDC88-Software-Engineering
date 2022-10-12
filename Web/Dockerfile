@@ -17,5 +17,7 @@ RUN pip install -r requirements.txt
 
 COPY . /app/
 
+RUN python3 manage.py migrate
+
 ENTRYPOINT ["python3", "manage.py"]
 CMD ["runserver", "0.0.0.0:8000"]
