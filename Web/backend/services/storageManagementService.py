@@ -80,6 +80,9 @@ class storageManagementService(IstorageManagementService):
         article = Article.objects.get(id=storage_space.article)
         inputOutput = InputOutput.objects.get(article = article)
         converter= inputOutput.outputUnitPerInputUnit
+        medical_employee = user.groups.filter(name='medical employee').exists()
+        if(medical_employee and article.sanitation_level=='Z41'):
+            return None
 
         if(addOutputUnit):
             amount_in_storage = StorageSpace.objects.get(id=id).amount + amount
