@@ -2,7 +2,7 @@ from backend.coremodels.cost_center import CostCenter
 from rest_framework import serializers
 from backend.coremodels.article import Article
 from backend.coremodels.article import GroupInfo
-
+from backend.coremodels.qr_code import QRCode
 from backend.coremodels.storage_unit import StorageUnit
 # from backend.coremodels.storageComponent import storageUnit
 from backend.coremodels.cost_center import CostCenter
@@ -10,6 +10,7 @@ from backend.coremodels.user_info import UserInfo
 from backend.coremodels.storage_space import StorageSpace
 from backend.coremodels.qr_code import QRCode
 from backend.coremodels.order import Order
+from backend.coremodels.transaction import Transaction
 
 
 class ArticleSerializer(serializers.ModelSerializer):

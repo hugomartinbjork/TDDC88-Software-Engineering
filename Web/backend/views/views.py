@@ -1,23 +1,25 @@
 from http.client import OK
 import pkgutil
 from urllib import request
+import json
 from django.shortcuts import render
 from rest_framework import generics
 from django.http import Http404, JsonResponse, HttpResponseBadRequest
-from backend.services.orderManagementService import orderManagementService
-from ..serializers import StorageUnitSerializer, ArticleSerializer, GroupSerializer, QRCodeSerializer, OrderSerializer
+from ..serializers import StorageUnitSerializer, ArticleSerializer, GroupSerializer, QRCodeSerializer, OrderSerializer, StorageSpaceSerializer
 # This import is important for now, since the dependency in articlemanagmentservice will not be stored in the serviceInjector otherwise however, I'm
 # hoping to be able to change this since it looks kind of trashy
 from backend.services.articleManagementService import articleManagementService
 from backend.services.userService import userService
 from backend.services.groupManagementService import groupManagementService
 from backend.services.storageManagementService import storageManagementService
+from backend.services.orderServices import OrderService
 from django.views import View
 from backend.__init__ import si
 from backend.coremodels.article import Article
 from backend.coremodels.storage_unit import StorageUnit
 from backend.coremodels.storage_space import StorageSpace
 from backend.coremodels.qr_code import QRCode
+from backend.coremodels.order import Order
 from rest_framework.authtoken.models import Token
 from rest_framework import status
 from rest_framework.views import APIView
@@ -84,17 +86,52 @@ class storage(View):
             return HttpResponseBadRequest
 
 
-class order(View):
+class storageSpace(View):
     # Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing
     @si.inject
     def __init__(self, _deps):
-        orderManagementService = _deps['orderManagementService']
+        storageManagementService = _deps['storageManagementService']
         # Instance of dependency is created in constructor
-        self._orderManagementService = orderManagementService()
-
-    def get(self, request, id):
+        self._storageManagementService = storageManagementService()
+    
+    def get(self, request, storageSpaceId):
         if request.method == 'GET':
-            order = self._orderManagementService.getOrderById(id)
+            storageSpace = self._storageManagementService.getStorageSpaceById(storageSpaceId)
+            if storageSpace is None:
+                return Http404("Could not find storage space")
+            if storageSpace.amount == 0:
+                if OrderService.has_order(self, storageSpace.storage_unit, storageSpace.article) is not None:
+                    order = OrderService.has_order(self, storageSpace.storage_unit, storageSpace.article)
+                    eta = OrderService.getETA(self, order.id)
+                    serializer = StorageSpaceSerializer(storageSpace)
+                    if serializer.is_valid:
+                        alteredDict = {}
+                        alteredDict.update(serializer.data)
+                        alteredDict['ETA: '] = eta
+                        return JsonResponse(alteredDict, status=200)
+                    return HttpResponseBadRequest
+                else:
+                    serializer = StorageSpaceSerializer(storageSpace)
+                    if serializer.is_valid:
+                        alteredDict = {}
+                        alteredDict.update(serializer.data)
+                        alteredDict['ETA: '] = "No order done"
+                        return JsonResponse(alteredDict, status=200)
+                    return HttpResponseBadRequest
+            else:
+                serializer = StorageSpaceSerializer(storageSpace)
+                if serializer.is_valid:
+                    return JsonResponse(serializer.data, status=200)
+                return HttpResponseBadRequest
+
+class order(View): 
+    @si.inject #Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing 
+    def __init__(self, _deps):
+        OrderService = _deps['OrderService']
+        self._orderService = OrderService() #Instance of dependency is created in constructor
+    def get(self, request, id): 
+        if request.method == 'GET':
+            order = self._orderService.getOrderById(id)
             if order is None:
                 raise Http404("Could not find order")
             serializer = OrderSerializer(order)
@@ -102,8 +139,30 @@ class order(View):
                 return JsonResponse(serializer.data, status=200)
             return HttpResponseBadRequest
 
+    
+    def post(self, request, id):
+        if request.method == 'POST':
+            json_body = json.loads(request.body)
+            article = json_body['ofArticle']
+            storageUnit = json_body['toStorageUnit']
+            amount = json_body['amount']
+            if(OrderService.has_order(self, storageUnit, article) is not None):
+                order = OrderService.has_order(self, storageUnit, article)
+                eta = {"Expected arrival: " : OrderService.getETA(self, order.id)}
+                return JsonResponse(eta, status=200)
+            else:
+                order =OrderService.place_order(self, storageUnit, article, amount)
+                serializer = OrderSerializer(order)
+                if serializer.is_valid:
+                    return JsonResponse(serializer.data, status=200)
+
+
 
 class Login(APIView):
+    @si.inject #Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing 
+    def __init__(self, _deps):
+        userService = _deps['userService']
+        self._userService = userService()
 
     def post(self, request):
         username = request.data.get('username')

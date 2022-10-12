@@ -53,7 +53,9 @@ class storageManagementService(IstorageManagementService):
 
 # FR 10.1.3 #
 
-    def addToStorage2(id: str, amount: int, addOutputUnit: bool) -> Transaction:
+
+##alltid takeout/takein
+    def addToStorage2(id: str, amount: int,user, addOutputUnit: bool) -> Transaction:
         storage_space = StorageSpace.objects.get(id=id)
         storage_unit_id= storage_space.storage_unit
         article = Article.objects.get(id=storage_space.article)
@@ -61,21 +63,47 @@ class storageManagementService(IstorageManagementService):
         converter= inputOutput.outputUnitPerInputUnit
 
         if(addOutputUnit):
-            newAmount = StorageSpace.objects.get(id=id).amount + amount
+            amount_in_storage = StorageSpace.objects.get(id=id).amount + amount
+            new_amount=amount
         else:
-            newAmount = StorageSpace.objects.get(id=id).amount + amount*converter
+            amount_in_storage = StorageSpace.objects.get(id=id).amount + amount*converter
+            new_amount=amount*converter
         
-        if (newAmount<0):
+        if (amount_in_storage<0):
             return None
         else:
-            StorageSpace.objects.update(**{amount: newAmount})
+            StorageSpace.objects.update(**{amount: amount_in_storage})
             try:
-                new_transaction = Transaction.objects.create(toStorageUnit=storage_unit_id, article = article, amount=newAmount )
+                new_transaction = Transaction.objects.create(storage_unit=storage_unit_id, article = article, operation=1, by_user=user , amount=new_amount )
                 new_transaction.save()
                 return new_transaction
             except:
                 return None
 
+    def addToReturnStorage(id: str, amount: int, user, addOutputUnit: bool) -> Transaction:
+        storage_space = StorageSpace.objects.get(id=id)
+        storage_unit_id= storage_space.storage_unit
+        amount=amount
+        article = Article.objects.get(id=storage_space.article)
+        inputOutput = InputOutput.objects.get(article = article)
+        converter= inputOutput.outputUnitPerInputUnit
+
+        if(addOutputUnit):
+            amount_in_storage = StorageSpace.objects.get(id=id).amount + amount
+            new_amount=amount
+        else:
+            amount_in_storage = StorageSpace.objects.get(id=id).amount + amount*converter
+            new_amount=amount*converter
+        if (amount_in_storage<0):
+            return None
+        else:
+            StorageSpace.objects.update(**{amount: amount_in_storage})
+            try:
+                new_transaction = Transaction.objects.create(storage_unit=storage_unit_id, article = article, operation=2, by_user=user, amount=new_amount )
+                new_transaction.save()
+                return new_transaction
+            except:
+                return None
     
     def getArticleInStorageSpace(storageSpaceId: str) -> Article:
         try:

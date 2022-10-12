@@ -1,17 +1,22 @@
-from datetime import datetime
+from email.policy import default
+from multiprocessing.sharedctypes import Value
+from random import choices
+from unittest.mock import DEFAULT
 from django.db import models
-from backend.coremodels.article import Article
-from django.contrib.auth.models import User
 from backend.coremodels.storage_unit import StorageUnit
+from django.contrib.auth.models import User
+from backend.coremodels.article import Article
+from backend.operations.enumerator import TransactionOperator
 
-
+#Transaction to or from storageUnit by User
 class Transaction(models.Model):
-    id = models.AutoField(primary_key=True)
-    toStorageUnit = models.ForeignKey(StorageUnit, on_delete=models.CASCADE)
-    byUser = models.ForeignKey(User, on_delete=models.CASCADE)
+    id = models.CharField(max_length=15, primary_key=True)
+    storage_unit = models.ForeignKey(StorageUnit, on_delete=models.CASCADE)
+    by_user = models.ForeignKey(User, on_delete=models.CASCADE)
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
-    amount = models.PositiveIntegerField(default=None)
-    timeOfTransaction = models.DateTimeField(default=datetime.now)
-
+    amount = models.PositiveSmallIntegerField(default=0)
+    time_of_transaction = models.DateTimeField(auto_now_add=True)
+    operation = models.IntegerField(choices=TransactionOperator.choices)
+    
     def __str__(self):
-        return str(self.id) + ": " + str(self.byUser) + " " + str(self.toStorageUnit)
+        return str(self.id)

@@ -5,7 +5,6 @@ import os.path
 def makeTextFile(name, article_id, storage_unit, eta, timeOfOrder):
     
     
-        print("tjena")
         with open('Order: {}.txt'.format(name), 'w+') as file:
                 file.write("Article: " + str(article_id) + "\n")
                 file.write("Storage unit: " + str(storage_unit)+ "\n")
