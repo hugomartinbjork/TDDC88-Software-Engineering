@@ -155,7 +155,7 @@ spec:
         # Here we can specify different paths to reverse proxy. It's a good idea
         # to read the documentation on this before attempting to use it.
         paths:
-          - path: /api/
+          - path: /admin/
             pathType: Prefix
             backend:
               service:
