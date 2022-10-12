@@ -77,7 +77,7 @@ spec:
             # Absolute limits
             limits:
               cpu: 100m  # "millicpu", so we are requesting 10% of one core.
-              memory: 80Mi
+              memory: 150Mi
             # But, we'll probably get by with these limits:
             requests:
               cpu: 10m
