@@ -4,13 +4,13 @@ kind: PersistentVolumeClaim
 metadata:
   name: postgres-claim
   labels:
-      app: postgresql
+    app: postgresql
 spec:
   accessModes:
-      - ReadWriteOnce
+    - ReadWriteOnce
   resources:
-      requests:
-        storage: 1Gi
+    requests:
+      storage: 1Gi
 ---
 apiVersion: v1
 kind: Secret
@@ -42,45 +42,45 @@ spec:
         tier: postgreSQL
     spec:
       containers:
-      - name: postgresql
-        image: postgres:9.6.2-alpine
-        env:
-        - name: POSTGRES_USER
-          valueFrom:
-            secretKeyRef:
-              name: postgresql-credentials
-              key: username
-        - name: POSTGRES_DB
-          valueFrom:
-            secretKeyRef:
-              name: postgresql-credentials
-              key: database
-        - name: POSTGRES_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: postgresql-credentials
-              key: password
-        ports:
-        - containerPort: 5432
-          name: postgresql
-        resources:
-          requests:
-            memory: "64Mi"
-            cpu: "50m"
-          limits:
-            memory: "128Mi"
-            cpu: "100m"  
-        volumeMounts:
         - name: postgresql
-          mountPath: /var/lib/postgresql/data
-          subPath: data
+          image: postgres:9.6.2-alpine
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-credentials
+                  key: username
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-credentials
+                  key: database
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-credentials
+                  key: password
+          ports:
+            - containerPort: 5432
+              name: postgresql
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+          volumeMounts:
+            - name: postgresql
+              mountPath: /var/lib/postgresql/data
+              subPath: data
       volumes:
-      - name: postgresql
-        persistentVolumeClaim:
-          claimName: postgres-claim
-      - name: postgresql-credentials
-        secret:
-          secretName: postgresql-credentials
+        - name: postgresql
+          persistentVolumeClaim:
+            claimName: postgres-claim
+        - name: postgresql-credentials
+          secret:
+            secretName: postgresql-credentials
 ---
 apiVersion: v1
 kind: Service
