@@ -144,7 +144,7 @@ spec:
   rules:
 
     # We want to make our application available on this host
-    - host: tddc88-c4testdeployment.kubernetes-public.it.liu.se
+    - host: rdx.kubernetes-public.it.liu.se
 
       # (A note on https: due to how LiUs cluster is set up, the stuff here will
       # be valid for both unencrypted http and encrypted https. The global
