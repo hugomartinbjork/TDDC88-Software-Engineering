@@ -10,6 +10,7 @@ from backend.coremodels.user_info import UserInfo
 from backend.coremodels.storage_space import StorageSpace
 from backend.coremodels.qr_code import QRCode
 from backend.coremodels.order import Order
+from backend.coremodels.transaction import Transaction
 
 
 class ArticleSerializer(serializers.ModelSerializer):
