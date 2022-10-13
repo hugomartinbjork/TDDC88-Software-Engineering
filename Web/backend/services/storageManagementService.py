@@ -45,10 +45,8 @@ class storageManagementService(IstorageManagementService):
             return None
     
     def getAllStorageUnits(self) -> dict:
-        print("tjeba")
         try:
-            
-            allStorageUnits = StorageUnit.objects.all()  
+            allStorageUnits = StorageUnit.objects.all().values()  
             return allStorageUnits
         except:
             return None

@@ -23,7 +23,7 @@ class ArticleSerializer(serializers.ModelSerializer):
 class StorageUnitSerializer(serializers.ModelSerializer):
     class Meta:
         model = StorageUnit
-        fields = ('name')
+        fields = ('name',)
 
 
 # class StorageUnitSerializer(serializers.ModelSerializer):

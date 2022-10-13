@@ -230,20 +230,8 @@ class seeAllStorageUnits(View):
 
     def get(self, request):
         if request.method == 'GET':
-            print("hej")
             allStorages = self._storageManagementService.getAllStorageUnits()
-            print("hej2")
-            #print(allStorages)
             if allStorages is None:
                 raise Http404("Could not find any storage units")
             else:
-                
-                for storage in allStorages:
-                    print(StorageUnitSerializer(storage).data)
-                serializer = StorageUnitSerializer(allStorages)
-                print(serializer)
-                if serializer.is_valid:
-                    print(serializer)
-                    return JsonResponse(serializer.data, status = 200)
-                else:
-                    return Response({'error': 'invalid storages'}, status=status.HTTP_400_BAD_REQUEST) 
+                return JsonResponse(list(allStorages), safe=False, status = 200)
