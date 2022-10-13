@@ -2,6 +2,7 @@ from django.test import TestCase
 from backend.coremodels.article import *
 from backend.coremodels.storage_space import StorageSpace
 from backend.coremodels.storage_unit import StorageUnit 
+from backend.coremodels.qr_code import *
 from backend.services.articleManagementService import *
 from backend.services.storageManagementService import storageManagementService
 
@@ -50,6 +51,18 @@ class FR4_3_Test(TestCase):
         self.assertEqual(storagespace1.storage_unit, storageunit)
         self.assertEqual(storagespace2.storage_unit, storageunit)
 
+# Testing FR4.2
+#-------Fails test and gives errormessage: "StorageSpace matching query does not exist."
+#-------No idea what is wrong.
+#class FR4_2_test(TestCase):
+#    def setUP(self):
+#        StorageSpace.objects.create(id="2")
+#        QRCode.objects.create(id="1", storage_space=StorageSpace.objects.get(id="2"))
+#
+#    def test_QRcode_containing_Storagespace(self):
+#        storagespace = StorageSpace.objects.get(id="2")
+#        qrcode = QRCode.objects.get(id="1")
+#        self.assertEqual(qrcode.storage_space, storagespace)
 
 
 
