@@ -29,4 +29,30 @@ class StorageSpaceCreationTest(TestCase):
         self.assertEqual(storageManagementService.getStorageUnitById(self,"1"), storageunit)
         self.assertEqual(storageManagementService.getStorageSpaceById(self,"1"), storagespace)
         self.assertEqual(storagespace.article, article1)
-        self.assertEqual(storagespace.storage_unit, storageunit)
+        self.assertEqual(storagespace.storage_unit, storageunit) 
+
+
+# Testing FR4.3
+class FR4_3_Test(TestCase):
+    def setUp(self):
+        Article.objects.create(lioId="1")
+        StorageUnit.objects.create(id="1")
+        StorageSpace.objects.create(id="1", storage_unit = StorageUnit.objects.get(id="1"), article = Article.objects.get(lioId="1"))
+        StorageSpace.objects.create(id="2", storage_unit = StorageUnit.objects.get(id="1"), article = Article.objects.get(lioId="1"))
+
+    def test_FR4_3(self):
+        storageunit = StorageUnit.objects.get(id="1")
+        storagespace1 = StorageSpace.objects.get(id="1")
+        storagespace2 = StorageSpace.objects.get(id="2")
+        article1 = Article.objects.get(lioId="1")
+        self.assertEqual(storagespace1.article, article1)
+        self.assertEqual(storagespace2.article, article1)
+        self.assertEqual(storagespace1.storage_unit, storageunit)
+        self.assertEqual(storagespace2.storage_unit, storageunit)
+
+
+
+
+
+
+
