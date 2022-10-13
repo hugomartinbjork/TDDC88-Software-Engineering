@@ -1,23 +1,20 @@
-FROM python:3
+FROM python:3.8.10
 
-RUN apt-get update && apt-get upgrade -y && apt-get install \
-  -y --no-install-recommends python3
+COPY . /app
+WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
-    libsqlite3-dev \
-&& rm -rf /var/lib/apt/lists/*
+RUN python3 -m venv /opt/venv
+
+RUN /opt/venv/bin/pip install pip --upgrade && \
+     /opt/venv/bin/pip install -r requirements.txt && \
+     chmod +x entrypoint.sh
+RUN pip install -r requirements.txt
+
+# RUN pip install pip --upgrade && \
+   # pip install -r requirements.txt && \
+   # chmod +x entrypoint.sh
 
 EXPOSE 8000
 
-RUN mkdir /app
-WORKDIR /app
-
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-
-COPY . /app/
-
-RUN python3 manage.py migrate
-
-ENTRYPOINT ["python3", "manage.py"]
-CMD ["runserver", "0.0.0.0:8000"]
+RUN mkdir static
+CMD ["/app/entrypoint.sh"]
