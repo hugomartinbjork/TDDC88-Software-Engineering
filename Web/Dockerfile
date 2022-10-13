@@ -3,16 +3,16 @@ FROM python:3.8.10
 COPY . /app
 WORKDIR /app
 
-#RUN python3 -m venv /opt/venv
+RUN python3 -m venv /opt/venv
 
-# RUN /opt/venv/bin/pip install pip --upgrade && \
-#     /opt/venv/bin/pip install -r requirements.txt && \
-#     chmod +x entrypoint.sh
-# RUN pip install -r requirements.txt
+RUN /opt/venv/bin/pip install pip --upgrade && \
+     /opt/venv/bin/pip install -r requirements.txt && \
+     chmod +x entrypoint.sh
+RUN pip install -r requirements.txt
 
-RUN pip install pip --upgrade && \
-    pip install -r requirements.txt && \
-    chmod +x entrypoint.sh
+# RUN pip install pip --upgrade && \
+   # pip install -r requirements.txt && \
+   # chmod +x entrypoint.sh
 
 EXPOSE 8000
 
