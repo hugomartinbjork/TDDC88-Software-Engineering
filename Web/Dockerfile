@@ -10,4 +10,5 @@ RUN /opt/venv/bin/pip install pip --upgrade && \
     chmod +x entrypoint.sh
 RUN pip install -r requirements.txt
 
+RUN mkdir static
 CMD ["/app/entrypoint.sh"]
