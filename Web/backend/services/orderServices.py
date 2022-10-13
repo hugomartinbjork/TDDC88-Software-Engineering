@@ -45,7 +45,6 @@ class OrderService():
     # Gets expected time for order to arrive from central storage. Returns 14 days if the article does not exist.
     def get_expected_wait(self, article_id, amount) -> int:
         central_storage_stock = OrderService.has_stock(self, article_id)
-        
 
         if central_storage_stock is None:
             central_storage_stock = 0
@@ -121,5 +120,6 @@ class OrderService():
             return amount
         else:
             return None
+
         
         

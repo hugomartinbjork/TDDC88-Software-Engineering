@@ -43,6 +43,13 @@ class storageManagementService(IstorageManagementService):
             return "article: {} amount: {}".format(StorageSpace.objects.get(id=id).article, StorageSpace.objects.get(id=id).amount)
         except:
             return None
+    
+    def getAllStorageUnits(self) -> dict:
+        try:
+            allStorageUnits = StorageUnit.objects.all().values()  
+            return allStorageUnits
+        except:
+            return None
 
 # FR 10.1.3 #
 

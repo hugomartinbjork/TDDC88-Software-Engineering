@@ -11,6 +11,7 @@ urlPatterns = [
     path('order/<int:id>/', csrf_exempt(views.order.as_view())),
     path('login/', views.Login.as_view()),
     path('loginwithid/', views.LoginWithId.as_view()),
+    path('storages/', views.seeAllStorageUnits.as_view()),
 ]
 
 urlpatterns = format_suffix_patterns(urlPatterns)

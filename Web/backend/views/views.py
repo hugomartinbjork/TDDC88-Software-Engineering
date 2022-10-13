@@ -29,6 +29,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 
 
+
 # Create your views here.
 
 class article(View):
@@ -77,7 +78,7 @@ class storage(View):
 
     def get(self, request, storageId):
         if request.method == 'GET':
-            storage = self._storageManagementService.getStorageById(storageId)
+            storage = self._storageManagementService.getStorageUnitById(storageId)
             if storage is None:
                 raise Http404("Could not find storage")
             serializer = StorageUnitSerializer(storage)
@@ -88,7 +89,6 @@ class storage(View):
 
 class storageSpace(View):
     # Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing
-    @si.inject
     def __init__(self, _deps):
         storageManagementService = _deps['storageManagementService']
         # Instance of dependency is created in constructor
@@ -158,6 +158,25 @@ class order(View):
 
 
 
+    def post(self, request, id):
+        if request.method == 'POST':
+            json_body = json.loads(request.body)
+            article = json_body['ofArticle']
+            storageUnit = json_body['toStorageUnit']
+            amount = json_body['amount']
+            if(OrderService.has_order(self, storageUnit, article) is not None):
+                order = OrderService.has_order(self, storageUnit, article)
+                eta = {"Expected arrival: " : OrderService.getETA(self, order.id)}
+                return JsonResponse(eta, status=200)
+            else:
+                order =OrderService.place_order(self, storageUnit, article, amount)
+                serializer = OrderSerializer(order)
+                if serializer.is_valid:
+                    return JsonResponse(serializer.data, status=200)
+
+
+
+
 class Login(APIView):
     @si.inject #Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing 
     def __init__(self, _deps):
@@ -200,3 +219,19 @@ class LoginWithId(APIView):
             return self._userService.createAuthToken(request, user)
         else:
             return Response({'error': 'invalid details'}, status=status.HTTP_400_BAD_REQUEST)
+
+class seeAllStorageUnits(View):
+    @si.inject
+    def __init__(self, _deps):
+        storageManagementService = _deps['storageManagementService']
+        # Instance of dependency is created in constructor
+        self._storageManagementService = storageManagementService()
+
+
+    def get(self, request):
+        if request.method == 'GET':
+            allStorages = self._storageManagementService.getAllStorageUnits()
+            if allStorages is None:
+                raise Http404("Could not find any storage units")
+            else:
+                return JsonResponse(list(allStorages), safe=False, status = 200)
