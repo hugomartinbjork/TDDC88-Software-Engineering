@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
-
+import os
 from pathlib import Path
 from datetime import timedelta
 from rest_framework.settings import api_settings
@@ -25,7 +25,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-&kgxky3c#god85vjz8-%ygle2^)iac+unxt_qud^tp4(10hi&_'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+
+# always set to false when pushing to dev
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -43,6 +45,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'backend',
     'knox',
+    'whitenoise.runserver_nostatic',
 ]
 
 REST_FRAMEWORK = {
@@ -67,6 +70,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'rdxSolutionsBackendProject.urls'
@@ -131,8 +135,19 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_ROOT = BASE_DIR / "staticfiles"
-STATIC_URL = "static/"
+
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+
+
+
+# uncomment these two under this line when running locally 
+
+# STATIC_ROOT = BASE_DIR / "staticfiles"
+# STATIC_URL = "static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
