@@ -1,0 +1,165 @@
+# yamllint disable rule:line-length
+
+# Tip: make sure you have an editor with support for editing yaml-files, since
+# they are indentation sensitive.
+
+# Note the three dashes, `---`, starting a new yaml-document.
+
+---
+
+
+# First of all, let's create a so called "Deployment" for our frontend. The deployment is
+# responsible for making sure our `hello-frontend`-container is running.
+
+# These two lines indicate to k8s what kind of resource we are defining
+
+apiVersion: apps/v1
+kind: Deployment
+# Here we define some metadata. In this case, we are using it for two things:
+#
+# + Giving it a resonable (unique) name, so we know what it is and can identify it in the running cluster when needed.
+# + Let us point our load balancer (that's comming in the next step) on all pods in our deployment.
+metadata:
+  name: rdx-backend-app-deployment  # Specify a name
+  labels:  # And give it a label to make the pods easy to identify later on
+    app: rdx-backend-app
+
+
+# Here come the actual specification of what we want the deployment to run. In
+# our case, we want to have a pod running a single container, and just one
+# instance of it.
+spec:
+  # How many replicas do we want of our pod? This is usually only 1, unless you
+  # really need to scale horisontally.
+  replicas: 1
+
+  # How do we indentify pods we should manage?
+  selector:
+    matchLabels:
+      # Match all nodes with this label
+      app: rdx-backend-app
+
+  # Now we can soon move on to defining what pods we want to run. In this case,
+  # we want a single pod running a single container. But first, specify more
+  # metadata:
+  template:
+    metadata:
+      labels:
+        # Again, specify our label to make the pod identifiable.
+        app: rdx-backend-app
+    # And finally, we can say what we want to run
+    spec:
+      # Since we want to pull an image from our internal registry, we'll need to
+      # provide the secrets needed to pull from there. The secret itself was
+      # hopefully already pushed to your k8s-namespace by your lab assistant.
+      imagePullSecrets:
+        - name: liu-gitlab-regcred
+
+      # And finally, define our container
+      containers:
+        -
+          name: rdx  # Give it a name
+          image: gitlab.liu.se:5000/tddc88-2022/c4/rdx-solutions-backend-project/rdx-backend:latest # Specify the image
+          env:
+            - name: PORT
+              value: "8000"
+          ports:  # Specify what ports should be opened
+            -
+              name: web  # Give our port as name for later reference
+              containerPort: 8000  # Our container is listening on TCP 80 in this specific case
+              protocol: TCP
+          # Kubernetes schedules workloads based on how much resources they
+          # need, so we must specify this. It is important to try to make these
+          # parameters somewhat realistic. If they are to low, your application
+          # will crash and burn. If they are too high, you will be wasting
+          # resources on the cluster (k8s does not overprovision)
+          resources:
+            # Absolute limits
+            limits:
+              cpu: 100m  # "millicpu", so we are requesting 10% of one core.
+              memory: 150Mi
+            # But, we'll probably get by with these limits:
+            requests:
+              cpu: 10m
+              memory: 42Mi
+          # Let's define some probes for k8s, to help manage the lifecycle of the pod.
+
+          # The readinessProbe indicates that the pod is ready to send out
+          # requests and can be included in for example load balancing. The
+          # livenessProbe detects if a pod has failed after start and needs to
+          # be restarted, while the readinessProbe detects if a pod is ready to
+          # recieve traffic and should be included as a backend for load
+          # balancers. These checks are strictly speaking not required, but are
+          # highly recommended. There are several ways to define these probes,
+          # the most common would be probing using http or trying to open a tcp
+          # socket. For the pods in this deployment, we'll use an http probe,
+          # and further down in this file you will find an example of probing by
+          # TCP.
+         # readinessProbe:
+          #  httpGet:
+           #   port: web
+            #  path: "/api/hello_world"
+         # livenessProbe:
+          #  httpGet:
+            #  port: web
+             # path: "/api/hello_world"
+
+
+# That's it, now our container is running on the cluster!
+
+
+# Remember the `---` to create a new yaml-document!
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: rdx-backend-app
+  name: rdx-backend-app-service
+spec:
+  type: ClusterIP
+  ports:
+    - name: web
+      protocol: TCP
+      targetPort: 8000  # Note the differing port!
+      port: 80
+  selector:
+    app: rdx-backend-app
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rdx-backend-app-ingress
+spec:
+  # `ingressClassName` is important, and specific to this particular cluster.
+  # Without `ingressClassName` set to nginx-public, LiUs cluster-global
+  # IngressController won't properly handle this Ingress. will not manage this
+  # Ingress.
+  ingressClassName: nginx-public
+  # This is a bunch of rules used to reverse proxy incomming traffic to your
+  # desired load balancing Service, so the traffic finally end up at the proper
+  # pod.
+  rules:
+
+    # We want to make our application available on this host
+    - host: rdx.kubernetes-public.it.liu.se
+
+      # (A note on https: due to how LiUs cluster is set up, the stuff here will
+      # be valid for both unencrypted http and encrypted https. The global
+      # IngressController will even make sure there is a certificate. However,
+      # there is no redirect in place, so you need to make sure to use `https` in
+      # the address bar of your browser.)
+      http:
+        # Here we can specify different paths to reverse proxy. It's a good idea
+        # to read the documentation on this before attempting to use it.
+        paths:
+          - path: /admin/
+            pathType: Prefix
+            backend:
+              service:
+                name: rdx-backend-app-service
+                port:
+                  number: 80
+---
