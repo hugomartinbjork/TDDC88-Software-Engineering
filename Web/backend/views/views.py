@@ -1,23 +1,25 @@
 from http.client import OK
 import pkgutil
 from urllib import request
+import json
 from django.shortcuts import render
 from rest_framework import generics
 from django.http import Http404, JsonResponse, HttpResponseBadRequest
-from backend.services.orderManagementService import orderManagementService
-from ..serializers import StorageUnitSerializer, ArticleSerializer, GroupSerializer, QRCodeSerializer, OrderSerializer
+from ..serializers import StorageUnitSerializer, ArticleSerializer, GroupSerializer, QRCodeSerializer, OrderSerializer, StorageSpaceSerializer
 # This import is important for now, since the dependency in articlemanagmentservice will not be stored in the serviceInjector otherwise however, I'm
 # hoping to be able to change this since it looks kind of trashy
 from backend.services.articleManagementService import articleManagementService
 from backend.services.userService import userService
 from backend.services.groupManagementService import groupManagementService
 from backend.services.storageManagementService import storageManagementService
+from backend.services.orderServices import OrderService
 from django.views import View
 from backend.__init__ import si
 from backend.coremodels.article import Article
 from backend.coremodels.storage_unit import StorageUnit
 from backend.coremodels.storage_space import StorageSpace
 from backend.coremodels.qr_code import QRCode
+from backend.coremodels.order import Order
 from rest_framework.authtoken.models import Token
 from rest_framework import status
 from rest_framework.views import APIView
@@ -25,6 +27,7 @@ from rest_framework.response import Response
 from rest_framework.authtoken.views import ObtainAuthToken
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+
 
 
 # Create your views here.
@@ -86,15 +89,13 @@ class storage(View):
 
 class order(View):
     # Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing
-    @si.inject
     def __init__(self, _deps):
-        orderManagementService = _deps['orderManagementService']
-        # Instance of dependency is created in constructor
-        self._orderManagementService = orderManagementService()
+        OrderService = _deps['OrderService']
+        self._orderService = OrderService() #Instance of dependency is created in constructor
 
-    def get(self, request, id):
+    def get(self, request, id): 
         if request.method == 'GET':
-            order = self._orderManagementService.getOrderById(id)
+            order = self._orderService.getOrderById(id)
             if order is None:
                 raise Http404("Could not find order")
             serializer = OrderSerializer(order)
@@ -103,7 +104,30 @@ class order(View):
             return HttpResponseBadRequest
 
 
+    def post(self, request, id):
+        if request.method == 'POST':
+            json_body = json.loads(request.body)
+            article = json_body['ofArticle']
+            storageUnit = json_body['toStorageUnit']
+            amount = json_body['amount']
+            if(OrderService.has_order(self, storageUnit, article) is not None):
+                order = OrderService.has_order(self, storageUnit, article)
+                eta = {"Expected arrival: " : OrderService.getETA(self, order.id)}
+                return JsonResponse(eta, status=200)
+            else:
+                order =OrderService.place_order(self, storageUnit, article, amount)
+                serializer = OrderSerializer(order)
+                if serializer.is_valid:
+                    return JsonResponse(serializer.data, status=200)
+
+
+
+
 class Login(APIView):
+    @si.inject
+    def __init__(self, _deps):
+        userService = _deps['userService']
+        self._userService = userService()
 
     def post(self, request):
         username = request.data.get('username')
@@ -153,21 +177,16 @@ class seeAllStorageUnits(View):
     def get(self, request):
         if request.method == 'GET':
             print("hej")
-            allStorages =  self._storageManagementService.getAllStorageUnits()
+            allStorages = self._storageManagementService.getAllStorageUnits()
             print("hej2")
-            for storage in allStorages:
-                print(storage['name'])
-            print(allStorages)
+            #print(allStorages)
             if allStorages is None:
                 raise Http404("Could not find any storage units")
             else:
-                serializer = {}
-                print(serializer)
-                key = 1
+                
                 for storage in allStorages:
-                    serializer.update({'key' : 'storage["name"]'})
-                    key = key + 1
-                    print(StorageUnitSerializer(storage))
+                    print(StorageUnitSerializer(storage).data)
+                serializer = StorageUnitSerializer(allStorages)
                 print(serializer)
                 if serializer.is_valid:
                     print(serializer)

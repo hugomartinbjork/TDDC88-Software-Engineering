@@ -51,8 +51,8 @@ class storageManagementService(IstorageManagementService):
     def getAllStorageUnits(self) -> dict:
         print("tjeba")
         try:
-
-            allStorageUnits = StorageUnit.objects.all().values_list('id', 'name')  
+            
+            allStorageUnits = StorageUnit.objects.all()  
             return allStorageUnits
         except:
             return None
