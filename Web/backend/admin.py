@@ -1,9 +1,7 @@
 from django.contrib import admin
 from backend.coremodels.article import Article
 from backend.coremodels.centralStorageSpace import CentralStorageSpace
-from backend.coremodels.order import Order
 from backend.coremodels.storage_unit import StorageUnit
-from backend.coremodels.centralStorageSpace import CentralStorageSpace
 # from backend.coremodels.storageComponent import storageUnit
 from backend.coremodels.cost_center import CostCenter
 from backend.coremodels.user_info import UserInfo
@@ -16,7 +14,6 @@ from backend.coremodels.storage_space import StorageSpace
 from backend.coremodels.order import Order
 from django.utils.html import format_html
 
-from backend.services.orderManagementService import orderManagementService
 
 # Register your models here.
 # admin.site.register(storageUnit)

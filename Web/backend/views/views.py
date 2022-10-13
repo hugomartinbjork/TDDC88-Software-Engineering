@@ -87,12 +87,48 @@ class storage(View):
             return HttpResponseBadRequest
 
 
-class order(View):
+class storageSpace(View):
     # Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing
+    def __init__(self, _deps):
+        storageManagementService = _deps['storageManagementService']
+        # Instance of dependency is created in constructor
+        self._storageManagementService = storageManagementService()
+    
+    def get(self, request, storageSpaceId):
+        if request.method == 'GET':
+            storageSpace = self._storageManagementService.getStorageSpaceById(storageSpaceId)
+            if storageSpace is None:
+                return Http404("Could not find storage space")
+            if storageSpace.amount == 0:
+                if OrderService.has_order(self, storageSpace.storage_unit, storageSpace.article) is not None:
+                    order = OrderService.has_order(self, storageSpace.storage_unit, storageSpace.article)
+                    eta = OrderService.getETA(self, order.id)
+                    serializer = StorageSpaceSerializer(storageSpace)
+                    if serializer.is_valid:
+                        alteredDict = {}
+                        alteredDict.update(serializer.data)
+                        alteredDict['ETA: '] = eta
+                        return JsonResponse(alteredDict, status=200)
+                    return HttpResponseBadRequest
+                else:
+                    serializer = StorageSpaceSerializer(storageSpace)
+                    if serializer.is_valid:
+                        alteredDict = {}
+                        alteredDict.update(serializer.data)
+                        alteredDict['ETA: '] = "No order done"
+                        return JsonResponse(alteredDict, status=200)
+                    return HttpResponseBadRequest
+            else:
+                serializer = StorageSpaceSerializer(storageSpace)
+                if serializer.is_valid:
+                    return JsonResponse(serializer.data, status=200)
+                return HttpResponseBadRequest
+
+class order(View): 
+    @si.inject #Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing 
     def __init__(self, _deps):
         OrderService = _deps['OrderService']
         self._orderService = OrderService() #Instance of dependency is created in constructor
-
     def get(self, request, id): 
         if request.method == 'GET':
             order = self._orderService.getOrderById(id)
@@ -102,6 +138,24 @@ class order(View):
             if serializer.is_valid:
                 return JsonResponse(serializer.data, status=200)
             return HttpResponseBadRequest
+
+    
+    def post(self, request, id):
+        if request.method == 'POST':
+            json_body = json.loads(request.body)
+            article = json_body['ofArticle']
+            storageUnit = json_body['toStorageUnit']
+            amount = json_body['amount']
+            if(OrderService.has_order(self, storageUnit, article) is not None):
+                order = OrderService.has_order(self, storageUnit, article)
+                eta = {"Expected arrival: " : OrderService.getETA(self, order.id)}
+                return JsonResponse(eta, status=200)
+            else:
+                order =OrderService.place_order(self, storageUnit, article, amount)
+                serializer = OrderSerializer(order)
+                if serializer.is_valid:
+                    return JsonResponse(serializer.data, status=200)
+
 
 
     def post(self, request, id):
@@ -124,7 +178,7 @@ class order(View):
 
 
 class Login(APIView):
-    @si.inject
+    @si.inject #Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing 
     def __init__(self, _deps):
         userService = _deps['userService']
         self._userService = userService()

@@ -26,6 +26,7 @@ class OrderService():
 
         if order is None:
             return None
+            
 
         # Checks if the order is already processesed so we dont process the same order twice.
         if order.hasArrived == False:
@@ -121,3 +122,5 @@ class OrderService():
         else:
             return None
 
+        
+        

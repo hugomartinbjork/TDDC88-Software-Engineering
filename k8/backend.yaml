@@ -77,7 +77,7 @@ spec:
             # Absolute limits
             limits:
               cpu: 100m  # "millicpu", so we are requesting 10% of one core.
-              memory: 80Mi
+              memory: 150Mi
             # But, we'll probably get by with these limits:
             requests:
               cpu: 10m
@@ -144,7 +144,7 @@ spec:
   rules:
 
     # We want to make our application available on this host
-    - host: tddc88-c4testdeployment.kubernetes-public.it.liu.se
+    - host: rdx.kubernetes-public.it.liu.se
 
       # (A note on https: due to how LiUs cluster is set up, the stuff here will
       # be valid for both unencrypted http and encrypted https. The global
@@ -155,7 +155,7 @@ spec:
         # Here we can specify different paths to reverse proxy. It's a good idea
         # to read the documentation on this before attempting to use it.
         paths:
-          - path: /api/
+          - path: /admin/
             pathType: Prefix
             backend:
               service:
