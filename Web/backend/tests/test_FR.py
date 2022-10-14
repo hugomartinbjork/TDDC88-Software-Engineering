@@ -51,18 +51,79 @@ class FR4_3_Test(TestCase):
         self.assertEqual(storagespace1.storage_unit, storageunit)
         self.assertEqual(storagespace2.storage_unit, storageunit)
 
-# Testing FR4.2
+
+#Testing FR6.2
+
+class FR6_2_test(TestCase):
+
+    def setUp(self):
+        Article.objects.create(lioId="1")
+        StorageUnit.objects.create(id="1")
+        StorageSpace.objects.create(id="1", storage_unit = StorageUnit.objects.get(id="1"), article = Article.objects.get(lioId="1"), amount = 2)
+        StorageSpace.objects.create(id="2", storage_unit = StorageUnit.objects.get(id="1"), article = Article.objects.get(lioId="1"), amount = 4)
+
+    def test_FR6_2(self):
+        article1 = Article.objects.get(lioId="1")
+        storagespace1 = StorageSpace.objects.get(id="1")
+        storagespace2 = StorageSpace.objects.get(id="2")
+        self.assertEqual(storagespace1.amount, 2) 
+
+
+#Testing FR1.2
+
+
+# class FR1_2_test(TestCase):
+
+#     def setUp(self):
+
+#         UserInfo.objects.create(name)
+
+
+#Testing FR8.9
+
+class FR8_9_test(TestCase):
+
+    def setUp(self):
+        Article.objects.create(lioId="1")
+        Article.objects.create(lioId="2")
+        StorageUnit.objects.create(id="1")
+        StorageUnit.objects.create(id="2")
+        StorageSpace.objects.create(id="1", storage_unit = StorageUnit.objects.get(id="1"), article = Article.objects.get(lioId="1"), amount = 2)
+        StorageSpace.objects.create(id="2", storage_unit = StorageUnit.objects.get(id="2"), article = Article.objects.get(lioId="2"), amount = 4)
+
+    def test_FR8_9(self):
+       article1 = Article.objects.get(lioId="1")
+       article2 = Article.objects.get(lioId="2")
+       storagespace1 = StorageSpace.objects.get(id="1")
+       storagespace2 = StorageSpace.objects.get(id="2")
+       storageunit1 = StorageUnit.objects.get(id="1")
+       storageunit2 = StorageUnit.objects.get(id="2")
+       self.assertEqual(storageManagementService.searchArticleInStorage("1", "1"), 2)  
+       self.assertNotEqual(storageManagementService.searchArticleInStorage("1", "1"), 3)  
+       self.assertNotEqual(storageManagementService.searchArticleInStorage("2", "1"), 2) 
+       self.assertEqual(storageManagementService.searchArticleInStorage("2", "2"), 4) 
+       self.assertEqual(storageManagementService.searchArticleInStorage("2", "1"), None) 
+
+       
+
+
+
+
+
+#Testing FR4.2
 #-------Fails test and gives errormessage: "StorageSpace matching query does not exist."
 #-------No idea what is wrong.
-#class FR4_2_test(TestCase):
-#    def setUP(self):
-#        StorageSpace.objects.create(id="2")
-#        QRCode.objects.create(id="1", storage_space=StorageSpace.objects.get(id="2"))
-#
-#    def test_QRcode_containing_Storagespace(self):
-#        storagespace = StorageSpace.objects.get(id="2")
-#        qrcode = QRCode.objects.get(id="1")
-#        self.assertEqual(qrcode.storage_space, storagespace)
+# class FR4_2_test(TestCase):
+#     def setUP(self):
+#         Article.objects.create(lioId="1")
+#         StorageUnit.objects.create(id="1")
+#         StorageSpace.objects.create(id="2", storage_unit = StorageUnit.objects.get(id="1"), article = Article.objects.get(lioId="1"))
+#         QRCode.objects.create(id="1", storage_space=StorageSpace.objects.get(id="2"))
+
+#     def test_QRcode_containing_Storagespace(self):
+#         storagespace = StorageSpace.objects.get(id="2")
+#         qrcode = QRCode.objects.get(id="1")
+#         self.assertEqual(qrcode.storage_space, storagespace)
 
 
 
