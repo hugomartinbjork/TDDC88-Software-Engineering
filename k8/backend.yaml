@@ -62,13 +62,13 @@ spec:
           image: gitlab.liu.se:5000/tddc88-2022/c4/rdx-solutions-backend-project/rdx-backend:latest # Specify the image
           env:
             - name: DJANGO_SECRET_KEY
-              value: echo "$DJANGO_SECRET_KEY"
+              value: 
             - name: DJANGO_SUPER_USER_USERNAME
-              value: echo "$DJANGO_SUPER_USER_USERNAME"
+              value: "admin"
             - name: DJANGO_SUPER_USER_PASSWORD
-              value: echo "$DJANGO_SUPER_USER_PASSWORD"
+              value: "rdxsolutions"
             - name: DJANGO_SUPERUSER_EMAIL
-              value: "$DJANGO_SUPERUSER_EMAIL"
+              value: "admin@rdx.com"
             - name: PORT
               value: "8000"
           ports:  # Specify what ports should be opened
