@@ -57,6 +57,8 @@ spec:
         - name: rdx # Give it a name
           image: gitlab.liu.se:5000/tddc88-2022/c4/rdx-solutions-backend-project/rdx-backend:latest # Specify the image
           env:
+            - name: PORT
+              value: "8000"
             - name: DJANGO_SECRET_KEY
               value: "8SKLdsklsdSD89DS)UISD0ds903"
             - name: DJANGO_SUPERUSER_USERNAME
@@ -66,9 +68,8 @@ spec:
             - name: DJANGO_SUPERUSER_EMAIL
               value: "admin@rdx.com"
             - name: DJANGO_SECRET_KEY
-              value: "&kgxdfky3dfc#dfgodfd85vjz8-%ygle2^)iac+unxt_qud^tp4(10"
-            - name: PORT
-              value: "8000"
+              value: "&kgxdfky3dfc#dfgodfd85vjz8-%ygle2^)iac+unxt_qud"
+           
           ports: # Specify what ports should be opened
             - name: web # Give our port as name for later reference
               containerPort: 8000 # Our container is listening on TCP 80 in this specific case
