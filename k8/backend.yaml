@@ -69,7 +69,6 @@ spec:
               value: "admin@rdx.com"
             - name: DJANGO_SECRET_KEY
               value: "&kgxdfky3dfc#dfgodfd85vjz8-%ygle2^)iac+unxt_qud"
-           
           ports: # Specify what ports should be opened
             - name: web # Give our port as name for later reference
               containerPort: 8000 # Our container is listening on TCP 80 in this specific case
