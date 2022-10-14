@@ -60,6 +60,7 @@ spec:
         -
           name: rdx  # Give it a name
           image: gitlab.liu.se:5000/tddc88-2022/c4/rdx-solutions-backend-project/rdx-backend:latest # Specify the image
+          env_file: .env
           env:
             - name: PORT
               value: "8000"
