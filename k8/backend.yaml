@@ -151,7 +151,7 @@ spec:
       # there is no redirect in place, so you need to make sure to use `https` in
       # the address bar of your browser.)
       http:
-        # Here we can specify different paths to reverse proxy. It's a good idea
+        # Here we can specify different paths to reverse proxy, It's a good idea
         # to read the documentation on this before attempting to use it.
         paths:
           - path: /admin/
@@ -160,5 +160,5 @@ spec:
               service:
                 name: rdx-backend-app-service
                 port:
-                  number: 80             
+                  number: 80
 ---
