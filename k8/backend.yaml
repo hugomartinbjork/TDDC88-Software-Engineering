@@ -78,18 +78,6 @@ spec:
               cpu: 10m
               memory: 42Mi
           # Let's define some probes for k8s, to help manage the lifecycle of the pod.
-
-          # The readinessProbe indicates that the pod is ready to send out
-          # requests and can be included in for example load balancing. The
-          # livenessProbe detects if a pod has failed after start and needs to
-          # be restarted, while the readinessProbe detects if a pod is ready to
-          # recieve traffic and should be included as a backend for load
-          # balancers. These checks are strictly speaking not required, but are
-          # highly recommended. There are several ways to define these probes,
-          # the most common would be probing using http or trying to open a tcp
-          # socket. For the pods in this deployment, we'll use an http probe,
-          # and further down in this file you will find an example of probing by
-          # TCP.
           # readinessProbe:
           #  httpGet:
           #   port: web
@@ -154,4 +142,3 @@ spec:
                 port:
                   number: 80
 ---
-
