@@ -70,7 +70,6 @@ deploy-test-k8s-connection:
 # Deploy a token for accessing our registry to our k8s namespace. The token must
 # be saved in the CI/CD variable $REGISTRY_PASS, but your lab assistant should
 # have done that for you.
-#
 # Please note that this pipeline step will really only do useful stuff on it's
 # first run, after that all the secrets should already be in place. However, it
 # is preserved here for posterity. Also, this allows us to *completely* nuke a
