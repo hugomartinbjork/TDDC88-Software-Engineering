@@ -160,6 +160,5 @@ spec:
               service:
                 name: rdx-backend-app-service
                 port:
-                  number: 80
-                  
+                  number: 80             
 ---
