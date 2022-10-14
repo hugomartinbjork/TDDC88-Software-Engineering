@@ -57,6 +57,16 @@ spec:
         - name: rdx # Give it a name
           image: gitlab.liu.se:5000/tddc88-2022/c4/rdx-solutions-backend-project/rdx-backend:latest # Specify the image
           env:
+            - name: DJANGO_SECRET_KEY
+              value: "8SKLdsklsdSD89DS)UISD0ds903"
+            - name: DJANGO_SUPERUSER_USERNAME
+              value: "admin"
+            - name: DJANGO_SUPERUSER_PASSWORD
+              value: "rdxsolutions"
+            - name: DJANGO_SUPERUSER_EMAIL
+              value: "admin@rdx.com"
+            - name: DJANGO_SECRET_KEY
+              value: "&kgxdfky3dfc#dfgodfd85vjz8-%ygle2^)iac+unxt_qud^tp4(10"
             - name: PORT
               value: "8000"
           ports: # Specify what ports should be opened
@@ -78,6 +88,18 @@ spec:
               cpu: 10m
               memory: 42Mi
           # Let's define some probes for k8s, to help manage the lifecycle of the pod.
+
+          # The readinessProbe indicates that the pod is ready to send out
+          # requests and can be included in for example load balancing. The
+          # livenessProbe detects if a pod has failed after start and needs to
+          # be restarted, while the readinessProbe detects if a pod is ready to
+          # recieve traffic and should be included as a backend for load
+          # balancers. These checks are strictly speaking not required, but are
+          # highly recommended. There are several ways to define these probes,
+          # the most common would be probing using http or trying to open a tcp
+          # socket. For the pods in this deployment, we'll use an http probe,
+          # and further down in this file you will find an example of probing by
+          # TCP.
           # readinessProbe:
           #  httpGet:
           #   port: web
