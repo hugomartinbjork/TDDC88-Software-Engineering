@@ -66,7 +66,7 @@ spec:
             - name: DJANGO_SUPERUSER_EMAIL
               value: "admin@rdx.com"
             - name: DJANGO_SECRET_KEY
-              value: "&kgxdfky3dfc#dfgodfd85vjz8-%ygle2^)iac+unxt_qud^tp4(10"
+              value: "u0026kgxdfky3dfc#dfgodfd85vjz8-%ygle2^)iac+unxt_qud^tp4(10"
             - name: PORT
               value: "8000"
           ports: # Specify what ports should be opened
