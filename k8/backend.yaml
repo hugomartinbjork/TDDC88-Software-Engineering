@@ -59,14 +59,12 @@ spec:
           env:
             - name: DJANGO_SECRET_KEY
               value: "8SKLdsklsdSD89DS)UISD0ds903"
-            - name: DJANGO_SUPERUSER_USERNAME
+            - name: DJANGO_SUPER_USER_USERNAME
               value: "admin"
-            - name: DJANGO_SUPERUSER_PASSWORD
+            - name: DJANGO_SUPER_USER_PASSWORD
               value: "rdxsolutions"
             - name: DJANGO_SUPERUSER_EMAIL
               value: "admin@rdx.com"
-            - name: DJANGO_SECRET_KEY
-              value: "u0026kgxdfky3dfc#dfgodfd85vjz8-%ygle2^)iac+unxt_qud^tp4(10"
             - name: PORT
               value: "8000"
           ports: # Specify what ports should be opened
