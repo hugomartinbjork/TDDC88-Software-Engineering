@@ -1,3 +1,4 @@
 from backend.dependencyInjection.serviceInjector import ServiceInjector
 
-si = ServiceInjector()
+dataAccessInjector = ServiceInjector()
+serviceInjector = ServiceInjector()
