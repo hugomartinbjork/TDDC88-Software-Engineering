@@ -3,7 +3,8 @@ from django.contrib.auth import login
 from django.conf import settings
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
-from backend.__init__ import si
+from backend.__init__ import serviceInjector as si
+from ..__init__ import dataAccessInjector as di
 from django.contrib.auth.backends import BaseBackend
 from rest_framework.response import Response
 from rest_framework import status
