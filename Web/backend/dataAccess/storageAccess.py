@@ -63,7 +63,8 @@ class storageAccess():
     def searchArticleInStorage(self, storageUnitId: str, articleId: str) -> int:
         try:
             storage_unit = StorageUnit.objects.get(id=storageUnitId)
-            storage_space = StorageSpace.objects.get(storage_unit=storage_unit.id, article=articleId)
+            article = Article.objects.get(lioId = articleId)
+            storage_space = StorageSpace.objects.get(storage_unit=storage_unit, article=article)
             return storage_space.amount
         except:
             return None
