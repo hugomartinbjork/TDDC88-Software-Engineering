@@ -1,6 +1,7 @@
 from datetime import timedelta
-from backend.coremodels.article import Article
 
+from backend.coremodels.transaction import Transaction
+from backend.coremodels.article import Article
 from backend.coremodels.storage_space import StorageSpace
 from backend.coremodels.storage_unit import StorageUnit
 from ..coremodels.order import Order
@@ -67,3 +68,11 @@ class storageAccess():
             return storage_space.amount
         except:
             return None
+
+    def get_all_transactions_by_user(self, user_id: int) -> dict:
+        try:
+            all_transactions_by_user = Transaction.objects.get(user_id).all().values()  
+            return allTransactions
+        except:
+            return None
+

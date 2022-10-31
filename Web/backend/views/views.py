@@ -179,3 +179,21 @@ class seeAllStorageUnits(View):
                 raise Http404("Could not find any storage units")
             else:
                 return JsonResponse(list(allStorages), safe=False, status = 200)
+
+
+class GetUserTransactions(View):
+    @si.inject
+    def __init__(self, _deps):
+        self._userService : userService = _deps['userService']()
+    
+    def get(self, request, user_id):
+        
+        check_user = User.objects.filter(id=user_id).exists()
+        if check_user == False:
+            return Response({'error': 'User ID does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+        allTransactions = 
+        if allStorages is None:
+            raise Http404("Could not find any storage units")
+        else:
+            return JsonResponse(list(allStorages), safe=False, status = 200)

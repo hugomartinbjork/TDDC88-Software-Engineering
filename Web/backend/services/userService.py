@@ -25,3 +25,6 @@ class userService(BaseBackend):
             'token': token.key,
         }
         return Response({'success': 'successfull login', 'data': data}, status=status.HTTP_200_OK)
+        
+    def get_all_transactions_by_user(self, id) -> dict:
+        return self._storageAccess.get_all_transactions()
