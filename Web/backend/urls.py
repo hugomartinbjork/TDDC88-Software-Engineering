@@ -12,6 +12,7 @@ urlPatterns = [
     path('login/', views.Login.as_view()),
     path('loginwithid/', views.LoginWithId.as_view()),
     path('storages/', views.seeAllStorageUnits.as_view()),
+    path('storage/<str:storageId>/value', views.getStorageValue.as_view()),
 ]
 
 urlpatterns = format_suffix_patterns(urlPatterns)
