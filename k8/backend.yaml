@@ -6,8 +6,6 @@
 # Note the three dashes, `---`, starting a new yaml-document.
 
 ---
-
-
 # First of all, let's create a so called "Deployment" for our frontend. The deployment is
 # responsible for making sure our `hello-frontend`-container is running.
 
@@ -20,10 +18,9 @@ kind: Deployment
 # + Giving it a resonable (unique) name, so we know what it is and can identify it in the running cluster when needed.
 # + Let us point our load balancer (that's comming in the next step) on all pods in our deployment.
 metadata:
-  name: rdx-backend-app-deployment  # Specify a name
-  labels:  # And give it a label to make the pods easy to identify later on
+  name: rdx-backend-app-deployment # Specify a name
+  labels: # And give it a label to make the pods easy to identify later on
     app: rdx-backend-app
-
 
 # Here come the actual specification of what we want the deployment to run. In
 # our case, we want to have a pod running a single container, and just one
@@ -57,16 +54,22 @@ spec:
 
       # And finally, define our container
       containers:
-        -
-          name: rdx  # Give it a name
+        - name: rdx # Give it a name
           image: gitlab.liu.se:5000/tddc88-2022/c4/rdx-solutions-backend-project/rdx-backend:latest # Specify the image
           env:
+            - name: DJANGO_SECRET_KEY
+              value: "8SKLdsklsdSD89DS)UISD0ds903"
+            - name: DJANGO_SUPERUSER_USERNAME
+              value: "admin"
+            - name: DJANGO_SUPERUSER_PASSWORD
+              value: "rdxsolutions"
+            - name: DJANGO_SUPERUSER_EMAIL
+              value: "admin@rdx.com"
             - name: PORT
               value: "8000"
-          ports:  # Specify what ports should be opened
-            -
-              name: web  # Give our port as name for later reference
-              containerPort: 8000  # Our container is listening on TCP 80 in this specific case
+          ports: # Specify what ports should be opened
+            - name: web # Give our port as name for later reference
+              containerPort: 8000 # Our container is listening on TCP 80 in this specific case
               protocol: TCP
           # Kubernetes schedules workloads based on how much resources they
           # need, so we must specify this. It is important to try to make these
@@ -76,7 +79,7 @@ spec:
           resources:
             # Absolute limits
             limits:
-              cpu: 100m  # "millicpu", so we are requesting 10% of one core.
+              cpu: 100m # "millicpu", so we are requesting 10% of one core.
               memory: 150Mi
             # But, we'll probably get by with these limits:
             requests:
@@ -95,22 +98,19 @@ spec:
           # socket. For the pods in this deployment, we'll use an http probe,
           # and further down in this file you will find an example of probing by
           # TCP.
-         # readinessProbe:
+          # readinessProbe:
           #  httpGet:
-           #   port: web
-            #  path: "/api/hello_world"
-         # livenessProbe:
+          #   port: web
+          #  path: "/api/hello_world"
+          # livenessProbe:
           #  httpGet:
-            #  port: web
-             # path: "/api/hello_world"
-
+          #  port: web
+          # path: "/api/hello_world"
 
 # That's it, now our container is running on the cluster!
 
-
 # Remember the `---` to create a new yaml-document!
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
@@ -122,7 +122,7 @@ spec:
   ports:
     - name: web
       protocol: TCP
-      targetPort: 8000  # Note the differing port!
+      targetPort: 8000 # Note the differing port!
       port: 80
   selector:
     app: rdx-backend-app
@@ -142,7 +142,6 @@ spec:
   # desired load balancing Service, so the traffic finally end up at the proper
   # pod.
   rules:
-
     # We want to make our application available on this host
     - host: rdx.kubernetes-public.it.liu.se
 
@@ -152,7 +151,7 @@ spec:
       # there is no redirect in place, so you need to make sure to use `https` in
       # the address bar of your browser.)
       http:
-        # Here we can specify different paths to reverse proxy. It's a good idea
+        # Here we can specify different paths to reverse proxy, It's a good idea
         # to read the documentation on this before attempting to use it.
         paths:
           - path: /admin/
