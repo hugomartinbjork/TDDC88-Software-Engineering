@@ -35,7 +35,7 @@ from django.contrib.auth.models import User
 class article(View):
     # Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing
     @si.inject
-    def __init__(self, _deps):
+    def __init__(self, _deps, *args):
         self._articleManagementService : articleManagementService = _deps['articleManagementService']()
 
     def get(self, request, articleId):
@@ -53,7 +53,7 @@ class article(View):
 class group(View):
     # Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing
     @si.inject
-    def __init__(self, _deps):
+    def __init__(self, _deps, *args):
         self._groupManagementService : groupManagementService = _deps['groupManagementService']()
 
     def get(self, request, groupId):
@@ -67,7 +67,7 @@ class group(View):
 class storage(View):
     # Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing
     @si.inject
-    def __init__(self, _deps):
+    def __init__(self, _deps, *args):
         self._storageManagementService : storageManagementService = _deps['storageManagementService']()
 
     def get(self, request, storageId):
@@ -82,7 +82,7 @@ class storage(View):
 
 
 class storageSpace(View):
-    def __init__(self, _deps):
+    def __init__(self, _deps, *args):
         self._orderService : OrderService = _deps['OrderService']()
         self._storageManagementService : storageManagementService = _deps['storageManagementService']()
     def get(self, request, storageSpaceId):
@@ -94,7 +94,7 @@ class storageSpace(View):
 
 class order(View): 
     @si.inject
-    def __init__(self, _deps):
+    def __init__(self, _deps, *args):
         self._orderService : OrderService = _deps['OrderService']() 
     def get(self, request, id): 
         if request.method == 'GET':
@@ -125,7 +125,7 @@ class order(View):
 
 class Login(APIView):
     @si.inject #Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing 
-    def __init__(self, _deps):
+    def __init__(self, _deps, *args):
         self._userService : userService = _deps['userService']()
 
     def post(self, request):
@@ -148,7 +148,7 @@ class Login(APIView):
 
 class LoginWithId(APIView):
     @si.inject
-    def __init__(self, _deps):
+    def __init__(self, _deps, *args):
         self._userService : userService = _deps['userService']()
 
     def post(self, request):
@@ -164,10 +164,9 @@ class LoginWithId(APIView):
         else:
             return Response({'error': 'invalid details'}, status=status.HTTP_400_BAD_REQUEST)
 
-
 class seeAllStorageUnits(View):
     @si.inject
-    def __init__(self, _deps):
+    def __init__(self, _deps, *args):
         _storageManagementService = _deps['storageManagementService']
         # Instance of dependency is created in constructor
         self._storageManagementService : storageManagementService = _storageManagementService()
