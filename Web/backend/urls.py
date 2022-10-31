@@ -16,7 +16,7 @@ urlPatterns = [
          csrf_exempt(views.AddInputUnit.as_view())),
     path('transactions/addoutputunit/<str:storage_space_id>/<int:amount>/',
          csrf_exempt(views.AddOutputUnit.as_view())),
-    path('transactions/returnunit/<str:storageSpaceId>/<int:amount>/',
+    path('transactions/returnunit/<str:storage_space_id>/<int:amount>/',
          views.ReturnUnit.as_view()),
 ]
 
