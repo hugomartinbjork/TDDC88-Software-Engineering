@@ -37,10 +37,10 @@ class storageManagementService():
 
     def getStorageValue(self, id: str) -> int:
         compartments = self._storageAccess.get_compartments_by_storage(storageId=id)
-        cost = 0
+        value = 0
         for compartment in compartments:
-            cost += compartment.article.price * compartment.amount
-        return cost
+            value += compartment.article.price * compartment.amount
+        return value
 
 # FR 10.1.3 #
 
