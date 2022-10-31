@@ -12,4 +12,7 @@ class articleManagementService():
     
     def getArticleByLioId(self, lioId: str) -> Article:
         return self._articleOperations.getArticleByLioId(lioId)
+
+    def getAlternativeArticles(self, lioId: str) -> Article:
+        return self._articleOperations.getAlternativeArticles(lioId)
             

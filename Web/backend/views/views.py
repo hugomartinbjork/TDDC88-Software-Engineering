@@ -179,3 +179,38 @@ class seeAllStorageUnits(View):
                 raise Http404("Could not find any storage units")
             else:
                 return JsonResponse(list(allStorages), safe=False, status = 200)
+
+
+#Gets alternative articles for a given article. If only article id is entered, the method returns a list of alternative articles and all
+#their attributes. If an article id and a storage id is entered, the method returns the id for alternative articles and the amount of
+#the alternative articles in that storage
+
+class getArticleAlternatives(View):
+    @si.inject
+    def __init__(self, _deps):
+        _articleManagementService = _deps['articleManagementService']
+        # Instance of dependency is created in constructor
+        self._storageManagementService : storageManagementService = _deps['storageManagementService']()
+        self._articleManagementService : articleManagementService = _articleManagementService()
+
+    def get(self, request, articleId, storageId = None):
+        if request.method == 'GET':
+            
+            article = self._articleManagementService.getAlternativeArticles(
+                articleId)
+
+            if storageId is not None:
+                storageList = []
+                dict = {'Article: ': None, 'Amount: ': None}
+                for i in article:
+                    dict['Article: '] = i.lioId
+                    dict['Amount: '] = self._storageManagementService.searchArticleInStorage(storageId, i.lioId)
+                    storageList.append(dict.copy())
+
+            if article is None:
+                raise Http404("Could not find article")
+            else:
+                if storageId is not None:
+                    return JsonResponse(list(storageList), safe=False, status=200)
+                else:
+                    return JsonResponse(list(article.values()), safe=False, status=200)
