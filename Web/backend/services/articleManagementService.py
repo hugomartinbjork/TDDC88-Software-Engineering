@@ -1,13 +1,15 @@
-from backend.services.IarticleManagementService import IarticleManagementService
 from backend.coremodels.article import Article
-from backend.__init__ import si 
+from backend.__init__ import serviceInjector as si 
+from ..__init__ import dataAccessInjector as di
+from ..dataAccess.articleAccess import articleAccess
 
 @si.register(name = 'articleManagementService')
-class articleManagementService(IarticleManagementService):
+class articleManagementService():
+
+    @di.inject
+    def __init__(self, _deps):
+        self._articleOperations : articleAccess = _deps["articleAccess"]()
+    
     def getArticleByLioId(self, lioId: str) -> Article:
-        try:
-            article = Article.objects.get(lioId=lioId)  
-            return article
-        except:
-            return None
+        return self._articleOperations.getArticleByLioId(lioId)
             
