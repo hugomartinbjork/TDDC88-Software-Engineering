@@ -14,8 +14,8 @@ from ..__init__ import dataAccessInjector as di
 class storageManagementService():
     @di.inject
     def __init__(self, _deps):
-        self._storageAccess : storageAccess = _deps["storageAccess"]()
-        self._orderAccess : orderAccess = _deps["orderAccess"]()
+        self._storageAccess: storageAccess = _deps["storageAccess"]()
+        self._orderAccess: orderAccess = _deps["orderAccess"]()
 
     def getStorageUnitById(self, id: str) -> StorageUnit:
         return self._storageAccess.get_storage(id)
@@ -31,82 +31,88 @@ class storageManagementService():
 
     def getStorageUnitStock(self, id: str) -> dict:
         return self._storageAccess.get_storage_stock(storageId=id)
-    
+
     def getAllStorageUnits(self) -> dict:
         return self._storageAccess.get_all_storage_units()
 
 # FR 10.1.3 #
 
 
-##alltid takeout/takein
-# TODO: This is a lot of work to refactor since barely any of the methods work. Leaving this 
+# alltid takeout/takein
+# TODO: This is a lot of work to refactor since barely any of the methods work. Leaving this
 # TODO to the original author
-    def addToStorage(self, id: str, amount: int,user, addOutputUnit: bool) -> Transaction:
+
+
+    def addToStorage(self, id: str, amount: int, user, addOutputUnit: bool) -> Transaction:
         storage_space = self._storageAccess.get_compartment_by_id(id=id)
-        storage_unit_id= storage_space.storage_unit
-        article = Article.objects.get(id=storage_space.article)
-        inputOutput = InputOutput.objects.get(article = article)
-        converter= inputOutput.outputUnitPerInputUnit
+        storage_unit_id = storage_space.storage_unit
+        article = Article.objects.get(lioId=storage_space.article)
+        inputOutput = InputOutput.objects.create(article=article)
+        converter = inputOutput.outputUnitPerInputUnit
 
         if(addOutputUnit):
             amount_in_storage = StorageSpace.objects.get(id=id).amount + amount
-            new_amount=amount
+            new_amount = amount
         else:
-            amount_in_storage = StorageSpace.objects.get(id=id).amount + amount*converter
-            new_amount=amount*converter
-        
-        if (amount_in_storage<0):
+            amount_in_storage = StorageSpace.objects.get(
+                id=id).amount + amount*converter
+            new_amount = amount*converter
+
+        if (amount_in_storage < 0):
             return None
         else:
-            StorageSpace.objects.update(**{amount: amount_in_storage})
+            StorageSpace.objects.update(amount=amount_in_storage)
             try:
-                new_transaction = Transaction.objects.create(storage_unit=storage_unit_id, article = article, operation=1, by_user=user , amount=new_amount )
+                new_transaction = Transaction.objects.create(
+                    storage_unit=storage_unit_id, article=article, operation=1, by_user=user, amount=new_amount)
                 new_transaction.save()
                 return new_transaction
             except:
                 return None
 
-# TODO: This is a lot of work to refactor since barely any of the methods work. Leaving this 
+# TODO: This is a lot of work to refactor since barely any of the methods work. Leaving this
 # TODO to the original author
 
     def addToReturnStorage(id: str, amount: int, user, addOutputUnit: bool) -> Transaction:
         storage_space = StorageSpace.objects.get(id=id)
-        storage_unit_id= storage_space.storage_unit
-        amount=amount
+        storage_unit_id = storage_space.storage_unit
+        amount = amount
         article = Article.objects.get(id=storage_space.article)
-        inputOutput = InputOutput.objects.get(article = article)
-        converter= inputOutput.outputUnitPerInputUnit
+        inputOutput = InputOutput.objects.get(article=article)
+        converter = inputOutput.outputUnitPerInputUnit
         medical_employee = user.groups.filter(name='medical employee').exists()
-        if(medical_employee and article.sanitation_level=='Z41'):
+        if(medical_employee and article.sanitation_level == 'Z41'):
             return None
 
         if(addOutputUnit):
             amount_in_storage = StorageSpace.objects.get(id=id).amount + amount
-            new_amount=amount
+            new_amount = amount
         else:
-            amount_in_storage = StorageSpace.objects.get(id=id).amount + amount*converter
-            new_amount=amount*converter
-        if (amount_in_storage<0):
+            amount_in_storage = StorageSpace.objects.get(
+                id=id).amount + amount*converter
+            new_amount = amount*converter
+        if (amount_in_storage < 0):
             return None
         else:
             StorageSpace.objects.update(**{amount: amount_in_storage})
             try:
-                new_transaction = Transaction.objects.create(storage_unit=storage_unit_id, article = article, operation=2, by_user=user, amount=new_amount )
+                new_transaction = Transaction.objects.create(
+                    storage_unit=storage_unit_id, article=article, operation=2, by_user=user, amount=new_amount)
                 new_transaction.save()
                 return new_transaction
             except:
                 return None
-    
+
     def getArticleInStorageSpace(self, storageSpaceId: str) -> Article:
         return self._storageAccess.getArticleInStorageSpace(storageSpaceId=storageSpaceId)
-    
+
     def searchArticleInStorage(self, storageUnitId: str, articleId: str) -> int:
         return self._storageAccess.searchArticleInStorage(storageUnitId=storageUnitId, articleId=articleId)
 # FR 10.1.3 #
 
-
     def getCompartmentContentAndOrders(self, compartmentId):
-        compartment = self._storageAccess.get_compartment_by_id(id=compartmentId)
+        compartment = self._storageAccess.get_compartment_by_id(
+            id=compartmentId)
         alteredDict = {}
 
         if compartment is None:
@@ -117,7 +123,8 @@ class storageManagementService():
             return None
         alteredDict.update(compartmentSerializer.data)
 
-        order = self._orderAccess.get_order_by_article_and_storage(compartment.storage_unit.id, compartment.article.lioId)
+        order = self._orderAccess.get_order_by_article_and_storage(
+            compartment.storage_unit.id, compartment.article.lioId)
         if order is not None:
             orderSerializer = OrderSerializer(order)
             eta = self._orderAccess.get_eta(order.id)

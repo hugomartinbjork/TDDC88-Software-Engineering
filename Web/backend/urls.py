@@ -12,6 +12,12 @@ urlPatterns = [
     path('login/', views.Login.as_view()),
     path('loginwithid/', views.LoginWithId.as_view()),
     path('storages/', views.seeAllStorageUnits.as_view()),
+    path('transactions/addinputunit/<str:storage_space_id>/<int:amount>/',
+         csrf_exempt(views.AddInputUnit.as_view())),
+    path('transactions/addoutputunit/<str:storage_space_id>/<int:amount>/',
+         csrf_exempt(views.AddOutputUnit.as_view())),
+    path('transactions/returnunit/<str:storageSpaceId>/<int:amount>/',
+         views.ReturnUnit.as_view()),
 ]
 
 urlpatterns = format_suffix_patterns(urlPatterns)
