@@ -13,6 +13,8 @@ urlPatterns = [
     path('loginwithid/', views.LoginWithId.as_view()),
     path('storages/', views.seeAllStorageUnits.as_view()),
     path('storage/<str:storageId>/value', views.getStorageValue.as_view()),
+    path('alternativearticles/<str:articleId>/', views.getArticleAlternatives.as_view()), #alternative articles if storage is not sent as input
+    path('alternativearticles/<str:articleId>/<str:storageId>/', views.getArticleAlternatives.as_view()), #alternative articles if a storage is sent as input
 ]
 
 urlpatterns = format_suffix_patterns(urlPatterns)
