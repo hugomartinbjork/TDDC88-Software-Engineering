@@ -11,6 +11,7 @@ from backend.coremodels.article import GroupInfo
 from django.contrib.auth.models import Group
 from backend.coremodels.qr_code import QRCode
 from backend.coremodels.storage_space import StorageSpace
+from backend.coremodels.transaction import Transaction
 from backend.coremodels.order import Order
 from django.utils.html import format_html
 
@@ -60,9 +61,9 @@ admin.site.register(GroupInfo, GroupAdmin)
 class StorageSpaceInline(admin.TabularInline):
     model = StorageSpace
 
+
 class ArticleAdmin(admin.ModelAdmin):
     inlines = (StorageSpaceInline, )
-
 
 
 admin.site.register(Article, ArticleAdmin)
@@ -79,3 +80,14 @@ admin.site.register(StorageUnit, StorageAdmin)
 
 admin.site.register(Order)
 admin.site.register(CentralStorageSpace)
+
+
+########################################################
+
+
+# Display Transaction in Backend
+class TransactioInline(admin.TabularInline):
+    model = Transaction
+
+
+admin.site.register(Transaction)
