@@ -90,7 +90,37 @@ class storageSpace(View):
         if alteredDict is None: 
             return Http404("Could not find storage space")
         return JsonResponse(alteredDict, status=200)
+        
 
+
+class Compartment(View):
+    def __init__(self, _deps):
+        self._storageManagementService : storageManagementService = _deps['storageManagementService']()
+
+
+    def get(self, request, qr_code):
+         if request.method == 'GET':
+            compartment = self._storageManagementService.get_compartment_by_qr(qr_code)
+            if compartment is None: 
+                return Http404("Could not find compartment")
+            return JsonResponse(compartment, status=200)
+
+
+    def post(self, request):
+        if request.method == 'POST':
+            json_body = json.loads(request.body)
+            storage_id = json_body['storage_id']
+            placement = json_body['placement']
+            qr_code = json_body['qr_code']
+            compartment = self._storageManagementService.create_compartment(
+            storage_id=storage_id, placement=placement, qr_code=qr_code
+        )
+
+        serializer = CompartmentSerializer(compartment)
+        if serializer.is_valid:
+            return JsonResponse(serializer.data, status=200)
+        return HttpResponseBadRequest
+                
 
 class order(View): 
     @si.inject
