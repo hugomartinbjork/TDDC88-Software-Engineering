@@ -187,13 +187,14 @@ class GetUserTransactions(View):
         self._userService : userService = _deps['userService']()
     
     def get(self, request, user_id):
-        
-        check_user = User.objects.filter(id=user_id).exists()
-        if check_user == False:
+        current_user = User.objects.filter(id=user_id)
+
+        if current_user.exists() == False:
             return Response({'error': 'User ID does not exist'}, status=status.HTTP_404_NOT_FOUND)
 
-        allTransactions = 
-        if allStorages is None:
-            raise Http404("Could not find any storage units")
+        all_transactions_by_user = self._userService.get_all_transactions_by_user(current_user = current_user)
+        
+        if all_transactions_by_user is None:
+            raise Http404("Could not find any transactions")
         else:
-            return JsonResponse(list(allStorages), safe=False, status = 200)
+            return JsonResponse(list(all_transactions_by_user), safe=False, status = 200)

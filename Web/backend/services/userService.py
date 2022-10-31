@@ -1,6 +1,7 @@
 from genericpath import exists
 from django.contrib.auth import login
 from django.conf import settings
+from backend.coremodels.transaction import Transaction
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from backend.__init__ import serviceInjector as si
@@ -25,6 +26,7 @@ class userService(BaseBackend):
             'token': token.key,
         }
         return Response({'success': 'successfull login', 'data': data}, status=status.HTTP_200_OK)
-        
-    def get_all_transactions_by_user(self, id) -> dict:
-        return self._storageAccess.get_all_transactions()
+
+    def get_all_transactions_by_user(self, current_user) -> dict:
+        all_transactions = Transaction.objects.get(by_user = current_user)
+        return all_transactions
