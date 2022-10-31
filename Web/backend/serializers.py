@@ -20,7 +20,6 @@ class ArticleSerializer(serializers.ModelSerializer):
                   'alternative_articles')
 
 
-
 class StorageUnitSerializer(serializers.ModelSerializer):
     class Meta:
         model = StorageUnit
@@ -68,3 +67,10 @@ class OrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = ('id', 'ofArticle', 'toStorageUnit',
                   'expectedWait', 'orderTime')
+
+
+class TransactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Transaction
+        fields = ('id', 'storage_unit', 'by_user', 'article',
+                  'amount', 'time_of_transaction', 'operation')
