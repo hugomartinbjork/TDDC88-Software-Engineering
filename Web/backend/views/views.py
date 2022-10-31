@@ -192,7 +192,7 @@ class getStorageValue(View):
             if storage is None:
                 raise Http404("Could not find storage")
             else:
-                cost = self._storageManagementService.getStorageCost(storageId)
+                cost = self._storageManagementService.getStorageValue(storageId)
                 return JsonResponse(cost, safe=False, status = 200)
 
 #Gets alternative articles for a given article. If only article id is entered, the method returns a list of alternative articles and all
