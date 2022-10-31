@@ -20,6 +20,7 @@ class ArticleSerializer(serializers.ModelSerializer):
                   'alternative_articles')
 
 
+
 class StorageUnitSerializer(serializers.ModelSerializer):
     class Meta:
         model = StorageUnit

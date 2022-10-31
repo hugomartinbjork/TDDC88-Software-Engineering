@@ -60,9 +60,9 @@ admin.site.register(GroupInfo, GroupAdmin)
 class StorageSpaceInline(admin.TabularInline):
     model = StorageSpace
 
-
 class ArticleAdmin(admin.ModelAdmin):
     inlines = (StorageSpaceInline, )
+
 
 
 admin.site.register(Article, ArticleAdmin)
