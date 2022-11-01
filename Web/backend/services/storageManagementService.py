@@ -45,6 +45,9 @@ class storageManagementService():
             value += compartment.article.price * compartment.amount
         return value
 
+    def get_storage_by_costcenter(self, cost_center: str) -> StorageUnit:
+        return self._storageAccess.get_storage_by_costcenter(cost_center)
+
 # FR 10.1.3 #
 
 

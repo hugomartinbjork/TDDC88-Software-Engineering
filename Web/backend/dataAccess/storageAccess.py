@@ -77,7 +77,12 @@ class storageAccess():
         except:
             return None
 
-
+    def get_storage_by_costcenter(self, cost_center: str) -> StorageUnit:
+        try:
+            storage = StorageUnit.objects.get(cost_center=cost_center)
+            return storage
+        except:
+            None
 
 ##  FR 9.4.1 och FR 9.4.2 ##
 
