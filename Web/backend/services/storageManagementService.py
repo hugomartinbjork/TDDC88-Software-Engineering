@@ -1,4 +1,4 @@
-from requests import request
+#from requests import request
 from backend.dataAccess.orderAccess import orderAccess
 from backend.dataAccess.storageAccess import storageAccess
 from backend.serializers import OrderSerializer, StorageSpaceSerializer
@@ -168,3 +168,21 @@ class storageManagementService():
                 orderDictionary.update(orderSerializer.data)
             alteredDict['Order'] = orderDictionary
             return alteredDict
+
+
+
+    ##  FR 9.4.1 och FR 9.4.2 ##
+    def create_compartment(self, storage_id:str, placement:str, qr_code:str) -> StorageSpace:
+
+        print(storage_id)
+        compartment = self._storageAccess.create_compartment(
+            storage_id=storage_id, placement = placement, qr_code = qr_code
+          )
+        return compartment
+
+    def get_compartment_by_qr(self, qr_code: str) -> StorageSpace:
+        compartment = self._storageAccess.get_compartment_by_qr(qr_code=qr_code)
+        return compartment
+
+
+    ##  FR 9.4.1 och FR 9.4.2 ##

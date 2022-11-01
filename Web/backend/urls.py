@@ -25,6 +25,8 @@ urlPatterns = [
     # alternative articles if a storage is sent as input
     path('alternativearticles/<str:articleId>/<str:storageId>/',
          views.getArticleAlternatives.as_view()),
+    path('compartments/', views.Compartment.as_view()),
+    path('compartments/<str:qr_code>', views.Compartment.as_view())
 ]
 
 urlpatterns = format_suffix_patterns(urlPatterns)
