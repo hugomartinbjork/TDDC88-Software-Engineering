@@ -30,8 +30,7 @@ from rest_framework.response import Response
 from rest_framework.authtoken.views import ObtainAuthToken
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
-from rest_framework.decorators import renderer_classes, api_view
-from django.http import HttpResponse
+
 
 
 # Create your views here.
