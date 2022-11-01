@@ -12,18 +12,9 @@ urlPatterns = [
     path('login/', views.Login.as_view()),
     path('loginwithid/', views.LoginWithId.as_view()),
     path('storages/', views.seeAllStorageUnits.as_view()),
-<<<<<<< HEAD
-    path('transactions/addinputunit/<str:storage_space_id>/<int:amount>/',
-         csrf_exempt(views.AddInputUnit.as_view())),
-    path('transactions/addoutputunit/<str:storage_space_id>/<int:amount>/',
-         csrf_exempt(views.AddOutputUnit.as_view())),
-    path('transactions/returnunit/<str:storage_space_id>/<int:amount>/',
-         views.ReturnUnit.as_view()),
-=======
     path('storage/<str:storageId>/value', views.getStorageValue.as_view()),
     path('alternativearticles/<str:articleId>/', views.getArticleAlternatives.as_view()), #alternative articles if storage is not sent as input
     path('alternativearticles/<str:articleId>/<str:storageId>/', views.getArticleAlternatives.as_view()), #alternative articles if a storage is sent as input
->>>>>>> 1b5728589c34b2ac3b5d0275ff1ced1d0f0910b4
 ]
 
 urlpatterns = format_suffix_patterns(urlPatterns)
