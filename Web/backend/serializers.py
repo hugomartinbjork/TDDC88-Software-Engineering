@@ -1,3 +1,4 @@
+from backend.coremodels.alternative_article_name import AlternativeArticleName
 from backend.coremodels.cost_center import CostCenter
 from rest_framework import serializers
 from backend.coremodels.article import Article
@@ -16,7 +17,7 @@ from backend.coremodels.transaction import Transaction
 class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
-        fields = ('name', 'lioId', 'description', 'article_group', 'image', 'Z41', 'price', 'alternative_names',
+        fields = ('name', 'lioId', 'description', 'article_group', 'image', 'Z41', 'price',
                   'alternative_articles')
 
 
@@ -74,3 +75,9 @@ class TransactionSerializer(serializers.ModelSerializer):
         model = Transaction
         fields = ('id', 'storage_unit', 'by_user', 'article',
                   'amount', 'time_of_transaction', 'operation')
+
+
+class AlternativeNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AlternativeArticleName
+        fields = ('name',)

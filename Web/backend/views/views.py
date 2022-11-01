@@ -8,7 +8,7 @@ from django.http import Http404, JsonResponse, HttpResponseBadRequest
 from backend.coremodels.transaction import Transaction
 
 from backend.dataAccess.storageAccess import storageAccess
-from ..serializers import StorageUnitSerializer, ArticleSerializer, GroupSerializer, QRCodeSerializer, OrderSerializer, StorageSpaceSerializer
+from ..serializers import AlternativeNameSerializer, StorageUnitSerializer, ArticleSerializer, GroupSerializer, QRCodeSerializer, OrderSerializer, StorageSpaceSerializer
 # This import is important for now, since the dependency in articlemanagmentservice will not be stored in the serviceInjector otherwise however, I'm
 # hoping to be able to change this since it looks kind of trashy
 from backend.services.articleManagementService import articleManagementService
@@ -51,21 +51,37 @@ class article(View):
             supplier = self._articleManagementService.getSupplier(article)
             supplier_article_nr = self._articleManagementService.getSupplierArticleNr(article)
             compartments = list(article.storagespace_set.all())
+            alternative_names = list(article.alternativearticlename_set.all())
 
             if article is None:
                 raise Http404("Could not find article")
+
             serializer = ArticleSerializer(article)
+
             compartment_list = []
+            unit_list = []
             for i in compartments:
                 compartment_serializer = StorageSpaceSerializer(i)
-                compartment_list.append(compartment_serializer.data)
+                unit_serializer = StorageUnitSerializer(i.storage_unit)
                 
+                compartment_list.append(compartment_serializer.data)
+                unit_list.append(unit_serializer.data.get('name'))
+
+            alt_names_list = []
+            print(alternative_names)
+            for j in alternative_names:
+                alternative_names_serializer = AlternativeNameSerializer(j)
+                alt_names_list.append(alternative_names_serializer.data.get("name"))
+
+
             if serializer.is_valid:
                 serializer_data = {}
                 serializer_data.update(serializer.data)
                 serializer_data["supplier"] = supplier.name
                 serializer_data["supplierArticleNr"] = supplier_article_nr
                 serializer_data["compartments"] = compartment_list
+                serializer_data["units"] = unit_list
+                serializer_data["alternative names"] = alt_names_list
                 
                 return JsonResponse(serializer_data, safe = False, status=200)
             return HttpResponseBadRequest

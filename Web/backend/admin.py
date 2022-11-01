@@ -1,4 +1,5 @@
 from django.contrib import admin
+from backend.coremodels.alternative_article_name import AlternativeArticleName
 from backend.coremodels.inputOutput import InputOutput
 from backend.coremodels.article import Article
 from backend.coremodels.centralStorageSpace import CentralStorageSpace
@@ -62,15 +63,18 @@ admin.site.register(GroupInfo, GroupAdmin)
 
 admin.site.register(Supplier)
 
-# Displays which storage components that the articles are in
+# Displays which storage components that the articles are in, the supplier that the article has and its alternative names
 class StorageSpaceInline(admin.TabularInline):
     model = StorageSpace
 
 class ArticleHasSupplierInline(admin.TabularInline):
     model = ArticleHasSupplier
 
+class AlternativeNameInLine(admin.TabularInline):
+    model = AlternativeArticleName
+
 class ArticleAdmin(admin.ModelAdmin):
-    inlines = (StorageSpaceInline, ArticleHasSupplierInline, )
+    inlines = (StorageSpaceInline, ArticleHasSupplierInline, AlternativeNameInLine, )
 
 
 admin.site.register(Article, ArticleAdmin)
