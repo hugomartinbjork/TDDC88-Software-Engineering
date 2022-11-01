@@ -26,6 +26,9 @@ class storageManagementService():
     def getStorageSpaceById(self, id: str) -> StorageSpace:
         return self._storageAccess.get_compartment_by_id(id)
 
+    def getStorageSpaceByArticle(self, article: Article) -> StorageSpace:
+        return self._storageAccess.get_compartment_by_id(id)
+
     def setStorage(self, id: str, amount: int) -> int:
         return self._storageAccess.set_storage_amount(compartmendId=id, amount=amount)
 

@@ -32,6 +32,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from rest_framework.decorators import renderer_classes, api_view
 from django.http import HttpResponse
+from itertools import chain
 
 
 # Create your views here.
@@ -49,17 +50,24 @@ class article(View):
                 articleId)
             supplier = self._articleManagementService.getSupplier(article)
             supplier_article_nr = self._articleManagementService.getSupplierArticleNr(article)
+            compartments = list(article.storagespace_set.all())
 
             if article is None:
                 raise Http404("Could not find article")
             serializer = ArticleSerializer(article)
+            compartment_list = []
+            for i in compartments:
+                compartment_serializer = StorageSpaceSerializer(i)
+                compartment_list.append(compartment_serializer.data)
+                
             if serializer.is_valid:
                 serializer_data = {}
                 serializer_data.update(serializer.data)
                 serializer_data["supplier"] = supplier.name
                 serializer_data["supplierArticleNr"] = supplier_article_nr
-                print(serializer_data)
-                return JsonResponse(serializer_data, status=200)
+                serializer_data["compartments"] = compartment_list
+                
+                return JsonResponse(serializer_data, safe = False, status=200)
             return HttpResponseBadRequest
 
 
