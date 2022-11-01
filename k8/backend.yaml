@@ -160,4 +160,12 @@ spec:
                 name: rdx-backend-app-service
                 port:
                   number: 80
+          - path: /api/
+            pathType: Prefix
+            backend:
+              service:
+                name: hello-backend-service
+                port:
+                  number: 80
+
 ---
