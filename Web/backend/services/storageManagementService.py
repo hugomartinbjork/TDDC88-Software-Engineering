@@ -57,8 +57,8 @@ class storageManagementService():
         storage_space = self._storageAccess.get_compartment_by_id(
             id=space_id)
         storage_unit_id = storage_space.storage_unit
-        article = Article.objects.get(lioId=storage_space.article)
-        inputOutput = InputOutput.objects.create(article=article)
+        article = Article.objects.get(lioId=storage_space.article.lioId)
+        inputOutput = InputOutput.objects.get(article=article)
         converter = inputOutput.outputUnitPerInputUnit
         user = User.objects.get(username=username)
         if(addOutputUnit):
