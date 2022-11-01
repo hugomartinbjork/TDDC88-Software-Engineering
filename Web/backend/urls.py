@@ -25,6 +25,7 @@ urlPatterns = [
     # alternative articles if a storage is sent as input
     path('alternativearticles/<str:articleId>/<str:storageId>/',
          views.getArticleAlternatives.as_view()),
+    path('storage/<str:storageId>/cost', views.getStorageCost.as_view()),
 ]
 
 urlpatterns = format_suffix_patterns(urlPatterns)

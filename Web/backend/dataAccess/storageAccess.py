@@ -1,5 +1,6 @@
 from datetime import timedelta
 from backend.coremodels.article import Article
+from backend.coremodels.transaction import Transaction
 
 from backend.coremodels.storage_space import StorageSpace
 from backend.coremodels.storage_unit import StorageUnit
@@ -72,5 +73,12 @@ class storageAccess():
     def get_compartments_by_storage(self, storageId: str) -> int:
         try: 
             return StorageSpace.objects.filter(storage_unit=storageId)
+        except:
+            return None
+    
+
+    def get_transaction_by_storage(self, storageId: str) -> int:
+        try:
+            return Transaction.objects.filter(storage_unit=storageId)
         except:
             return None

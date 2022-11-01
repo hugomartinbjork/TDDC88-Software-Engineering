@@ -8,6 +8,7 @@ from backend.coremodels.storage_space import StorageSpace
 from backend.coremodels.transaction import Transaction
 from backend.coremodels.inputOutput import InputOutput
 from django.contrib.auth.models import User
+from datetime import datetime, timezone
 from backend.__init__ import serviceInjector as si
 from ..__init__ import dataAccessInjector as di
 import random
@@ -44,6 +45,27 @@ class storageManagementService():
         for compartment in compartments:
             value += compartment.article.price * compartment.amount
         return value
+   
+    #Not working
+    def getStorageCost(self, storage_id: str, start_date: str, end_date: str) -> int:
+        print(start_date)
+        print(type(start_date))
+        #start_date = datetime.strptime(start_date, '%Y-%m-%d %H:%M:%S.%u')
+        print(start_date)
+        #transactions = Transaction.objects.filter(time_of_transaction__gte='start_date', time_of_transaction__lt='end_date') 
+        transactions = self._storageAccess.get_transaction_by_storage(storageId=storage_id)
+    
+        #for transaction in transactions:
+        #    print(type(transaction.time_of_transaction))
+        #    print(transaction.time_of_transaction)
+        #    if  (start_date <= transaction.time_of_transaction.now() and end_date >= transaction.time_of_transaction.now()):
+        #        print(transaction.time_of_transaction)
+        
+        #take_out_transaction = date_transactions.objects.filter(operation=1)
+        #return_transaction = date_transactions.objects.filter(operation=2)
+
+        return None
+
 
 # FR 10.1.3 #
 
