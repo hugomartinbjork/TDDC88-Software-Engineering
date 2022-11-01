@@ -34,10 +34,8 @@ image-rdx-backend:
   stage: image
   image: docker.io/buildah/buildah
   only:
-     - master
      - main
      - dev
-     - Fixfordeployment
   # needs:
   #   - test-backend
 
@@ -56,8 +54,6 @@ deploy-test-k8s-connection:
   image: bitnami/kubectl
   needs: []
   only:
-    - Fixfordeployment
-    - master
     - main
     - dev
   script:
@@ -68,8 +64,6 @@ deploy-k8s-regcred:
   needs:
     - deploy-test-k8s-connection
   only:
-    - Fixfordeployment
-    - master
     - main
     - dev
   script:
@@ -84,8 +78,6 @@ deploy-rdx-backend:
 
   # Only deploy when on main/master/dev
   only:
-    - Fixfordeployment
-    - master
     - main
     - dev
   # And wait for all dependencies to build

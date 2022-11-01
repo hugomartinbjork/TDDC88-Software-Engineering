@@ -1,10 +1,13 @@
-from http.client import OK
+from http.client import OK, HTTPResponse
 import pkgutil
 from urllib import request
 import json
 from django.shortcuts import render
 from rest_framework import generics
 from django.http import Http404, JsonResponse, HttpResponseBadRequest
+from backend.coremodels.transaction import Transaction
+
+from backend.dataAccess.storageAccess import storageAccess
 from ..serializers import StorageUnitSerializer, ArticleSerializer, GroupSerializer, QRCodeSerializer, OrderSerializer, StorageSpaceSerializer
 # This import is important for now, since the dependency in articlemanagmentservice will not be stored in the serviceInjector otherwise however, I'm
 # hoping to be able to change this since it looks kind of trashy
@@ -27,6 +30,7 @@ from rest_framework.response import Response
 from rest_framework.authtoken.views import ObtainAuthToken
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+
 
 
 # Create your views here.
@@ -188,6 +192,77 @@ class seeAllStorageUnits(View):
                 raise Http404("Could not find any storage units")
             else:
                 return JsonResponse(list(allStorages), safe=False, status=200)
+
+
+class AddInputUnit(View):
+    @si.inject
+    def __init__(self, _deps):
+        storageManagementService = _deps['storageManagementService']
+        self._storageManagementService = storageManagementService()
+        self._storageAccess = storageAccess()
+        self._userService: userService = _deps['userService']()
+
+    def post(self, request, storage_space_id, amount):
+        storage_space = storageManagementService.getStorageSpaceById(
+            self=self, id=storage_space_id)
+        user = request.user
+        if request.method == 'POST':
+            if storage_space == None:
+                return Http404("Could not find storage space")
+            storageManagementService.addToStorage(self=self,
+                                                  space_id=storage_space_id, amount=amount, username=user.username, addOutputUnit=False)
+            return HttpResponse(status=200)
+
+# AddOutputUnit is used to add articles to the storage space in
+# the form of single articles, or smaller parts etc.
+# For example: One output unit could be one single mask or the article -->one meter of paper.
+# Creates a transaction
+
+
+class AddOutputUnit(View):
+    @si.inject
+    def __init__(self, _deps):
+        #storageAccess = _deps['storageAccess']
+        storageManagementService = _deps['storageManagementService']
+        self._storageManagementService = storageManagementService()
+        self._storageAccess = storageAccess()
+        self._userService: userService = _deps['userService']()
+
+    def post(self, request, storage_space_id, amount):
+        storage_space = storageManagementService.getStorageSpaceById(
+            self=self, id=storage_space_id)
+        user = request.user
+        if request.method == 'POST':
+            if storage_space == None:
+                return Http404("Could not find storage space")
+            storageManagementService.addToStorage(self=self,
+                                                  space_id=storage_space_id, amount=amount, username=user.username, addOutputUnit=True)
+            return HttpResponse(status=200)
+
+# ReturnUnit takes one single output unit and returns it to the storage space,
+# thus increasing the amount in storage.
+# Creates a transaction
+
+
+class ReturnUnit(View):
+    @si.inject
+    def __init__(self, _deps):
+        #storageAccess = _deps['storageAccess']
+        storageManagementService = _deps['storageManagementService']
+        self._storageManagementService = storageManagementService()
+        self._storageAccess = storageAccess()
+        self._userService: userService = _deps['userService']()
+
+    def post(self, request, storage_space_id, amount):
+        storage_space = storageManagementService.getStorageSpaceById(
+            self=self, id=storage_space_id)
+        user = request.user
+        if request.method == 'POST':
+            if storage_space == None:
+                return Http404("Could not find storage space")
+            storageManagementService.addToReturnStorage(
+                space_id=storage_space_id, amount=amount, username=user.username, addOutputUnit=True)
+            return HttpResponse(status=200)
 
 
 class getStorageValue(View):
