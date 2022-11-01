@@ -16,7 +16,7 @@ from ..dataAccess.orderAccess import orderAccess
 @si.register(name='OrderService')
 class OrderService():
     @di.inject
-    def __init__(self, _deps):
+    def __init__(self, _deps, *args):
         self._orderAccess : orderAccess = _deps["orderAccess"]()
         self._centralStorageAccess : centralStorageAccess = _deps["centralStorageAccess"]()
 

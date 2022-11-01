@@ -7,9 +7,12 @@ from ..dataAccess.articleAccess import articleAccess
 class articleManagementService():
 
     @di.inject
-    def __init__(self, _deps):
+    def __init__(self, _deps, *args):
         self._articleOperations : articleAccess = _deps["articleAccess"]()
     
     def getArticleByLioId(self, lioId: str) -> Article:
         return self._articleOperations.getArticleByLioId(lioId)
+
+    def getAlternativeArticles(self, lioId: str) -> Article:
+        return self._articleOperations.getAlternativeArticles(lioId)
             
