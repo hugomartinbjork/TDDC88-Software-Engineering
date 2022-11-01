@@ -1,4 +1,4 @@
-from requests import request
+#from requests import request
 from backend.dataAccess.orderAccess import orderAccess
 from backend.dataAccess.storageAccess import storageAccess
 from backend.serializers import OrderSerializer, StorageSpaceSerializer
@@ -48,6 +48,9 @@ class storageManagementService():
             value += compartment.article.price * compartment.amount
         return value
 
+    def get_storage_by_costcenter(self, cost_center: str) -> StorageUnit:
+        return self._storageAccess.get_storage_by_costcenter(cost_center)
+
 # FR 10.1.3 #
 
 
@@ -60,8 +63,8 @@ class storageManagementService():
         storage_space = self._storageAccess.get_compartment_by_id(
             id=space_id)
         storage_unit_id = storage_space.storage_unit
-        article = Article.objects.get(lioId=storage_space.article)
-        inputOutput = InputOutput.objects.create(article=article)
+        article = Article.objects.get(lioId=storage_space.article.lioId)
+        inputOutput = InputOutput.objects.get(article=article)
         converter = inputOutput.outputUnitPerInputUnit
         user = User.objects.get(username=username)
         if(addOutputUnit):
@@ -171,3 +174,21 @@ class storageManagementService():
                 orderDictionary.update(orderSerializer.data)
             alteredDict['Order'] = orderDictionary
             return alteredDict
+
+
+
+    ##  FR 9.4.1 och FR 9.4.2 ##
+    def create_compartment(self, storage_id:str, placement:str, qr_code:str) -> StorageSpace:
+
+        print(storage_id)
+        compartment = self._storageAccess.create_compartment(
+            storage_id=storage_id, placement = placement, qr_code = qr_code
+          )
+        return compartment
+
+    def get_compartment_by_qr(self, qr_code: str) -> StorageSpace:
+        compartment = self._storageAccess.get_compartment_by_qr(qr_code=qr_code)
+        return compartment
+
+
+    ##  FR 9.4.1 och FR 9.4.2 ##

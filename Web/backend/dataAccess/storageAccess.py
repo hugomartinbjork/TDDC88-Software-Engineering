@@ -1,5 +1,7 @@
 from datetime import timedelta
 from backend.coremodels.article import Article
+#from backend.coremodels.Compartment import Compartment
+#from backend.coremodels.Storage import Storage
 
 from backend.coremodels.storage_space import StorageSpace
 from backend.coremodels.storage_unit import StorageUnit
@@ -74,3 +76,39 @@ class storageAccess():
             return StorageSpace.objects.filter(storage_unit=storageId)
         except:
             return None
+
+    def get_storage_by_costcenter(self, cost_center: str) -> StorageUnit:
+        try:
+            storage = StorageUnit.objects.get(cost_center=cost_center)
+            return storage
+        except:
+            None
+
+##  FR 9.4.1 och FR 9.4.2 ##
+
+    def create_compartment(self, storage_id: str, placement: str, qr_code) -> StorageSpace:
+        print("helelo: " +storage_id)
+        storage = StorageUnit.objects.filter(id = storage_id).first()
+        article = Article.objects.get(lioId = '123')
+        print(storage)
+        try:
+            compartment = StorageSpace(
+            id = qr_code,
+            storage_unit = storage, 
+            placement = placement,
+        )
+            compartment.save()
+            return compartment
+        except:
+            return None
+
+    
+    def get_compartment_by_qr(self, qr_code: str) -> StorageSpace:
+        try:
+            compartment = StorageSpace.objects.get(id=qr_code)
+            return compartment
+        except:
+            return None
+        
+
+##  FR 9.4.1 och FR 9.4.2 ##
