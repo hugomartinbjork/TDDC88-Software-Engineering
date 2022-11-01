@@ -102,7 +102,45 @@ class storageSpace(View):
         if alteredDict is None:
             return Http404("Could not find storage space")
         return JsonResponse(alteredDict, status=200)
+        
 
+
+class Compartment(View):
+    # Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing
+    @si.inject
+    def __init__(self, _deps, *args):
+        self._storageManagementService : storageManagementService = _deps['storageManagementService']()
+
+
+    def get(self, request, qr_code):
+        print("lets get it")
+        if request.method == 'GET':
+            compartment = self._storageManagementService.get_compartment_by_qr(qr_code)
+            if compartment is None: 
+                return Http404("Could not find compartment")
+            else:
+                serializer = StorageSpaceSerializer(compartment)
+                if serializer.is_valid:
+                    return JsonResponse(serializer.data, status=200)
+                return HttpResponseBadRequest
+
+
+    def post(self, request):
+        if request.method == 'POST':
+            json_body = request.POST
+
+            storage_id = json_body['storage_id']
+            placement = json_body['placement']
+            qr_code = json_body['qr_code']
+            compartment = self._storageManagementService.create_compartment(
+            storage_id, placement, qr_code
+        )
+
+        serializer = StorageSpaceSerializer(compartment)
+        if serializer.is_valid:
+            return JsonResponse(serializer.data, status=200)
+        return HttpResponseBadRequest
+                
 
 class order(View):
     @si.inject
