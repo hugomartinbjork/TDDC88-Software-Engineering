@@ -44,7 +44,7 @@ class ArticleIdentificationTest2(TestCase):
         self.article_management_service : articleManagementService = articleManagementService(
             {
                 "articleAccess": article_access_stub #The mocked dependency is injected into the article management service
-            }
+            }   # NOTE: for this to work it is important that the class we are injecting into, takes *args as an input argument for the constructor (__init__) 
         )
     def test_get_article_by_lio_id_unittestversion(self):
         test_search = self.article_management_service.getArticleByLioId(lioId="1")
