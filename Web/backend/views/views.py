@@ -303,6 +303,18 @@ class ReturnUnit(View):
                 space_id=storage_space_id, amount=amount, username=user.username, addOutputUnit=True)
             return HttpResponse(status=200)
 
+class Transactions(APIView):
+    # Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing
+    @si.inject
+    def __init__(self, _deps):
+        _storageManagementService = _deps['storageManagementService']
+        self._storageManagementService: storageManagementService = _storageManagementService()
+
+    def post(self, request):
+        compartment = self._storageManagementService.get_compartment_by_qr_2(qr_code=request.data.get("qrCode"))
+        serializer = StorageSpaceSerializer(compartment)
+        return JsonResponse(serializer.data, status=200)
+
 
 class getStorageValue(View):
     @si.inject

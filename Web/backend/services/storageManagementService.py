@@ -45,6 +45,12 @@ class storageManagementService():
             value += compartment.article.price * compartment.amount
         return value
 
+    # the existing function for this did not query the actual compartment in relation to the QR
+    def get_compartment_by_qr_2(self, qr_code: str) -> StorageSpace:
+        compartment = self._storageAccess.get_compartment_by_qr_2(qr_code=qr_code)
+        return compartment
+    
+
 # FR 10.1.3 #
 
 
@@ -96,7 +102,7 @@ class storageManagementService():
         storage_space = StorageSpace.objects.get(id=space_id)
         storage_unit_id = storage_space.storage_unit
         amount = amount
-        article = Article.objects.get(lioId=storage_space.article)
+        article = Article.objects.get(lioId=storage_space.article.lioId)
         user = User.objects.get(username=username)
         medical_employee = User.objects.get(username=username).groups.filter(
             name='medical employee').exists()

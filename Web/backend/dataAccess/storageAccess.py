@@ -2,7 +2,7 @@ from datetime import timedelta
 from backend.coremodels.article import Article
 #from backend.coremodels.Compartment import Compartment
 #from backend.coremodels.Storage import Storage
-
+from backend.coremodels.qr_code import QRCode
 from backend.coremodels.storage_space import StorageSpace
 from backend.coremodels.storage_unit import StorageUnit
 from ..coremodels.order import Order
@@ -71,9 +71,19 @@ class storageAccess():
         except:
             return None
 
-    def get_compartments_by_storage(self, storageId: str) -> int:
+    def get_compartment_by_storage(self, storageId: str) -> int:
         try: 
             return StorageSpace.objects.filter(storage_unit=storageId)
+        except:
+            return None
+
+
+    # the existing funciton for this did not return the correct storage space (compartment)
+    # should overlook and remove that one
+    def get_compartment_by_qr_2(self, qr_code: str) -> StorageSpace:
+        try:
+            compartment = QRCode.objects.get(id=qr_code).storage_space
+            return compartment
         except:
             return None
 
