@@ -1,8 +1,8 @@
 from django.test import TestCase
-from backend.coremodels.article import *
+from backend.coremodels.article import Article
 from backend.coremodels.storage_space import StorageSpace
 from backend.coremodels.storage_unit import StorageUnit 
-from backend.services.articleManagementService import *
+from backend.services.articleManagementService import articleManagementService
 from backend.services.storageManagementService import storageManagementService
 
 class articleManagementServiceTest(TestCase):    
