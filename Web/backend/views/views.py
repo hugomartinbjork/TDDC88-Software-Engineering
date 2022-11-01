@@ -163,6 +163,7 @@ class LoginWithId(APIView):
         else:
             return Response({'error': 'invalid details'}, status=status.HTTP_400_BAD_REQUEST)
 
+
 class seeAllStorageUnits(View):
     @si.inject
     def __init__(self, _deps, *args):
@@ -176,7 +177,32 @@ class seeAllStorageUnits(View):
             if allStorages is None:
                 raise Http404("Could not find any storage units")
             else:
-                return JsonResponse(list(allStorages), safe=False, status = 200)
+                return JsonResponse(list(allStorages), safe=False, status=200)
+
+
+class AddInputUnit(View):
+    @si.inject
+    def __init__(self, _deps):
+        storageManagementService = _deps['storageManagementService']
+        self._storageManagementService = storageManagementService()
+        self._storageAccess = storageAccess()
+        self._userService: userService = _deps['userService']()
+
+    def post(self, request, storage_space_id, amount):
+        storage_space = storageManagementService.getStorageSpaceById(
+            self=self, id=storage_space_id)
+        user = request.user
+        if request.method == 'POST':
+            if storage_space == None:
+                return Http404("Could not find storage space")
+            storageManagementService.addToStorage(self=self,
+                                                  space_id=storage_space_id, amount=amount, username=user.username, addOutputUnit=False)
+            return HttpResponse(status=200)
+
+# AddOutputUnit is used to add articles to the storage space in
+# the form of single articles, or smaller parts etc.
+# For example: One output unit could be one single mask or the article -->one meter of paper.
+# Creates a transaction
 
 
 class GetUserTransactions(View):
@@ -189,6 +215,27 @@ class GetUserTransactions(View):
 
         if current_user.exists() == False:
             return Response({'error': 'User ID does not exist'}, status=status.HTTP_404_NOT_FOUND)
+            
+class ReturnUnit(View):
+    @si.inject
+    def __init__(self, _deps):
+        #storageAccess = _deps['storageAccess']
+        storageManagementService = _deps['storageManagementService']
+        self._storageManagementService = storageManagementService()
+        self._storageAccess = storageAccess()
+        self._userService: userService = _deps['userService']()
+
+    def post(self, request, storage_space_id, amount):
+        storage_space = storageManagementService.getStorageSpaceById(
+            self=self, id=storage_space_id)
+        user = request.user
+        if request.method == 'POST':
+            if storage_space == None:
+                return Http404("Could not find storage space")
+            storageManagementService.addToReturnStorage(
+                space_id=storage_space_id, amount=amount, username=user.username, addOutputUnit=True)
+            return HttpResponse(status=200)
+
 
         all_transactions_by_user = self._userService.get_all_transactions_by_user(current_user = current_user)
         
@@ -200,32 +247,36 @@ class getStorageValue(View):
     @si.inject
     def __init__(self, _deps):
         _storageManagementService = _deps['storageManagementService']
-        self._storageManagementService : storageManagementService = _storageManagementService()
-    
+        self._storageManagementService: storageManagementService = _storageManagementService()
+
     def get(self, request, storageId):
         if request.method == 'GET':
-            storage = self._storageManagementService.getStorageUnitById(storageId)
+            storage = self._storageManagementService.getStorageUnitById(
+                storageId)
             if storage is None:
                 raise Http404("Could not find storage")
             else:
-                value = self._storageManagementService.getStorageValue(storageId)
-                return JsonResponse(value, safe=False, status = 200)
+                value = self._storageManagementService.getStorageValue(
+                    storageId)
+                return JsonResponse(value, safe=False, status=200)
 
-#Gets alternative articles for a given article. If only article id is entered, the method returns a list of alternative articles and all
-#their attributes. If an article id and a storage id is entered, the method returns the id for alternative articles and the amount of
-#the alternative articles in that storage
+# Gets alternative articles for a given article. If only article id is entered, the method returns a list of alternative articles and all
+# their attributes. If an article id and a storage id is entered, the method returns the id for alternative articles and the amount of
+# the alternative articles in that storage
+
 
 class getArticleAlternatives(View):
     @si.inject
     def __init__(self, _deps):
         _articleManagementService = _deps['articleManagementService']
         # Instance of dependency is created in constructor
-        self._storageManagementService : storageManagementService = _deps['storageManagementService']()
-        self._articleManagementService : articleManagementService = _articleManagementService()
+        self._storageManagementService: storageManagementService = _deps['storageManagementService'](
+        )
+        self._articleManagementService: articleManagementService = _articleManagementService()
 
-    def get(self, request, articleId, storageId = None):
+    def get(self, request, articleId, storageId=None):
         if request.method == 'GET':
-            
+
             article = self._articleManagementService.getAlternativeArticles(
                 articleId)
 
@@ -234,7 +285,8 @@ class getArticleAlternatives(View):
                 dict = {'Article: ': None, 'Amount: ': None}
                 for i in article:
                     dict['Article: '] = i.lioId
-                    dict['Amount: '] = self._storageManagementService.searchArticleInStorage(storageId, i.lioId)
+                    dict['Amount: '] = self._storageManagementService.searchArticleInStorage(
+                        storageId, i.lioId)
                     storageList.append(dict.copy())
 
             if article is None:
