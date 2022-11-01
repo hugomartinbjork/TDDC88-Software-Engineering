@@ -2,7 +2,7 @@ from unittest.util import _MAX_LENGTH
 from django.db import models
 from datetime import datetime
 
-from sqlalchemy import PrimaryKeyConstraint
+#from sqlalchemy import PrimaryKeyConstraint
 from backend.coremodels.storage_unit import StorageUnit
 from django.contrib.auth.models import User
 from backend.coremodels.article import Article

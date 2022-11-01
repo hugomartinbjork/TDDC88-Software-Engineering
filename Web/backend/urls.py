@@ -27,6 +27,8 @@ urlPatterns = [
          views.getArticleAlternatives.as_view()),
     path('searcharticles/<str:search_string>/<str:input_storage>/',
          views.SearchForArticleInStorages.as_view()),
+    path('compartments/', views.Compartment.as_view()),
+    path('compartments/<str:qr_code>', views.Compartment.as_view())
 ]
 
 urlpatterns = format_suffix_patterns(urlPatterns)
