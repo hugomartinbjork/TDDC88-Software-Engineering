@@ -4,7 +4,7 @@ from backend.views import views
 from django.views.decorators.csrf import csrf_exempt
 
 urlPatterns = [
-    path('article/<str:articleId>/', views.article.as_view()),
+    path('articles/lio/<str:articleId>/', views.article.as_view()),
     path('group/<str:groupId>/', views.group.as_view()),
     path('storage/<int:storageId>/', views.storage.as_view()),
     path('storagespace/<int:storageSpaceId>/', views.storageSpace.as_view()),
