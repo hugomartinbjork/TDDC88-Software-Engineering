@@ -1,4 +1,5 @@
 from django.contrib import admin
+from backend.coremodels.inputOutput import InputOutput
 from backend.coremodels.article import Article
 from backend.coremodels.centralStorageSpace import CentralStorageSpace
 from backend.coremodels.storage_unit import StorageUnit
@@ -11,6 +12,7 @@ from backend.coremodels.article import GroupInfo
 from django.contrib.auth.models import Group
 from backend.coremodels.qr_code import QRCode
 from backend.coremodels.storage_space import StorageSpace
+from backend.coremodels.transaction import Transaction
 from backend.coremodels.order import Order
 from django.utils.html import format_html
 
@@ -79,3 +81,21 @@ admin.site.register(StorageUnit, StorageAdmin)
 
 admin.site.register(Order)
 admin.site.register(CentralStorageSpace)
+
+
+########################################################
+
+
+# Display Transaction in Backend
+class TransactioInline(admin.TabularInline):
+    model = Transaction
+
+# Display InputOutput in Backend
+
+
+class InputOutputInline(admin.TabularInline):
+    model = InputOutput
+
+
+admin.site.register(InputOutput)
+admin.site.register(Transaction)

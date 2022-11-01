@@ -8,7 +8,7 @@ from ..dataAccess.orderAccess import orderAccess
 class orderManagementService():
     
     @di.inject
-    def __init__(self, _deps):
+    def __init__(self, _deps, *args):
         self._orderAccess : orderAccess = _deps["orderAccess"]()
 
     def getOrderById(self, id: int) -> Order:

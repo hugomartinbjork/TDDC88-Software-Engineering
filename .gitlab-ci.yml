@@ -34,7 +34,6 @@ image-rdx-backend:
   stage: image
   image: docker.io/buildah/buildah
   only:
-     - master
      - main
      - dev
   # needs:
@@ -46,51 +45,30 @@ image-rdx-backend:
     - export DIR= "Web"
     - export NAME="rdx-backend"
 
-    # Build the image
     - buildah build-using-dockerfile --tag "${NAME}" "${DIR}"
-
-    # Push the image
-    # buildah fails to initially push new containers to gitlab,
-    # so if it fails, just try again. Then it should succeed
     - buildah push --creds "${CI_REGISTRY_USER}:${CI_JOB_TOKEN}" "${NAME}" "docker://${CI_REGISTRY_IMAGE}/${NAME}:latest" && exit 0 || true
     - buildah push --creds "${CI_REGISTRY_USER}:${CI_JOB_TOKEN}" "${NAME}" "docker://${CI_REGISTRY_IMAGE}/${NAME}:latest"
 
-# Make sure that our kubectl-config is working properly before we do anything more advanced
 deploy-test-k8s-connection:
   stage: deploy
   image: bitnami/kubectl
   needs: []
   only:
-    - master
     - main
     - dev
   script:
     - kubectl get all
-
-# Deploy a token for accessing our registry to our k8s namespace. The token must
-# be saved in the CI/CD variable $REGISTRY_PASS, but your lab assistant should
-# have done that for you.
-# Please note that this pipeline step will really only do useful stuff on it's
-# first run, after that all the secrets should already be in place. However, it
-# is preserved here for posterity. Also, this allows us to *completely* nuke a
-# k8s namespace without needing to do any manual steps to get back on track.
 deploy-k8s-regcred:
   stage: deploy
   image: bitnami/kubectl
   needs:
     - deploy-test-k8s-connection
   only:
-    - master
     - main
     - dev
   script:
-    # Check if the secret already exists, if so, no need to create it, so we just exit cleanly in that case
     - kubectl get secrets | grep liu-gitlab-regcred && exit 0
-
-    # Create a new secret that allows us to use this projects registry. This only needs to be done once
     - kubectl create secret docker-registry liu-gitlab-regcred --docker-server=https://gitlab.liu.se:5000 --docker-username=k8s --docker-password=${REGISTRY_PASSWORD}
-
-    # Just double check our fancy new credentials
     - kubectl get secret liu-gitlab-regcred
 
 # Deploy our application to k8s!
@@ -98,9 +76,8 @@ deploy-rdx-backend:
   stage: deploy
   image: bitnami/kubectl
 
-  # Only deploy when on main/master
+  # Only deploy when on main/master/dev
   only:
-    - master
     - main
     - dev
   # And wait for all dependencies to build
@@ -108,15 +85,8 @@ deploy-rdx-backend:
     - deploy-test-k8s-connection
     - deploy-k8s-regcred
     - image-rdx-backend
-    - yamllint # Don't try to deploy malformatted yaml, that will result in pain
+    - yamllint
   script:
-    # First, apply our yaml. This will make sure all resources are created.
-    # However, unless the configuration is changed, it won't actually restart
-    # any existing pods. That means the following line *won't* ensure that all
-    # pods run the latest container images.
     - kubectl apply -f k8/backend.yaml
-
-    # Now, start a rollout to make sure we are running the latest versions of
-    # our container images. This will make sure we use the newly built docker
-    # images in our registry.
     - kubectl rollout restart deployment rdx-backend-app-deployment
+  

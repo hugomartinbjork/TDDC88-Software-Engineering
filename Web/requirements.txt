@@ -36,4 +36,5 @@ Pillow==9.2.0
 django-rest-knox
 gunicorn
 whitenoise
-django-storages
+django-dotenv
+SQLAlchemy==1.4.32

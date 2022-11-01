@@ -1,7 +1,7 @@
 from datetime import timedelta
 from backend.coremodels.article import Article
-from backend.coremodels.Compartment import Compartment
-from backend.coremodels.Storage import Storage
+#from backend.coremodels.Compartment import Compartment
+#from backend.coremodels.Storage import Storage
 
 from backend.coremodels.storage_space import StorageSpace
 from backend.coremodels.storage_unit import StorageUnit
@@ -65,8 +65,15 @@ class storageAccess():
     def searchArticleInStorage(self, storageUnitId: str, articleId: str) -> int:
         try:
             storage_unit = StorageUnit.objects.get(id=storageUnitId)
-            storage_space = StorageSpace.objects.get(storage_unit=storage_unit.id, article=articleId)
+            article = Article.objects.get(lioId = articleId)
+            storage_space = StorageSpace.objects.get(storage_unit=storage_unit, article=article)
             return storage_space.amount
+        except:
+            return None
+
+    def get_compartments_by_storage(self, storageId: str) -> int:
+        try: 
+            return StorageSpace.objects.filter(storage_unit=storageId)
         except:
             return None
 
@@ -74,21 +81,26 @@ class storageAccess():
 
 ##  FR 9.4.1 och FR 9.4.2 ##
 
-    def create_compartment(self, storage_id: str, placement: str, qr_code) -> Compartment:
-        storage = Storage.objects.filter(id = storage_id).first()
+    def create_compartment(self, storage_id: str, placement: str, qr_code) -> StorageSpace:
+        print("helelo: " +storage_id)
+        storage = StorageUnit.objects.filter(id = storage_id).first()
+        article = Article.objects.get(lioId = '123')
+        print(storage)
         try:
-            compartment = Compartment(
-            storage = storage, placement = placement,
-            qr_code = qr_code)
+            compartment = StorageSpace(
+            id = qr_code,
+            storage_unit = storage, 
+            placement = placement,
+        )
             compartment.save()
             return compartment
         except:
             return None
 
     
-    def get_compartment_by_qr(self, qr_code: str) -> Compartment:
+    def get_compartment_by_qr(self, qr_code: str) -> StorageSpace:
         try:
-            compartment = Compartment.objects.get(qr_code=qr_code)
+            compartment = StorageSpace.objects.get(id=qr_code)
             return compartment
         except:
             return None
