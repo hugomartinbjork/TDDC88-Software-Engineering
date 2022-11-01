@@ -1,4 +1,5 @@
 from http.client import OK, HTTPResponse
+from itertools import chain
 import pkgutil
 from urllib import request
 import json
@@ -318,3 +319,41 @@ class getArticleAlternatives(View):
                     return JsonResponse(list(storageList), safe=False, status=200)
                 else:
                     return JsonResponse(list(article.values()), safe=False, status=200)
+
+
+# FR 8.1 start #
+class SearchForArticleInStorages(View):
+    @si.inject
+    def __init__(self, _deps):
+        storageManagementService = _deps['storageManagementService']
+        OrderService = _deps['OrderService']
+        userService = _deps['userService']
+        self._storageManagementService = storageManagementService()
+        self._userService = userService()
+
+    def get(self, request, search_string, input_storage_unit) -> dict:
+        if request.method == 'GET':
+
+            # Getting the storage unit which is connected to the users cost center.
+            user = request.user
+            user_info = self._userService.getUserInfo(user.id)
+            user_storage_unit = self._storageManagementService.getStorageUnitByCostCenter(
+                user_info.cost_center)
+
+            # If not input storage unit is given, we assume the user wants to search from it's own storage unit
+            if input_storage_unit is None:
+                storage_unit = user_storage_unit.id
+            else:
+                storage_unit = input_storage_unit
+
+            # query for the articles which match the input search string and the chosen storage unit.
+            articles_in_chosen_storage = StorageSpace.objects.filter(article__name__contains=search_string, storage_unit__id=storage_unit).values_list(
+                'article__name', 'id', 'amount', 'storage_unit__name', 'storage_unit__floor', 'storage_unit__building')
+            # query for the articles which only matches the input search string in all storage units.
+            articles = StorageSpace.objects.filter(article__name__contains=search_string).values_list(
+                'article__name', 'id', 'amount', 'storage_unit__name', 'storage_unit__floor', 'storage_unit__building').order_by('storage_unit__floor', 'storage_unit__building')
+
+            # Chains the above querys together and removes duplicates with set.
+            data = set(chain(articles_in_chosen_storage, articles))
+
+            return JsonResponse(list(data), safe=False, status=200)
