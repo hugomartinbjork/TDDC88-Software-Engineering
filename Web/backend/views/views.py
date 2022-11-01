@@ -47,11 +47,19 @@ class article(View):
         if request.method == 'GET':
             article = self._articleManagementService.getArticleByLioId(
                 articleId)
+            supplier = self._articleManagementService.getSupplier(article)
+            supplier_article_nr = self._articleManagementService.getSupplierArticleNr(article)
+
             if article is None:
                 raise Http404("Could not find article")
             serializer = ArticleSerializer(article)
             if serializer.is_valid:
-                return JsonResponse(serializer.data, status=200)
+                serializer_data = {}
+                serializer_data.update(serializer.data)
+                serializer_data["supplier"] = supplier.name
+                serializer_data["supplierArticleNr"] = supplier_article_nr
+                print(serializer_data)
+                return JsonResponse(serializer_data, status=200)
             return HttpResponseBadRequest
 
 

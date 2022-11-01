@@ -12,6 +12,8 @@ from backend.coremodels.article import GroupInfo
 from django.contrib.auth.models import Group
 from backend.coremodels.qr_code import QRCode
 from backend.coremodels.storage_space import StorageSpace
+from backend.coremodels.article_has_supplier import ArticleHasSupplier
+from backend.coremodels.supplier import Supplier
 from backend.coremodels.transaction import Transaction
 from backend.coremodels.order import Order
 from django.utils.html import format_html
@@ -58,13 +60,17 @@ admin.site.register(GroupInfo, GroupAdmin)
 #######################################################
 
 
+admin.site.register(Supplier)
+
 # Displays which storage components that the articles are in
 class StorageSpaceInline(admin.TabularInline):
     model = StorageSpace
 
+class ArticleHasSupplierInline(admin.TabularInline):
+    model = ArticleHasSupplier
 
 class ArticleAdmin(admin.ModelAdmin):
-    inlines = (StorageSpaceInline, )
+    inlines = (StorageSpaceInline, ArticleHasSupplierInline, )
 
 
 admin.site.register(Article, ArticleAdmin)

@@ -16,7 +16,7 @@ from backend.coremodels.transaction import Transaction
 class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
-        fields = ('name', 'lioId', 'description', 'article_group', 'image', 'sanitation_level', 'price', 'alternative_names',
+        fields = ('name', 'lioId', 'description', 'article_group', 'image', 'Z41', 'price', 'alternative_names',
                   'alternative_articles')
 
 
