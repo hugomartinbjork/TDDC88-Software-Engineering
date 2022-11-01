@@ -68,3 +68,9 @@ class storageAccess():
             return storage_space.amount
         except:
             return None
+
+    def get_compartments_by_storage(self, storageId: str) -> int:
+        try: 
+            return StorageSpace.objects.filter(storage_unit=storageId)
+        except:
+            return None
