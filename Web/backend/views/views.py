@@ -39,14 +39,8 @@ from django.http import HttpResponse
 class article(View):
     # Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing
     @si.inject
-<<<<<<< HEAD
-    def __init__(self, _deps):
-        self._articleManagementService: articleManagementService = _deps['articleManagementService'](
-        )
-=======
     def __init__(self, _deps, *args):
         self._articleManagementService : articleManagementService = _deps['articleManagementService']()
->>>>>>> 1b5728589c34b2ac3b5d0275ff1ced1d0f0910b4
 
     def get(self, request, articleId):
         if request.method == 'GET':
@@ -63,14 +57,8 @@ class article(View):
 class group(View):
     # Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing
     @si.inject
-<<<<<<< HEAD
-    def __init__(self, _deps):
-        self._groupManagementService: groupManagementService = _deps['groupManagementService'](
-        )
-=======
     def __init__(self, _deps, *args):
         self._groupManagementService : groupManagementService = _deps['groupManagementService']()
->>>>>>> 1b5728589c34b2ac3b5d0275ff1ced1d0f0910b4
 
     def get(self, request, groupId):
         if request.method == 'GET':
@@ -84,14 +72,8 @@ class group(View):
 class storage(View):
     # Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing
     @si.inject
-<<<<<<< HEAD
-    def __init__(self, _deps):
-        self._storageManagementService: storageManagementService = _deps['storageManagementService'](
-        )
-=======
     def __init__(self, _deps, *args):
         self._storageManagementService : storageManagementService = _deps['storageManagementService']()
->>>>>>> 1b5728589c34b2ac3b5d0275ff1ced1d0f0910b4
 
     def get(self, request, storageId):
         if request.method == 'GET':
@@ -106,17 +88,9 @@ class storage(View):
 
 
 class storageSpace(View):
-<<<<<<< HEAD
-    def __init__(self, _deps):
-        self._orderService: OrderService = _deps['OrderService']()
-        self._storageManagementService: storageManagementService = _deps['storageManagementService'](
-        )
-
-=======
     def __init__(self, _deps, *args):
         self._orderService : OrderService = _deps['OrderService']()
         self._storageManagementService : storageManagementService = _deps['storageManagementService']()
->>>>>>> 1b5728589c34b2ac3b5d0275ff1ced1d0f0910b4
     def get(self, request, storageSpaceId):
         alteredDict = self._storageManagementService.getCompartmentContentAndOrders(
             storageSpaceId)
@@ -127,16 +101,9 @@ class storageSpace(View):
 
 class order(View):
     @si.inject
-<<<<<<< HEAD
-    def __init__(self, _deps):
-        self._orderService: OrderService = _deps['OrderService']()
-
-    def get(self, request, id):
-=======
     def __init__(self, _deps, *args):
         self._orderService : OrderService = _deps['OrderService']() 
     def get(self, request, id): 
->>>>>>> 1b5728589c34b2ac3b5d0275ff1ced1d0f0910b4
         if request.method == 'GET':
             order = self._orderService.getOrderById(id)
             if order is None:
