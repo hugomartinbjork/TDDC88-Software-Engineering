@@ -164,7 +164,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: hello-backend-service
+                name: rdx-backend-app-service
                 port:
                   number: 80
 

@@ -37,3 +37,4 @@ django-rest-knox
 gunicorn
 whitenoise
 django-dotenv
+SQLAlchemy==1.4.32
