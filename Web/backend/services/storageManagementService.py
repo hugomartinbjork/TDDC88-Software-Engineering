@@ -45,6 +45,7 @@ class storageManagementService():
 # TODO: This is a lot of work to refactor since barely any of the methods work. Leaving this
 # TODO to the original author
 
+
     def addToStorage(self, space_id: str, amount: int, username: str, addOutputUnit: bool) -> Transaction:
         storage_space = self._storageAccess.get_compartment_by_id(
             id=space_id)
@@ -89,10 +90,19 @@ class storageManagementService():
         storage_unit_id = storage_space.storage_unit
         amount = amount
         article = Article.objects.get(lioId=storage_space.article)
-        inputOutput = InputOutput.objects.get(article=article)
-        converter = inputOutput.outputUnitPerInputUnit
+        user = User.objects.get(username=username)
         medical_employee = User.objects.get(username=username).groups.filter(
             name='medical employee').exists()
+        inputOutputCheck = InputOutput.objects.filter(article=article).exists()
+        if (inputOutputCheck):
+            print("inne i första if")
+            inputOutput = InputOutput.objects.get(article=article)
+            converter = inputOutput.outputUnitPerInputUnit
+        else:
+            print("inne i else")
+            inputOutput = InputOutput.objects.create(article=article)
+            converter = inputOutput.outputUnitPerInputUnit
+
         if(medical_employee and article.sanitation_level == 'Z41'):
             return None
 
