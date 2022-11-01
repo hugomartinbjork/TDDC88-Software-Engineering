@@ -336,7 +336,7 @@ class SearchForArticleInStorages(View):
 
             # Getting the storage unit which is connected to the users cost center.
             user = request.user
-            user_info = self._userService.getUserInfo(user.id)
+            user_info = self._userService.get_user_info(user.id)
             user_storage_unit = self._storageManagementService.getStorageUnitByCostCenter(
                 user_info.cost_center)
 
