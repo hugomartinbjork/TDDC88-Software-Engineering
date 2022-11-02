@@ -2,6 +2,7 @@ from tkinter import CASCADE
 from unittest.util import _MAX_LENGTH
 from django.db import models
 from backend.coremodels.group import GroupInfo
+from backend.operations.enumerator import UnitOperator
 #from backend.coremodels.storageComponent import storageComponent
 
 
@@ -10,11 +11,15 @@ class Article(models.Model):
     description = models.CharField(max_length=100, null=True)
     price = models.IntegerField(null=True)
     name = models.CharField(max_length=30)
-    sanitation_level = models.CharField(max_length=30, default=0, null=True)
+    Z41 = models.BooleanField(default=False) #Change to boolean because Z41 is true or false
     image = models.ImageField(null=True, blank=True)
-    article_group = models.ManyToManyField(GroupInfo)
-    alternative_names = models.TextField(null=True, blank=True)
+    article_group = models.ManyToManyField(GroupInfo) #Look at database schema and requirement
     alternative_articles = models.ManyToManyField('self', blank=True)
+	# The following four lines might make inputOuput.py obsolete // FH
+    refill_unit = models.IntegerField(
+        choices=UnitOperator.choices, default=1, null=False)
+    takeout_unit = models.IntegerField(
+        choices=UnitOperator.choices, default=1, null=False)
 
     # Should these attributes below really be included, they are not
     # included in the database schema??

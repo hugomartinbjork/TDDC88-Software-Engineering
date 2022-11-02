@@ -1,5 +1,6 @@
 from datetime import timedelta
 from backend.coremodels.article import Article
+from backend.coremodels.transaction import Transaction
 #from backend.coremodels.Compartment import Compartment
 #from backend.coremodels.Storage import Storage
 from backend.coremodels.qr_code import QRCode
@@ -77,13 +78,26 @@ class storageAccess():
             return StorageSpace.objects.filter(storage_unit=storageId)
         except:
             return None
+    
 
     def get_all_transactions(self) -> dict:
         try:
-            allTransactions = Transaction.objects.all().values()  
+            allTransactions = Transaction.objects.all().values()
             return allTransactions
         except:
             return None
+    def get_transaction_by_storage(self, storageId: str) -> int:
+        try:
+            return Transaction.objects.filter(storage_unit=storageId)
+        except:
+            return None
+
+    def get_storage_by_costcenter(self, cost_center: str) -> StorageUnit:
+        try:
+            storage = StorageUnit.objects.get(cost_center=cost_center)
+            return storage
+        except:
+            None
 
 ##  FR 9.4.1 och FR 9.4.2 ##
 

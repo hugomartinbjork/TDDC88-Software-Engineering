@@ -4,7 +4,7 @@ from backend.views import views
 from django.views.decorators.csrf import csrf_exempt
 
 urlPatterns = [
-    path('article/<str:articleId>/', views.article.as_view()),
+    path('articles/lio/<str:articleId>/', views.article.as_view()),
     path('group/<str:groupId>/', views.group.as_view()),
     path('storage/<int:storageId>/', views.storage.as_view()),
     path('storagespace/<int:storageSpaceId>/', views.storageSpace.as_view()),
@@ -25,6 +25,9 @@ urlPatterns = [
     # alternative articles if a storage is sent as input
     path('alternativearticles/<str:articleId>/<str:storageId>/',
          views.getArticleAlternatives.as_view()),
+    path('storage/<str:storageId>/cost', views.getStorageCost.as_view()),
+    path('searcharticles/<str:search_string>/<str:input_storage>/',
+         views.SearchForArticleInStorages.as_view()),
     path('compartments/', views.Compartment.as_view()),
     path('compartments/<str:qr_code>', views.Compartment.as_view()),
     path('transactions/', views.Transactions.as_view())
