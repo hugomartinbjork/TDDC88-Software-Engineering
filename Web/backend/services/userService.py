@@ -9,6 +9,7 @@ from ..__init__ import dataAccessInjector as di
 from django.contrib.auth.backends import BaseBackend
 from rest_framework.response import Response
 from rest_framework import status
+from backend.coremodels.user_info import UserInfo
 
 
 @si.register()
@@ -30,3 +31,10 @@ class userService(BaseBackend):
     def get_all_transactions_by_user(self, current_user) -> dict:
         all_transactions = Transaction.objects.all().values()
         return all_transactions
+        
+    def get_user_info(self, user_id):
+        try:
+            user_info = UserInfo.objects.get(user=user_id)
+            return user_info
+        except:
+            return None

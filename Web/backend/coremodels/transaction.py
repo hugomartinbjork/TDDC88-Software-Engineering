@@ -1,5 +1,10 @@
 from django.db import models
 from datetime import datetime
+<<<<<<< HEAD
+=======
+
+#from sqlalchemy import PrimaryKeyConstraint
+>>>>>>> c4910a99f3856d4d9bd71b9487eb63b772fe2c49
 from backend.coremodels.storage_unit import StorageUnit
 from django.contrib.auth.models import User
 from backend.coremodels.article import Article
@@ -12,9 +17,24 @@ class Transaction(models.Model):
     by_user = models.ForeignKey(User, on_delete=models.CASCADE)
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     amount = models.PositiveSmallIntegerField(default=0)
+<<<<<<< HEAD
     time_of_transaction = models.DateTimeField(auto_now_add=True, null = False)
     operation = models.IntegerField(choices=TransactionOperator.choices,default=0, null = False)
+=======
+    time_of_transaction = models.DateField(auto_now_add=True, null=False)
+    operation = models.IntegerField(
+        choices=TransactionOperator.choices, default=0, null=False)
+>>>>>>> c4910a99f3856d4d9bd71b9487eb63b772fe2c49
 
     
     def __str__(self):
+<<<<<<< HEAD
         return str(self.id)
+=======
+        return str(self.id)
+
+    def get_value(self):
+        return self.article.price*self.amount
+
+
+>>>>>>> c4910a99f3856d4d9bd71b9487eb63b772fe2c49
