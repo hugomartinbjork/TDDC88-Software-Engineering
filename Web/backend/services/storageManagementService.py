@@ -1,4 +1,5 @@
 #from requests import request
+#from Web.backend.views.views import Compartment
 from backend.dataAccess.orderAccess import orderAccess
 from backend.dataAccess.storageAccess import storageAccess
 from backend.dataAccess.userAccess import userAccess
@@ -53,6 +54,9 @@ class storageManagementService():
             value += compartment.article.price * compartment.amount
         return value
 
+    def getAllTransactions(self) -> dict:
+        return self._storageAccess.get_all_transactions()
+    
     # Storage is not connected to a costcenter atm
     # For now this is sum och costs (takeout-return)
     # from transactions for one storage_compartment
@@ -115,12 +119,7 @@ class storageManagementService():
             return None
         else:
             StorageSpace.objects.update(amount=amount_in_storage)
-            # the auto increment function of id in django bängade ur, so I just created my own ids for Transaction. This is crazy ugly.
-            random_id = random.randint(1, 9999)
-            if Transaction.objects.filter(id=random_id):
-                random_id += 1
-            new_transaction = Transaction.objects.create(id=random_id,
-                                                         storage_unit=storage_unit_id, article=article, operation=3, by_user=user, amount=new_amount)
+            new_transaction = Transaction.objects.create(storage_unit=storage_unit_id, article=article, operation=3, by_user=user, amount=new_amount)
             new_transaction.save()
             print("New add transaction created:")
             print(new_transaction)
@@ -131,11 +130,11 @@ class storageManagementService():
 # TODO: This is a lot of work to refactor since barely any of the methods work. Leaving this
 # TODO to the original author
 
-    def addToReturnStorage(space_id: str, amount: int, username: str, addOutputUnit: bool) -> Transaction:
+    def addToReturnStorage(self, space_id: str, amount: int, username: str, addOutputUnit: bool) -> Transaction:
         storage_space = StorageSpace.objects.get(id=space_id)
         storage_unit_id = storage_space.storage_unit
         amount = amount
-        article = Article.objects.get(lioId=storage_space.article)
+        article = Article.objects.get(lioId=storage_space.article.lioId)
         user = User.objects.get(username=username)
         medical_employee = User.objects.get(username=username).groups.filter(
             name='medical employee').exists()
@@ -166,16 +165,39 @@ class storageManagementService():
             return None
         else:
             StorageSpace.objects.update(amount=amount_in_storage)
-            # the auto increment function of id in django bängade ur, so I just created my own ids for Transaction. This is crazy ugly.
-            random_id = random.randint(1, 9999)
-            if Transaction.objects.filter(id=random_id):
-                random_id += 1
-            new_transaction = Transaction.objects.create(id=random_id,
-                                                         storage_unit=storage_unit_id, article=article, operation=2, by_user=user, amount=new_amount)
+            new_transaction = Transaction.objects.create(storage_unit=storage_unit_id, article=article, operation=2, by_user=user, amount=new_amount)
             new_transaction.save()
             print("New return transaction created:")
             print(new_transaction)
             return new_transaction
+
+    def takeFromCompartment(self, space_id, amount, username, addOutputUnit):
+        compartment = self._storageAccess.get_compartment_by_id(id=space_id)
+        article = Article.objects.get(lioId=compartment.article.lioId)
+        inputOutput = InputOutput.objects.get(article=article)
+        converter = inputOutput.outputUnitPerInputUnit
+        user = User.objects.get(username=username)
+        if(addOutputUnit):
+            amount_in_storage = StorageSpace.objects.get(
+                id=space_id).amount - amount
+            new_amount = amount
+        else:
+            # eftersom det inte verkar finnas funktionalitet för input/output-amounts så har jag satt denna till 2 bara för testningens skull.
+            if not converter:
+                converter = 2
+            amount_in_storage = StorageSpace.objects.get(
+                id=space_id).amount - amount*converter
+            new_amount = amount*converter
+        if (amount_in_storage < 0):
+            return None
+        else:
+            StorageSpace.objects.update(amount=amount_in_storage)
+            new_transaction = Transaction.objects.create(storage_unit=compartment.storage_unit, article=article, operation=1, by_user=user, amount=new_amount)
+            new_transaction.save()
+            print("New add transaction created:")
+            print(new_transaction)
+            return new_transaction
+
 
     def getArticleInStorageSpace(self, storageSpaceId: str) -> Article:
         return self._storageAccess.getArticleInStorageSpace(storageSpaceId=storageSpaceId)
