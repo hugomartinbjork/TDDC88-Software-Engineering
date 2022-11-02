@@ -352,7 +352,7 @@ class Transactions(APIView):
         if allTransactions is None:
             raise Http404("Could not find any transactions")
         else:          
-            return JsonResponse(dict(allTransactions), safe=False, status=200)
+            return JsonResponse(list(allTransactions), safe=False, status=200)
     
     def post(self, request):
         compartment = self._storageManagementService.get_compartment_by_qr(qr_code=request.data.get("qrCode"))
