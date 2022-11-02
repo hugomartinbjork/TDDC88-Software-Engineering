@@ -316,8 +316,7 @@ class Transactions(APIView):
             allTransactions = self._storageManagementService.getAllTransactions()
         if allTransactions is None:
             raise Http404("Could not find any transactions")
-        else:
-            
+        else:          
             return JsonResponse(list(allTransactions), safe=False, status=200)
     
     def post(self, request):
@@ -332,9 +331,9 @@ class Transactions(APIView):
             operation = request.data.get("operation")
 
             if unit=="output":
-                addOutputUnit = True
-            else:
                 addOutputUnit = False
+            else:
+                addOutputUnit = True
             
             if operation=="replenish":
                 print("printing username")
@@ -343,10 +342,13 @@ class Transactions(APIView):
                     space_id=compartment.id, amount=amount, username=user.username, addOutputUnit=addOutputUnit)
                 return JsonResponse(TransactionSerializer(transaction).data, status=200)
             elif operation=="return":
-                transaction = storageManagementService.addToReturnStorage(
-                self=self, space_id=compartment.id, amount=amount, username=user.username, addOutputUnit=addOutputUnit)
+                transaction = self._storageManagementService.addToReturnStorage(
+                    space_id=compartment.id, amount=amount, username=user.username, addOutputUnit=addOutputUnit)
                 return JsonResponse(TransactionSerializer(transaction).data, status=200)
-
+            elif operation=="takeout":
+                transaction = self._storageManagementService.takeFromCompartment(
+                    space_id=compartment.id, amount=amount, username=user.username, addOutputUnit=addOutputUnit)
+                return JsonResponse(TransactionSerializer(transaction).data, status=200)
 
 class getStorageValue(View):
     @si.inject
