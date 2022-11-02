@@ -33,41 +33,23 @@ class ArticleIdentificationTest(TestCase):
 #         article = Article.objects.get(lioId="1")                  
 #         self.assertEqual(articleManagementService.getArticleByLioId(self,"1"), article)        
 
-# === example 2 === #
-# This is how the test would be written as a unit test
-class ArticleIdentificationTest2(TestCase):
-    def setUp(self):
-        # First we create a stub of articleAccess (this is because the method we are testing is using this data access class)
-        article_access_stub = articleAccess
-        self.article_to_search_for = Article(lioId="1") # Article to search for is created without being put in the database
-        article_access_stub.getArticleByLioId = MagicMock(return_value = self.article_to_search_for) #A return value for a method of the stub is specified (this simulates that the stub is functional, so we can test the method we are testing individually)
-        self.article_management_service : articleManagementService = articleManagementService(
-            {
-                "articleAccess": article_access_stub #The mocked dependency is injected into the article management service
-            }   # NOTE: for this to work it is important that the class we are injecting into, takes *args as an input argument for the constructor (__init__) 
-        )
-    def test_get_article_by_lio_id_unittestversion(self):
-        test_search = self.article_management_service.getArticleByLioId(lioId="1")
-        self.assertEqual(self.article_to_search_for, test_search)
-
 
 # Testing FR4.6
-
 class StorageSpaceCreationTest(TestCase):    
      def setUp(self):                     
-         Article.objects.create(lioId="1")
-         StorageUnit.objects.create(id="1")
-         StorageSpace.objects.create(id="1", storage_unit = StorageUnit.objects.get(id="1"), article = Article.objects.get(lioId="1"))
+         self.article_in_storagespace = Article.objects.create(lioId="1")
+         self.article_management_service : articleManagementService = articleManagementService()
+         self.storageunit_in_storagespace = StorageUnit.objects.create(id="1")
+         self.storage_management_service : storageManagementService = storageManagementService()
+         self.storagespace = StorageSpace.objects.create(id="1", storage_unit = StorageUnit.objects.get(id="1"), article = Article.objects.get(lioId="1"))
             
      def test_storageManagementService(self):
-        storageunit = StorageUnit.objects.get(id="1")
-        storagespace = StorageSpace.objects.get(id="1")
-        article1 = Article.objects.get(lioId="1")
-        self.assertEqual(articleManagementService.getArticleByLioId(self,"1"), article1)
-        self.assertEqual(storageManagementService.getStorageUnitById(self,"1"), storageunit)
-        self.assertEqual(storageManagementService.getStorageSpaceById(self,"1"), storagespace)
-        self.assertEqual(storagespace.article, article1)
-        self.assertEqual(storagespace.storage_unit, storageunit) 
+        test_search_storagespace = self.storage_management_service.getStorageSpaceById(id="1")
+        test_search_article = self.article_management_service.getArticleByLioId(lioId="1")
+        test_search_storageunit = self.storage_management_service.getStorageUnitById(id="1")
+        self.assertEqual(test_search_storagespace, self.storagespace)
+        self.assertEqual(self.storagespace.article, test_search_article)
+        self.assertEqual(self.storagespace.storage_unit, test_search_storageunit)
 
 
 # Testing FR4.3
