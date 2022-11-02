@@ -317,6 +317,7 @@ class Transactions(APIView):
         if allTransactions is None:
             raise Http404("Could not find any transactions")
         else:
+            
             return JsonResponse(list(allTransactions), safe=False, status=200)
     
     def post(self, request):
