@@ -8,7 +8,7 @@ from backend.operations.enumerator import TransactionOperator
 
 #Transaction to or from storageUnit by User
 class Transaction(models.Model):
-    id = models.CharField(max_length=15, primary_key=True)
+    id = models.AutoField(primary_key=True, null=False)
     storage_unit = models.ForeignKey(StorageUnit, on_delete=models.CASCADE)
     by_user = models.ForeignKey(User, on_delete=models.CASCADE)
     article = models.ForeignKey(Article, on_delete=models.CASCADE)

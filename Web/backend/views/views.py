@@ -9,7 +9,7 @@ from rest_framework import generics
 from django.http import Http404, JsonResponse, HttpResponseBadRequest
 from backend.coremodels.transaction import Transaction
 from backend.dataAccess.storageAccess import storageAccess
-from ..serializers import AlternativeNameSerializer, StorageUnitSerializer, ArticleSerializer, GroupSerializer, QRCodeSerializer, OrderSerializer, StorageSpaceSerializer
+from ..serializers import AlternativeNameSerializer, StorageUnitSerializer, ArticleSerializer, GroupSerializer, QRCodeSerializer, OrderSerializer, StorageSpaceSerializer, TransactionSerializer
 # This import is important for now, since the dependency in articlemanagmentservice will not be stored in the serviceInjector otherwise however, I'm
 # hoping to be able to change this since it looks kind of trashy
 from backend.services.articleManagementService import articleManagementService
@@ -318,6 +318,52 @@ class ReturnUnit(View):
                 space_id=storage_space_id, amount=amount, username=user.username, addOutputUnit=True)
             return HttpResponse(status=200)
 
+class Transactions(APIView):
+    @si.inject
+    def __init__(self, _deps):
+        storageManagementService = _deps['storageManagementService']
+        self._storageManagementService = storageManagementService()
+        self._storageAccess = storageAccess()
+        self._userService: userService = _deps['userService']()
+
+    def get(self, request):
+        if request.method == 'GET':
+            allTransactions = self._storageManagementService.getAllTransactions()
+        if allTransactions is None:
+            raise Http404("Could not find any transactions")
+        else:          
+            return JsonResponse(list(allTransactions), safe=False, status=200)
+    
+    def post(self, request):
+        compartment = self._storageManagementService.get_compartment_by_qr(qr_code=request.data.get("qrCode"))
+        if compartment == None:
+            return Response({'error': 'Could not find compartment'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            storage = self._storageManagementService.getStorageUnitById(id=compartment.id)
+            amount = request.data.get("quantity")
+            unit = request.data.get("unit")
+            user = request.user
+            operation = request.data.get("operation")
+
+            if unit=="output":
+                addOutputUnit = False
+            else:
+                addOutputUnit = True
+            
+            if operation=="replenish":
+                print("printing username")
+                print(user)
+                transaction = self._storageManagementService.addToStorage(
+                    space_id=compartment.id, amount=amount, username=user.username, addOutputUnit=addOutputUnit)
+                return JsonResponse(TransactionSerializer(transaction).data, status=200)
+            elif operation=="return":
+                transaction = self._storageManagementService.addToReturnStorage(
+                    space_id=compartment.id, amount=amount, username=user.username, addOutputUnit=addOutputUnit)
+                return JsonResponse(TransactionSerializer(transaction).data, status=200)
+            elif operation=="takeout":
+                transaction = self._storageManagementService.takeFromCompartment(
+                    space_id=compartment.id, amount=amount, username=user.username, addOutputUnit=addOutputUnit)
+                return JsonResponse(TransactionSerializer(transaction).data, status=200)
 
 class getStorageValue(View):
     @si.inject

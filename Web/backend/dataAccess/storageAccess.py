@@ -3,11 +3,12 @@ from backend.coremodels.article import Article
 from backend.coremodels.transaction import Transaction
 #from backend.coremodels.Compartment import Compartment
 #from backend.coremodels.Storage import Storage
-
 from backend.coremodels.transaction import Transaction
 from backend.coremodels.article import Article
+from backend.coremodels.qr_code import QRCode
 from backend.coremodels.storage_space import StorageSpace
 from backend.coremodels.storage_unit import StorageUnit
+from backend.coremodels.transaction import Transaction
 from ..coremodels.order import Order
 from ..__init__ import dataAccessInjector as di
 
@@ -81,6 +82,12 @@ class storageAccess():
             return None
     
 
+    def get_all_transactions(self) -> dict:
+        try:
+            allTransactions = Transaction.objects.all().values()
+            return allTransactions
+        except:
+            return None
     def get_transaction_by_storage(self, storageId: str) -> int:
         try:
             return Transaction.objects.filter(storage_unit=storageId)

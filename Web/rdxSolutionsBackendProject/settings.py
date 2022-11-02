@@ -44,6 +44,24 @@ INSTALLED_APPS = [
     'backend',
 ]
 
+<<<<<<< HEAD
+=======
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'knox.auth.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ]
+}
+
+REST_KNOX = {
+    'TOKEN_TTL': timedelta(minutes=600),
+    'USER_SERIALIZER': 'knox.serializers.UserSerializer',
+    'TOKEN_LIMIT_PER_USER': None,
+    'AUTO_REFRESH': False,
+    'EXPIRY_DATETIME_FORMAT': api_settings.DATETIME_FORMAT,
+}
+
+>>>>>>> 0a42b5d74aaf5e978a9f072ecd315f6cda5ff520
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
