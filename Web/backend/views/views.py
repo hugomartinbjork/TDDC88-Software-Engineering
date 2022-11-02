@@ -3,8 +3,9 @@ import pkgutil
 from urllib import request
 import json
 from django.shortcuts import render
+from backend.dataAccess.storageAccess import storageAccess
 from rest_framework import generics
-from django.http import Http404, JsonResponse, HttpResponseBadRequest
+from django.http import Http404, HttpResponse, JsonResponse, HttpResponseBadRequest
 from ..serializers import StorageUnitSerializer, ArticleSerializer, GroupSerializer, QRCodeSerializer, OrderSerializer, StorageSpaceSerializer
 # This import is important for now, since the dependency in articlemanagmentservice will not be stored in the serviceInjector otherwise however, I'm
 # hoping to be able to change this since it looks kind of trashy
@@ -215,6 +216,13 @@ class GetUserTransactions(View):
 
         if current_user.exists() == False:
             return Response({'error': 'User ID does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+        all_transactions_by_user = self._userService.get_all_transactions_by_user(current_user = current_user)
+        
+        if all_transactions_by_user is None:
+            raise Http404("Could not find any transactions")
+        else:
+            return JsonResponse(list(all_transactions_by_user), safe=False, status = 200)
             
 class ReturnUnit(View):
     @si.inject
@@ -237,12 +245,6 @@ class ReturnUnit(View):
             return HttpResponse(status=200)
 
 
-        all_transactions_by_user = self._userService.get_all_transactions_by_user(current_user = current_user)
-        
-        if all_transactions_by_user is None:
-            raise Http404("Could not find any transactions")
-        else:
-            return JsonResponse(list(all_transactions_by_user), safe=False, status = 200)
 class getStorageValue(View):
     @si.inject
     def __init__(self, _deps):
