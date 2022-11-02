@@ -45,12 +45,8 @@ class storageManagementService():
             value += compartment.article.price * compartment.amount
         return value
 
-    # the existing function for this did not query the actual compartment in relation to the QR
-    def get_compartment_by_qr_2(self, qr_code: str) -> StorageSpace:
-        compartment = self._storageAccess.get_compartment_by_qr_2(qr_code=qr_code)
-        return compartment
-    
-
+    def getAllTransactions(self) -> dict:
+        return self._storageAccess.get_all_transactions()
 # FR 10.1.3 #
 
 

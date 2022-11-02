@@ -5,6 +5,7 @@ from backend.coremodels.article import Article
 from backend.coremodels.qr_code import QRCode
 from backend.coremodels.storage_space import StorageSpace
 from backend.coremodels.storage_unit import StorageUnit
+from backend.coremodels.transaction import Transaction
 from ..coremodels.order import Order
 from ..__init__ import dataAccessInjector as di
 
@@ -77,17 +78,12 @@ class storageAccess():
         except:
             return None
 
-
-    # the existing funciton for this did not return the correct storage space (compartment)
-    # should overlook and remove that one
-    def get_compartment_by_qr_2(self, qr_code: str) -> StorageSpace:
+    def get_all_transactions(self) -> dict:
         try:
-            compartment = QRCode.objects.get(id=qr_code).storage_space
-            return compartment
+            allTransactions = Transaction.objects.all().values()  
+            return allTransactions
         except:
             return None
-
-
 
 ##  FR 9.4.1 och FR 9.4.2 ##
 
