@@ -355,6 +355,23 @@ class getStorageValue(View):
                     storageId)
                 return JsonResponse(value, safe=False, status=200)
 
+class getStorageCost(APIView):
+    @si.inject
+    def __init__(self, _deps, *args):
+        _storageManagementService = _deps['storageManagementService']
+        self._storageManagementService: storageManagementService = _storageManagementService()
+    
+    def get(self, request, storageId):
+        start_date = request.data.get('start_date')
+        end_date = request.data.get('end_date')
+        if request.method == 'GET':
+            storage = self._storageManagementService.getStorageUnitById(storageId)
+            if storage is None:
+                raise Http404("Could not find storage")
+            else:
+                value = self._storageManagementService.getStorageCost(storageId, start_date, end_date)
+            return JsonResponse(value, safe=False, status=200)
+
 # Gets alternative articles for a given article. If only article id is entered, the method returns a list of alternative articles and all
 # their attributes. If an article id and a storage id is entered, the method returns the id for alternative articles and the amount of
 # the alternative articles in that storage
