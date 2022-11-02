@@ -29,7 +29,9 @@ class userService(BaseBackend):
         return Response({'success': 'successfull login', 'data': data}, status=status.HTTP_200_OK)
 
     def get_all_transactions_by_user(self, current_user) -> dict:
-        all_transactions = Transaction.objects.all().values()
+        user_convert = list(current_user)
+        all_transactions = Transaction.objects.filter(by_user = user_convert[0]).all().values()
+        
         return all_transactions
         
     def get_user_info(self, user_id):

@@ -290,7 +290,7 @@ class GetUserTransactions(View):
 
         if current_user.exists() == False:
             return Response({'error': 'User ID does not exist'}, status=status.HTTP_404_NOT_FOUND)
-
+        
         all_transactions_by_user = self._userService.get_all_transactions_by_user(current_user = current_user)
         
         if all_transactions_by_user is None:
