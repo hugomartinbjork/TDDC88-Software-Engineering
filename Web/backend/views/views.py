@@ -39,6 +39,7 @@ from itertools import chain
 
 # Create your views here.
 
+
 class article(View):
     # Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing
     @si.inject
@@ -51,7 +52,8 @@ class article(View):
             article = self._articleManagementService.getArticleByLioId(
                 articleId)
             supplier = self._articleManagementService.getSupplier(article)
-            supplier_article_nr = self._articleManagementService.getSupplierArticleNr(article)
+            supplier_article_nr = self._articleManagementService.getSupplierArticleNr(
+                article)
             compartments = list(article.storagespace_set.all())
             alternative_names = list(article.alternativearticlename_set.all())
 
@@ -65,7 +67,7 @@ class article(View):
             for i in compartments:
                 compartment_serializer = StorageSpaceSerializer(i)
                 unit_serializer = StorageUnitSerializer(i.storage_unit)
-                
+
                 compartment_list.append(compartment_serializer.data)
                 unit_list.append(unit_serializer.data.get('name'))
 
@@ -73,8 +75,8 @@ class article(View):
             print(alternative_names)
             for j in alternative_names:
                 alternative_names_serializer = AlternativeNameSerializer(j)
-                alt_names_list.append(alternative_names_serializer.data.get("name"))
-
+                alt_names_list.append(
+                    alternative_names_serializer.data.get("name"))
 
             if serializer.is_valid:
                 serializer_data = {}
@@ -84,8 +86,8 @@ class article(View):
                 serializer_data["compartments"] = compartment_list
                 serializer_data["units"] = unit_list
                 serializer_data["alternative names"] = alt_names_list
-                
-                return JsonResponse(serializer_data, safe = False, status=200)
+
+                return JsonResponse(serializer_data, safe=False, status=200)
             return HttpResponseBadRequest
 
 
@@ -136,28 +138,27 @@ class storageSpace(View):
         if alteredDict is None:
             return Http404("Could not find storage space")
         return JsonResponse(alteredDict, status=200)
-        
 
 
 class Compartment(View):
     # Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing
     @si.inject
     def __init__(self, _deps, *args):
-        self._storageManagementService : storageManagementService = _deps['storageManagementService']()
-
+        self._storageManagementService: storageManagementService = _deps['storageManagementService'](
+        )
 
     def get(self, request, qr_code):
         print("lets get it")
         if request.method == 'GET':
-            compartment = self._storageManagementService.get_compartment_by_qr(qr_code)
-            if compartment is None: 
+            compartment = self._storageManagementService.get_compartment_by_qr(
+                qr_code)
+            if compartment is None:
                 return Http404("Could not find compartment")
             else:
                 serializer = StorageSpaceSerializer(compartment)
                 if serializer.is_valid:
                     return JsonResponse(serializer.data, status=200)
                 return HttpResponseBadRequest
-
 
     def post(self, request):
         if request.method == 'POST':
@@ -167,14 +168,14 @@ class Compartment(View):
             placement = json_body['placement']
             qr_code = json_body['qr_code']
             compartment = self._storageManagementService.create_compartment(
-            storage_id, placement, qr_code
-        )
+                storage_id, placement, qr_code
+            )
 
         serializer = StorageSpaceSerializer(compartment)
         if serializer.is_valid:
             return JsonResponse(serializer.data, status=200)
         return HttpResponseBadRequest
-                
+
 
 class order(View):
     @si.inject
@@ -355,21 +356,24 @@ class getStorageValue(View):
                     storageId)
                 return JsonResponse(value, safe=False, status=200)
 
+
 class getStorageCost(APIView):
     @si.inject
     def __init__(self, _deps, *args):
         _storageManagementService = _deps['storageManagementService']
         self._storageManagementService: storageManagementService = _storageManagementService()
-    
+
     def get(self, request, storageId):
         start_date = request.data.get('start_date')
         end_date = request.data.get('end_date')
         if request.method == 'GET':
-            storage = self._storageManagementService.getStorageUnitById(storageId)
+            storage = self._storageManagementService.getStorageUnitById(
+                storageId)
             if storage is None:
                 raise Http404("Could not find storage")
             else:
-                value = self._storageManagementService.getStorageCost(storageId, start_date, end_date)
+                value = self._storageManagementService.getStorageCost(
+                    storageId, start_date, end_date)
             return JsonResponse(value, safe=False, status=200)
 
 # Gets alternative articles for a given article. If only article id is entered, the method returns a list of alternative articles and all
@@ -450,7 +454,7 @@ class SearchForArticleInStorages(View):
             # chain the querysets together.
             data = list(chain(articles_in_chosen_storage, sorted_articles))
 
-            #ugly way to remove duplicates from the data. Can't use set() since order has to be preserved
+            # ugly way to remove duplicates from the data. Can't use set() since order has to be preserved
             data2 = []
             for article in data:
                 if article not in data2:
