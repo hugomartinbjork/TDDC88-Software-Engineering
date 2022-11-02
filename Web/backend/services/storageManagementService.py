@@ -1,6 +1,7 @@
 from requests import request
 from backend.dataAccess.orderAccess import orderAccess
 from backend.dataAccess.storageAccess import storageAccess
+from backend.dataAccess.userAccess import userAccess
 from backend.serializers import OrderSerializer, StorageSpaceSerializer
 from backend.coremodels.article import Article
 from backend.coremodels.storage_unit import StorageUnit
@@ -9,6 +10,7 @@ from backend.coremodels.transaction import Transaction
 from backend.coremodels.inputOutput import InputOutput
 from django.contrib.auth.models import User
 from datetime import datetime, timezone
+from django.utils.dateparse import parse_date
 from backend.__init__ import serviceInjector as si
 from ..__init__ import dataAccessInjector as di
 import random
@@ -20,6 +22,7 @@ class storageManagementService():
     def __init__(self, _deps):
         self._storageAccess: storageAccess = _deps["storageAccess"]()
         self._orderAccess: orderAccess = _deps["orderAccess"]()
+        self._userAccess: userAccess = _deps["userAccess"]()
 
     def getStorageUnitById(self, id: str) -> StorageUnit:
         return self._storageAccess.get_storage(id)
@@ -46,25 +49,29 @@ class storageManagementService():
             value += compartment.article.price * compartment.amount
         return value
    
-    #Not working
+    #Storage is not connected to a costcenter atm
+    #For now this is sum och costs (takeout-return) 
+    #from transactions for one storage_compartment
     def getStorageCost(self, storage_id: str, start_date: str, end_date: str) -> int:
-        print(start_date)
-        print(type(start_date))
-        #start_date = datetime.strptime(start_date, '%Y-%m-%d %H:%M:%S.%u')
-        print(start_date)
-        #transactions = Transaction.objects.filter(time_of_transaction__gte='start_date', time_of_transaction__lt='end_date') 
+        start_date_date = parse_date(start_date)
+        end_date_date = parse_date(end_date)
         transactions = self._storageAccess.get_transaction_by_storage(storageId=storage_id)
-    
-        #for transaction in transactions:
-        #    print(type(transaction.time_of_transaction))
-        #    print(transaction.time_of_transaction)
-        #    if  (start_date <= transaction.time_of_transaction.now() and end_date >= transaction.time_of_transaction.now()):
-        #        print(transaction.time_of_transaction)
-        
-        #take_out_transaction = date_transactions.objects.filter(operation=1)
-        #return_transaction = date_transactions.objects.filter(operation=2)
-
-        return None
+        sum_value = 0
+        takeout_value = 0
+        return_value = 0
+        for transaction in transactions:
+            transaction_date = transaction.time_of_transaction
+            transaction_date_date = transaction_date.date()
+            if  (start_date_date <= transaction_date_date and end_date_date >= transaction_date_date):
+                #transaction_user = transaction.by_user
+                #cost_center = self._userAccess.get_user_cost_center(user=transaction_user)
+                #if cost_center == transaction.storage_id.cost_center
+                if transaction.operation == 1:
+                    takeout_value = transaction.get_value()
+                if transaction.operation == 2:
+                    return_value = transaction.get_value()
+        sum_value = takeout_value - return_value   
+        return sum_value
 
 
 # FR 10.1.3 #

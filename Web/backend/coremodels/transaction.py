@@ -17,9 +17,14 @@ class Transaction(models.Model):
     by_user = models.ForeignKey(User, on_delete=models.CASCADE)
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     amount = models.PositiveSmallIntegerField(default=0)
-    time_of_transaction = models.DateTimeField(auto_now_add=True, null=False)
+    time_of_transaction = models.DateField(auto_now_add=True, null=False)
     operation = models.IntegerField(
         choices=TransactionOperator.choices, default=0, null=False)
 
     def __str__(self):
         return str(self.id)
+
+    def get_value(self):
+        return self.article.price*self.amount
+
+
