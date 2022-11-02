@@ -60,6 +60,9 @@ class storageManagementService():
     # For now this is sum och costs (takeout-return)
     # from transactions for one storage_compartment
     
+    # Storage is not connected to a costcenter atm
+    # For now this is sum och costs (takeout-return)
+    # from transactions for one storage_compartment
     def getStorageCost(self, storage_id: str, start_date: str, end_date: str) -> int:
         start_date_date = parse_date(start_date)
         end_date_date = parse_date(end_date)
