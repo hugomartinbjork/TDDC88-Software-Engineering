@@ -100,12 +100,5 @@ admin.site.register(CentralStorageSpace)
 class TransactioInline(admin.TabularInline):
     model = Transaction
 
-# Display InputOutput in Backend
 
-
-class InputOutputInline(admin.TabularInline):
-    model = InputOutput
-
-
-admin.site.register(InputOutput)
 admin.site.register(Transaction)

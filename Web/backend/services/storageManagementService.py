@@ -14,7 +14,6 @@ from datetime import datetime, timezone
 from django.utils.dateparse import parse_date
 from backend.__init__ import serviceInjector as si
 from ..__init__ import dataAccessInjector as di
-import random
 
 
 @si.register(name='storageManagementService')
@@ -42,7 +41,7 @@ class storageManagementService():
 
     def getStorageUnitStock(self, id: str) -> dict:
         return self._storageAccess.get_storage_stock(storageId=id)
-
+    
     def getAllStorageUnits(self) -> dict:
         return self._storageAccess.get_all_storage_units()
 
@@ -92,8 +91,8 @@ class storageManagementService():
 # FR 10.1.3 #
 
 
-# alltid takeout/takein
-# TODO: This is a lot of work to refactor since barely any of the methods work. Leaving this
+##alltid takeout/takein
+# TODO: This is a lot of work to refactor since barely any of the methods work. Leaving this 
 # TODO to the original author
 
     def addToStorage(self, space_id: str, amount: int, username: str, addOutputUnit: bool) -> Transaction:
@@ -109,13 +108,10 @@ class storageManagementService():
                 id=space_id).amount + amount
             new_amount = amount
         else:
-            # eftersom det inte verkar finnas funktionalitet för input/output-amounts så har jag satt denna till 2 bara för testningens skull.
-            if not converter:
-                converter = 2
-            amount_in_storage = StorageSpace.objects.get(
-                id=space_id).amount + amount*converter
-            new_amount = amount*converter
-        if (amount_in_storage < 0):
+            amount_in_storage = StorageSpace.objects.get(id=id).amount + amount*converter
+            new_amount=amount*converter
+        
+        if (amount_in_storage<0):
             return None
         else:
             StorageSpace.objects.update(amount=amount_in_storage)
@@ -156,12 +152,9 @@ class storageManagementService():
                 id=space_id).amount + amount
             new_amount = amount
         else:
-            if not converter:
-                converter = 2
-            amount_in_storage = StorageSpace.objects.get(
-                id=space_id).amount + amount*converter
-            new_amount = amount*converter
-        if (amount_in_storage < 0):
+            amount_in_storage = StorageSpace.objects.get(id=id).amount + amount*converter
+            new_amount=amount*converter
+        if (amount_in_storage<0):
             return None
         else:
             StorageSpace.objects.update(amount=amount_in_storage)
@@ -201,14 +194,14 @@ class storageManagementService():
 
     def getArticleInStorageSpace(self, storageSpaceId: str) -> Article:
         return self._storageAccess.getArticleInStorageSpace(storageSpaceId=storageSpaceId)
-
+    
     def searchArticleInStorage(self, storageUnitId: str, articleId: str) -> int:
         return self._storageAccess.searchArticleInStorage(storageUnitId=storageUnitId, articleId=articleId)
 # FR 10.1.3 #
 
+
     def getCompartmentContentAndOrders(self, compartmentId):
-        compartment = self._storageAccess.get_compartment_by_id(
-            id=compartmentId)
+        compartment = self._storageAccess.get_compartment_by_id(id=compartmentId)
         alteredDict = {}
 
         if compartment is None:
@@ -219,8 +212,7 @@ class storageManagementService():
             return None
         alteredDict.update(compartmentSerializer.data)
 
-        order = self._orderAccess.get_order_by_article_and_storage(
-            compartment.storage_unit.id, compartment.article.lioId)
+        order = self._orderAccess.get_order_by_article_and_storage(compartment.storage_unit.id, compartment.article.lioId)
         if order is not None:
             orderSerializer = OrderSerializer(order)
             eta = self._orderAccess.get_eta(order.id)

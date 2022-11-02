@@ -1,6 +1,7 @@
 from genericpath import exists
 from django.contrib.auth import login
 from django.conf import settings
+from backend.coremodels.transaction import Transaction
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from backend.__init__ import serviceInjector as si
@@ -27,6 +28,12 @@ class userService(BaseBackend):
         }
         return Response({'success': 'successfull login', 'data': data}, status=status.HTTP_200_OK)
 
+    def get_all_transactions_by_user(self, current_user) -> dict:
+        user_convert = list(current_user)
+        all_transactions = Transaction.objects.filter(by_user = user_convert[0]).all().values()
+        
+        return all_transactions
+        
     def get_user_info(self, user_id):
         try:
             user_info = UserInfo.objects.get(user=user_id)
