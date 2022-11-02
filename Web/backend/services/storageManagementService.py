@@ -56,9 +56,6 @@ class storageManagementService():
 
     def getAllTransactions(self) -> dict:
         return self._storageAccess.get_all_transactions()
-    # Storage is not connected to a costcenter atm
-    # For now this is sum och costs (takeout-return)
-    # from transactions for one storage_compartment
     
     # Storage is not connected to a costcenter atm
     # For now this is sum och costs (takeout-return)
