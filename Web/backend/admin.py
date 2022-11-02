@@ -1,9 +1,6 @@
 from django.contrib import admin
-<<<<<<< HEAD
-=======
 from backend.coremodels.alternative_article_name import AlternativeArticleName
 from backend.coremodels.inputOutput import InputOutput
->>>>>>> c4910a99f3856d4d9bd71b9487eb63b772fe2c49
 from backend.coremodels.article import Article
 from backend.coremodels.centralStorageSpace import CentralStorageSpace
 from backend.coremodels.storage_unit import StorageUnit

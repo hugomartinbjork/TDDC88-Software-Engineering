@@ -12,13 +12,6 @@ class Article(models.Model):
     description = models.CharField(max_length=100, null = True)
     price = models.IntegerField(null = True)
     name = models.CharField(max_length=30)
-<<<<<<< HEAD
-    sanitation_level = models.CharField(max_length=30, default=0, null = True)
-    image = models.ImageField(null=True, blank=True)
-    article_group = models.ManyToManyField(GroupInfo)
-    alternative_names = models.TextField(null=True, blank=True)
-    alternative_articles = models.ManyToManyField('self', blank = True)
-=======
     Z41 = models.BooleanField(default=False) #Change to boolean because Z41 is true or false
     image = models.ImageField(null=True, blank=True)
     article_group = models.ManyToManyField(GroupInfo) #Look at database schema and requirement
@@ -28,7 +21,6 @@ class Article(models.Model):
         choices=UnitOperator.choices, default=1, null=False)
     takeout_unit = models.IntegerField(
         choices=UnitOperator.choices, default=1, null=False)
->>>>>>> c4910a99f3856d4d9bd71b9487eb63b772fe2c49
 
     ## Should these attributes below really be included, they are not
     # included in the database schema??
