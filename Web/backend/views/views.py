@@ -34,6 +34,7 @@ from django.contrib.auth.models import User
 from rest_framework.decorators import renderer_classes, api_view
 from django.http import HttpResponse
 from itertools import chain
+from django.utils.timezone import now
 
 # Create your views here.
 
@@ -42,7 +43,8 @@ class article(View):
     # Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing
     @si.inject
     def __init__(self, _deps, *args):
-        self._articleManagementService : articleManagementService = _deps['articleManagementService']()
+        self._articleManagementService: articleManagementService = _deps['articleManagementService'](
+        )
 
     def get(self, request, articleId):
         if request.method == 'GET':
@@ -92,7 +94,8 @@ class group(View):
     # Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing
     @si.inject
     def __init__(self, _deps, *args):
-        self._groupManagementService : groupManagementService = _deps['groupManagementService']()
+        self._groupManagementService: groupManagementService = _deps['groupManagementService'](
+        )
 
     def get(self, request, groupId):
         if request.method == 'GET':
@@ -100,17 +103,20 @@ class group(View):
             if group is None:
                 raise Http404("Could not find group")
             serializer = GroupSerializer(group)
-    #TODO: I assume that there is supposed to be some type of return here.
+    # TODO: I assume that there is supposed to be some type of return here.
+
 
 class storage(View):
     # Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing
     @si.inject
     def __init__(self, _deps, *args):
-        self._storageManagementService : storageManagementService = _deps['storageManagementService']()
+        self._storageManagementService: storageManagementService = _deps['storageManagementService'](
+        )
 
     def get(self, request, storageId):
         if request.method == 'GET':
-            storage = self._storageManagementService.getStorageUnitById(storageId)
+            storage = self._storageManagementService.getStorageUnitById(
+                storageId)
             if storage is None:
                 raise Http404("Could not find storage")
             serializer = StorageUnitSerializer(storage)
@@ -121,11 +127,14 @@ class storage(View):
 
 class storageSpace(View):
     def __init__(self, _deps, *args):
-        self._orderService : OrderService = _deps['OrderService']()
-        self._storageManagementService : storageManagementService = _deps['storageManagementService']()
+        self._orderService: OrderService = _deps['OrderService']()
+        self._storageManagementService: storageManagementService = _deps['storageManagementService'](
+        )
+
     def get(self, request, storageSpaceId):
-        alteredDict = self._storageManagementService.getCompartmentContentAndOrders(storageSpaceId)
-        if alteredDict is None: 
+        alteredDict = self._storageManagementService.getCompartmentContentAndOrders(
+            storageSpaceId)
+        if alteredDict is None:
             return Http404("Could not find storage space")
         return JsonResponse(alteredDict, status=200)
 
@@ -170,8 +179,9 @@ class Compartment(View):
 class order(View):
     @si.inject
     def __init__(self, _deps, *args):
-        self._orderService : OrderService = _deps['OrderService']() 
-    def get(self, request, id): 
+        self._orderService: OrderService = _deps['OrderService']()
+
+    def get(self, request, id):
         if request.method == 'GET':
             order = self._orderService.getOrderById(id)
             if order is None:
@@ -181,7 +191,6 @@ class order(View):
                 return JsonResponse(serializer.data, status=200)
             return HttpResponseBadRequest
 
-    
     def post(self, request, id):
         if request.method == 'POST':
             json_body = json.loads(request.body)
@@ -198,10 +207,12 @@ class order(View):
                 return JsonResponse(serializer.data, status=200)
             return HttpResponseBadRequest
 
+
 class Login(APIView):
-    @si.inject #Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing 
+    # Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing
+    @si.inject
     def __init__(self, _deps, *args):
-        self._userService : userService = _deps['userService']()
+        self._userService: userService = _deps['userService']()
 
     def post(self, request):
         username = request.data.get('username')
@@ -219,12 +230,12 @@ class Login(APIView):
             return self._userService.createAuthToken(request, user)
         else:
             return Response({'error': 'invalid details'}, status=status.HTTP_400_BAD_REQUEST)
-            
+
 
 class LoginWithId(APIView):
     @si.inject
     def __init__(self, _deps, *args):
-        self._userService : userService = _deps['userService']()
+        self._userService: userService = _deps['userService']()
 
     def post(self, request):
         user_id = request.data.get('id')
@@ -244,7 +255,7 @@ class seeAllStorageUnits(View):
     def __init__(self, _deps, *args):
         _storageManagementService = _deps['storageManagementService']
         # Instance of dependency is created in constructor
-        self._storageManagementService : storageManagementService = _storageManagementService()
+        self._storageManagementService: storageManagementService = _storageManagementService()
 
     def get(self, request):
         if request.method == 'GET':
@@ -263,7 +274,7 @@ class AddInputUnit(View):
         self._storageAccess = storageAccess()
         self._userService: userService = _deps['userService']()
 
-    def post(self, request, storage_space_id, amount):
+    def post(self, request, storage_space_id, amount, time_stamp):
         storage_space = storageManagementService.getStorageSpaceById(
             self=self, id=storage_space_id)
         user = request.user
@@ -271,7 +282,7 @@ class AddInputUnit(View):
             if storage_space == None:
                 return Http404("Could not find storage space")
             storageManagementService.addToStorage(self=self,
-                                                  space_id=storage_space_id, amount=amount, username=user.username, addOutputUnit=False)
+                                                  space_id=storage_space_id, amount=amount, username=user.username, addOutputUnit=False, time_stamp=time_stamp)
             return HttpResponse(status=200)
 
 # AddOutputUnit is used to add articles to the storage space in
@@ -283,21 +294,23 @@ class AddInputUnit(View):
 class GetUserTransactions(View):
     @si.inject
     def __init__(self, _deps):
-        self._userService : userService = _deps['userService']()
-    
+        self._userService: userService = _deps['userService']()
+
     def get(self, request, user_id):
         current_user = User.objects.filter(id=user_id)
 
         if current_user.exists() == False:
             return Response({'error': 'User ID does not exist'}, status=status.HTTP_404_NOT_FOUND)
-        
-        all_transactions_by_user = self._userService.get_all_transactions_by_user(current_user = current_user)
-        
+
+        all_transactions_by_user = self._userService.get_all_transactions_by_user(
+            current_user=current_user)
+
         if all_transactions_by_user is None:
             raise Http404("Could not find any transactions")
         else:
-            return JsonResponse(list(all_transactions_by_user), safe=False, status = 200)
-            
+            return JsonResponse(list(all_transactions_by_user), safe=False, status=200)
+
+
 class ReturnUnit(View):
     @si.inject
     def __init__(self, _deps):
@@ -307,16 +320,17 @@ class ReturnUnit(View):
         self._storageAccess = storageAccess()
         self._userService: userService = _deps['userService']()
 
-    def post(self, request, storage_space_id, amount):
+    def post(self, request, storage_space_id, amount, time_stamp=now):
         storage_space = storageManagementService.getStorageSpaceById(
             self=self, id=storage_space_id)
         user = request.user
         if request.method == 'POST':
             if storage_space == None:
                 return Http404("Could not find storage space")
-            storageManagementService.addToReturnStorage(
-                space_id=storage_space_id, amount=amount, username=user.username, addOutputUnit=True)
+            storageManagementService.addToReturnStorage(self=self,
+                                                        space_id=storage_space_id, amount=amount, username=user.username, addOutputUnit=True, time_stamp=time_stamp)
             return HttpResponse(status=200)
+
 
 class Transactions(APIView):
     @si.inject
@@ -331,39 +345,42 @@ class Transactions(APIView):
             allTransactions = self._storageManagementService.getAllTransactions()
         if allTransactions is None:
             raise Http404("Could not find any transactions")
-        else:          
+        else:
             return JsonResponse(list(allTransactions), safe=False, status=200)
-    
-    def post(self, request):
-        compartment = self._storageManagementService.get_compartment_by_qr(qr_code=request.data.get("qrCode"))
+
+    def post(self, request, time_stamp):
+        compartment = self._storageManagementService.get_compartment_by_qr(
+            qr_code=request.data.get("qrCode"))
         if compartment == None:
             return Response({'error': 'Could not find compartment'}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            storage = self._storageManagementService.getStorageUnitById(id=compartment.id)
+            storage = self._storageManagementService.getStorageUnitById(
+                id=compartment.id)
             amount = request.data.get("quantity")
             unit = request.data.get("unit")
             user = request.user
             operation = request.data.get("operation")
 
-            if unit=="output":
+            if unit == "output":
                 addOutputUnit = False
             else:
                 addOutputUnit = True
-            
-            if operation=="replenish":
+
+            if operation == "replenish":
                 print("printing username")
                 print(user)
                 transaction = self._storageManagementService.addToStorage(
-                    space_id=compartment.id, amount=amount, username=user.username, addOutputUnit=addOutputUnit)
+                    space_id=compartment.id, amount=amount, username=user.username, addOutputUnit=addOutputUnit, time_stamp=time_stamp)
                 return JsonResponse(TransactionSerializer(transaction).data, status=200)
-            elif operation=="return":
+            elif operation == "return":
                 transaction = self._storageManagementService.addToReturnStorage(
                     space_id=compartment.id, amount=amount, username=user.username, addOutputUnit=addOutputUnit)
                 return JsonResponse(TransactionSerializer(transaction).data, status=200)
-            elif operation=="takeout":
+            elif operation == "takeout":
                 transaction = self._storageManagementService.takeFromCompartment(
                     space_id=compartment.id, amount=amount, username=user.username, addOutputUnit=addOutputUnit)
                 return JsonResponse(TransactionSerializer(transaction).data, status=200)
+
 
 class getStorageValue(View):
     @si.inject

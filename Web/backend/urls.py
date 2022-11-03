@@ -12,8 +12,11 @@ urlPatterns = [
     path('login/', views.Login.as_view()),
     path('loginwithid/', views.LoginWithId.as_view()),
     path('storages/', views.seeAllStorageUnits.as_view()),
-    path('user/<int:user_id>/transactions/', views.GetUserTransactions.as_view()),
+    path('user/<int:user_id>/transactions/',
+         views.GetUserTransactions.as_view()),
     path('transactions/addinputunit/<str:storage_space_id>/<int:amount>/',
+         csrf_exempt(views.AddInputUnit.as_view())),
+    path('transactions/addoutputunit/<str:storage_space_id>/<int:amount>/',
          csrf_exempt(views.AddInputUnit.as_view())),
     path('transactions/returnunit/<str:storage_space_id>/<int:amount>/',
          views.ReturnUnit.as_view()),
@@ -29,7 +32,15 @@ urlPatterns = [
          views.SearchForArticleInStorages.as_view()),
     path('compartments/', views.Compartment.as_view()),
     path('compartments/<str:qr_code>', views.Compartment.as_view()),
-    path('transactions/', views.Transactions.as_view())
+    path('transactions/', views.Transactions.as_view()),
+    # alternative urls for transactions if date is input
+    path('transactions/<str:time_stamp>/', views.Transactions.as_view()),
+    path('transactions/returnunit/<str:storage_space_id>/<int:amount>/<str:time_stamp>/',
+         views.ReturnUnit.as_view()),
+    path('transactions/addinputunit/<str:storage_space_id>/<int:amount>/<str:time_stamp>/',
+         csrf_exempt(views.AddInputUnit.as_view())),
+    path('transactions/addoutputunit/<str:storage_space_id>/<int:amount>/<str:time_stamp>',
+         csrf_exempt(views.AddInputUnit.as_view())),
 ]
 
 urlpatterns = format_suffix_patterns(urlPatterns)

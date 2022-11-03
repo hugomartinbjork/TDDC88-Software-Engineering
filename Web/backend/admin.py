@@ -64,17 +64,23 @@ admin.site.register(GroupInfo, GroupAdmin)
 admin.site.register(Supplier)
 
 # Displays which storage components that the articles are in, the supplier that the article has and its alternative names
+
+
 class StorageSpaceInline(admin.TabularInline):
     model = StorageSpace
+
 
 class ArticleHasSupplierInline(admin.TabularInline):
     model = ArticleHasSupplier
 
+
 class AlternativeNameInLine(admin.TabularInline):
     model = AlternativeArticleName
 
+
 class ArticleAdmin(admin.ModelAdmin):
-    inlines = (StorageSpaceInline, ArticleHasSupplierInline, AlternativeNameInLine, )
+    inlines = (StorageSpaceInline, ArticleHasSupplierInline,
+               AlternativeNameInLine, )
 
 
 admin.site.register(Article, ArticleAdmin)
