@@ -7,11 +7,12 @@ from backend.coremodels.storage_unit import StorageUnit
 from django.contrib.auth.models import User
 from backend.coremodels.article import Article
 from backend.operations.enumerator import TransactionOperator
-from datetime import datetime
+# from datetime import datetime
 # Transaction to or from storageUnit by User
 
 
 class Transaction(models.Model):
+    '''Transaction.'''
     id = models.AutoField(primary_key=True, null=False)
     storage_unit = models.ForeignKey(StorageUnit, on_delete=models.CASCADE)
     by_user = models.ForeignKey(User, on_delete=models.CASCADE)

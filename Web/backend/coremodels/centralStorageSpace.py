@@ -7,6 +7,7 @@ from backend.coremodels.article import Article
 
 
 class CentralStorageSpace(models.Model):
+    '''Central storage space.'''
     id = models.AutoField(primary_key=True)
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     amount = models.PositiveSmallIntegerField(default=0)

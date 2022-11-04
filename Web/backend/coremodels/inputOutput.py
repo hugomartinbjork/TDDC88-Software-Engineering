@@ -6,13 +6,14 @@ from backend.coremodels.article import Article
 
 
 class InputOutput(models.Model):
+    '''Describes output/input parameters for articles.'''
     id = models.AutoField(primary_key=True)
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
-    inputUnitName = models.CharField(max_length=30)
-    outputUnitName = models.CharField(max_length=30)
-    outputUnitPerInputUnit = models.PositiveIntegerField(default=0)
+    input_unit_name = models.CharField(max_length=30)
+    output_unit_name = models.CharField(max_length=30)
+    output_unit_per_input_unit = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return (str(self.id)
                 + ": " + str(self.article)
-                + " " + str(self.outputUnitPerInputUnit))
+                + " " + str(self.output_unit_per_input_unit))

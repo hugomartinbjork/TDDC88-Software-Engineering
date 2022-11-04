@@ -4,7 +4,7 @@ from backend.coremodels.inputOutput import InputOutput
 from backend.coremodels.article import Article
 from backend.coremodels.centralStorageSpace import CentralStorageSpace
 from backend.coremodels.storage_unit import StorageUnit
-# from backend.coremodels.storageComponent import storageUnit
+# from backend.coremodels.storageComponent import storage_unit
 from backend.coremodels.cost_center import CostCenter
 from backend.coremodels.user_info import UserInfo
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
@@ -21,7 +21,7 @@ from django.utils.html import format_html
 
 
 # Register your models here.
-# admin.site.register(storageUnit)
+# admin.site.register(storage_unit)
 admin.site.register(CostCenter)
 
 
@@ -63,7 +63,8 @@ admin.site.register(GroupInfo, GroupAdmin)
 
 admin.site.register(Supplier)
 
-# Displays which storage components that the articles are in, the supplier that the article has and its alternative names
+# Displays which storage components that the articles are in, 
+# the supplier that the article has and its alternative names
 
 
 class StorageSpaceInline(admin.TabularInline):

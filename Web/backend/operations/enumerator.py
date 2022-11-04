@@ -2,6 +2,7 @@ from django.db import models
 
 
 class TransactionOperator(models.IntegerChoices):
+    '''Transation operator.'''
     TAKEOUT = 1
     RETURN = 2
     REPLENISH = 3
@@ -9,6 +10,7 @@ class TransactionOperator(models.IntegerChoices):
 
 
 class UnitOperator(models.IntegerChoices):
+    '''Unit operator.'''
     MILLILITRES = 1
     CENTILITRES = 2
     DECILITRES = 3
