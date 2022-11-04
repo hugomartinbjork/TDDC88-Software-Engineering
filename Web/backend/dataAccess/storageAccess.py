@@ -126,10 +126,8 @@ class StorageAccess():
     def create_compartment(self, storage_id: str, placement: str,
                            qr_code) -> StorageSpace:
         '''Create new compartment.'''
-        print("helelo: " + storage_id)
         storage = StorageUnit.objects.filter(id=storage_id).first()
         # article = Article.objects.get(lio_id='123')
-        print(storage)
         try:
             compartment = StorageSpace(
                 id=qr_code,

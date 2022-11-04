@@ -80,7 +80,6 @@ class Article(View):
                 unit_list.append(unit_serializer.data.get('name'))
 
             alt_names_list = []
-            print(alternative_names)
             for j in alternative_names:
                 alternative_names_serializer = AlternativeNameSerializer(j)
                 alt_names_list.append(
@@ -169,7 +168,6 @@ class Compartment(View):
 
     def get(self, request, qr_code):
         '''Returns compartment using qr code.'''
-        print("lets get it")
         if request.method == 'GET':
             compartment = (
                 self.storage_management_service.get_compartment_by_qr(

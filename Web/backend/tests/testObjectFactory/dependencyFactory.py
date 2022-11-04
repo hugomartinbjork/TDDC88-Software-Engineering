@@ -8,7 +8,7 @@ def get_directory_class_names(directory):
     class_names = []
     for file in os.listdir(directory):
         if file.endswith(".py"):
-            with open(directory+'/'+file) as mf:
+            with open(os.path.join(directory, file)) as mf:
                 tree = ast.parse(mf.read())
                 module_classes = [_ for _ in tree.body if isinstance(
                                                     _, _ast.ClassDef)]

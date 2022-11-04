@@ -78,7 +78,6 @@ class StorageManagementService():
         end_date_date = parse_date(end_date)
         transactions = self.storage_access.get_transaction_by_storage(
             storage_id=storage_id)
-        print(transactions)
         sum_value = 0
         takeout_value = 0
         return_value = 0
@@ -139,8 +138,6 @@ class StorageManagementService():
                 by_user=user, amount=new_amount,
                 time_of_transaction=time_of_transaction)
             new_transaction.save()
-            print("New add transaction created:")
-            print(new_transaction)
             return new_transaction
             # except:
             # return None
@@ -163,11 +160,9 @@ class StorageManagementService():
         input_output_check = InputOutput.objects.filter(
                                 article=article).exists()
         if (input_output_check):
-            print("inne i första if")
             input_output = InputOutput.objects.get(article=article)
             converter = input_output.output_unit_per_input_unit
         else:
-            print("inne i else")
             input_output = InputOutput.objects.create(article=article)
             converter = input_output.output_unit_per_input_unit
 
@@ -186,14 +181,11 @@ class StorageManagementService():
             return None
         else:
             StorageSpace.objects.update(amount=amount_in_storage)
-            print("skapar ny transaction")
             new_transaction = Transaction.objects.create(
                 storage_unit=storage_unit_id, article=article, operation=2,
                 by_user=user, amount=new_amount,
                 time_of_transaction=time_of_transaction)
             new_transaction.save()
-            print("New return transaction created:")
-            print(new_transaction)
             return new_transaction
 
     def take_from_Compartment(self, space_id, amount, username,
@@ -226,8 +218,6 @@ class StorageManagementService():
                 operation=1, by_user=user, amount=new_amount,
                 time_of_transaction=time_of_transaction)
             new_transaction.save()
-            print("New add transaction created:")
-            print(new_transaction)
             return new_transaction
 
     def get_article_in_storage_space(self, storage_space_id: str) -> Article:
@@ -273,7 +263,6 @@ class StorageManagementService():
                            qr_code: str) -> StorageSpace:
         '''Create new compartment.'''
 
-        print(storage_id)
         compartment = self.storage_access.create_compartment(
             storage_id=storage_id, placement=placement, qr_code=qr_code
         )
