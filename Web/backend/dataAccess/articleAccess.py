@@ -3,13 +3,14 @@ from backend.coremodels.supplier import Supplier
 from ..coremodels.article import Article
 from ..__init__ import dataAccessInjector as di
 
-@di.register(name = "articleAccess")
+
+@di.register(name="articleAccess")
 class articleAccess():
     def getArticleByLioId(self, lioId: str) -> Article:
         try:
-            article = Article.objects.get(lioId=lioId)  
+            article = Article.objects.get(lioId=lioId)
             return article
-        except:
+        except Exception:
             return None
 
     def getAlternativeArticles(self, lioId: str) -> Article:
@@ -17,19 +18,21 @@ class articleAccess():
             article = Article.objects.get(lioId=lioId)
             alternative_articles = article.alternative_articles.all()
             return alternative_articles
-        except:
+        except Exception:
             return None
 
     def getSupplier(self, article: Article) -> Supplier:
         try:
-            supplier = ArticleHasSupplier.objects.get(article=article).article_supplier
+            supplier = ArticleHasSupplier.objects.get(
+                        article=article).article_supplier
             return supplier
-        except:
+        except Exception:
             return None
 
     def getSupplierArticleNr(self, article: Article) -> Supplier:
         try:
-            supplier_article_nr = ArticleHasSupplier.objects.get(article=article).supplier_article_nr
+            supplier_article_nr = ArticleHasSupplier.objects.get(
+                                    article=article).supplier_article_nr
             return supplier_article_nr
-        except:
+        except Exception:
             return None

@@ -1,16 +1,21 @@
-from http.client import OK, HTTPResponse
+# from http.client import OK, HTTPResponse
 from itertools import chain
 from operator import itemgetter
-import pkgutil
-from urllib import request
+# import pkgutil
+# from urllib import request
 import json
-from django.shortcuts import render
-from rest_framework import generics
+# from django.shortcuts import render
+# from rest_framework import generics
 from django.http import Http404, JsonResponse, HttpResponseBadRequest
-from backend.coremodels.transaction import Transaction
-from ..serializers import AlternativeNameSerializer, StorageUnitSerializer, ArticleSerializer, GroupSerializer, QRCodeSerializer, OrderSerializer, StorageSpaceSerializer, TransactionSerializer
-# This import is important for now, since the dependency in articlemanagmentservice will not be stored in the serviceInjector otherwise however, I'm
-# hoping to be able to change this since it looks kind of trashy
+# from backend.coremodels.transaction import Transaction
+from ..serializers import AlternativeNameSerializer, StorageUnitSerializer
+from ..serializers import ArticleSerializer, OrderSerializer
+from ..serializers import StorageSpaceSerializer, TransactionSerializer
+# from ..serializers import GroupSerializer, QRCodeSerializer
+#  This import is important for now, since the dependency
+# in articlemanagmentservice will not be stored in the serviceInjector
+# otherwise however, I'm hoping to be able to change this since
+# it looks kind of trashy
 from backend.services.articleManagementService import articleManagementService
 from backend.services.userService import userService
 from backend.services.groupManagementService import groupManagementService
@@ -18,40 +23,52 @@ from backend.services.storageManagementService import storageManagementService
 from backend.services.orderServices import OrderService
 from django.views import View
 from backend.__init__ import serviceInjector as si
-from backend.coremodels.article import Article
-from backend.coremodels.storage_unit import StorageUnit
+# from backend.coremodels.article import Article
+# from backend.coremodels.storage_unit import StorageUnit
 from backend.coremodels.storage_space import StorageSpace
-from backend.coremodels.qr_code import QRCode
-from backend.coremodels.order import Order
-from rest_framework.authtoken.models import Token
+# from backend.coremodels.qr_code import QRCode
+# from backend.coremodels.order import Order
+# from rest_framework.authtoken.models import Token
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.authtoken.views import ObtainAuthToken
+# from rest_framework.authtoken.views import ObtainAuthToken
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
-from rest_framework.decorators import renderer_classes, api_view
+# from rest_framework.decorators import renderer_classes, api_view
 from django.http import HttpResponse
+<<<<<<< HEAD
 from itertools import chain
 from datetime import date
 from django.utils.timezone import now
+=======
+# from itertools import chain
+
+>>>>>>> 752d5cbe640d4793fb6f54f218c2829f0284f26e
 # Create your views here.
 
 
 class article(View):
-    # Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing
+    # Dependencies are injected, I hope that we will be able to mock
+    # (i.e. make stubs of) these for testing
     @si.inject
     def __init__(self, _deps, *args):
+<<<<<<< HEAD
         self._articleManagementService: articleManagementService = _deps['articleManagementService'](
         )
+=======
+        self._articleManagementService: articleManagementService = (
+                                _deps['articleManagementService']())
+>>>>>>> 752d5cbe640d4793fb6f54f218c2829f0284f26e
 
     def get(self, request, articleId):
         if request.method == 'GET':
             article = self._articleManagementService.getArticleByLioId(
                 articleId)
             supplier = self._articleManagementService.getSupplier(article)
-            supplier_article_nr = self._articleManagementService.getSupplierArticleNr(
-                article)
+            supplier_article_nr = (
+                self._articleManagementService.getSupplierArticleNr(
+                    article))
             compartments = list(article.storagespace_set.all())
             alternative_names = list(article.alternativearticlename_set.all())
 
@@ -90,25 +107,37 @@ class article(View):
 
 
 class group(View):
-    # Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing
+    # Dependencies are injected, I hope that we will be able to mock
+    # (i.e. make stubs of) these for testing
     @si.inject
     def __init__(self, _deps, *args):
+<<<<<<< HEAD
         self._groupManagementService: groupManagementService = _deps['groupManagementService'](
         )
+=======
+        self._groupManagementService: groupManagementService = (
+                              _deps['groupManagementService']())
+>>>>>>> 752d5cbe640d4793fb6f54f218c2829f0284f26e
 
     def get(self, request, groupId):
         if request.method == 'GET':
             group = self._groupManagementService.getGroupById(groupId)
             if group is None:
                 raise Http404("Could not find group")
+<<<<<<< HEAD
             serializer = GroupSerializer(group)
+=======
+            # serializer = GroupSerializer(group)
+>>>>>>> 752d5cbe640d4793fb6f54f218c2829f0284f26e
     # TODO: I assume that there is supposed to be some type of return here.
 
 
 class storage(View):
-    # Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing
+    # Dependencies are injected, I hope that we will be able to mock
+    # (i.e. make stubs of) these for testing
     @si.inject
     def __init__(self, _deps, *args):
+<<<<<<< HEAD
         self._storageManagementService: storageManagementService = _deps['storageManagementService'](
         )
 
@@ -116,6 +145,15 @@ class storage(View):
         if request.method == 'GET':
             storage = self._storageManagementService.getStorageUnitById(
                 storageId)
+=======
+        self._storageManagementService: storageManagementService = (
+                                _deps['storageManagementService']())
+
+    def get(self, request, storageId):
+        if request.method == 'GET':
+            storage = (
+                self._storageManagementService.getStorageUnitById(storageId))
+>>>>>>> 752d5cbe640d4793fb6f54f218c2829f0284f26e
             if storage is None:
                 raise Http404("Could not find storage")
             serializer = StorageUnitSerializer(storage)
@@ -127,23 +165,34 @@ class storage(View):
 class storageSpace(View):
     def __init__(self, _deps, *args):
         self._orderService: OrderService = _deps['OrderService']()
+<<<<<<< HEAD
         self._storageManagementService: storageManagementService = _deps['storageManagementService'](
         )
 
     def get(self, request, storageSpaceId):
         alteredDict = self._storageManagementService.getCompartmentContentAndOrders(
             storageSpaceId)
+=======
+        self._storageManagementService: storageManagementService = (
+                                _deps['storageManagementService']())
+
+    def get(self, request, storageSpaceId):
+        alteredDict = (
+            self._storageManagementService.getCompartmentContentAndOrders(
+                                                           storageSpaceId))
+>>>>>>> 752d5cbe640d4793fb6f54f218c2829f0284f26e
         if alteredDict is None:
             return Http404("Could not find storage space")
         return JsonResponse(alteredDict, status=200)
 
 
 class Compartment(View):
-    # Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing
+    # Dependencies are injected, I hope that we will be able to mock
+    # (i.e. make stubs of) these for testing
     @si.inject
     def __init__(self, _deps, *args):
-        self._storageManagementService: storageManagementService = _deps['storageManagementService'](
-        )
+        self._storageManagementService: storageManagementService = (
+            _deps['storageManagementService']())
 
     def get(self, request, qr_code):
         print("lets get it")
@@ -161,7 +210,6 @@ class Compartment(View):
     def post(self, request):
         if request.method == 'POST':
             json_body = request.POST
-
             storage_id = json_body['storage_id']
             placement = json_body['placement']
             qr_code = json_body['qr_code']
@@ -208,8 +256,13 @@ class order(View):
 
 
 class Login(APIView):
+<<<<<<< HEAD
     # Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing
     @si.inject
+=======
+    @si.inject  # Dependencies are injected, I hope that we will be able
+    # to mock (i.e. make stubs of) these for testing
+>>>>>>> 752d5cbe640d4793fb6f54f218c2829f0284f26e
     def __init__(self, _deps, *args):
         self._userService: userService = _deps['userService']()
 
@@ -218,17 +271,24 @@ class Login(APIView):
         password = request.data.get('password')
 
         if not username or not password:
-            return Response({'error': 'Please fill in all fields'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Please fill in all fields'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         check_user = User.objects.filter(username=username).exists()
-        if check_user == False:
-            return Response({'error': 'Username does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+        if check_user is False:
+            return Response({'error': 'Username does not exist'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         user = authenticate(username=username, password=password)
         if user is not None:
             return self._userService.createAuthToken(request, user)
         else:
+<<<<<<< HEAD
             return Response({'error': 'invalid details'}, status=status.HTTP_400_BAD_REQUEST)
+=======
+            return Response({'error': 'invalid details'},
+                            status=status.HTTP_400_BAD_REQUEST)
+>>>>>>> 752d5cbe640d4793fb6f54f218c2829f0284f26e
 
 
 class LoginWithId(APIView):
@@ -239,14 +299,16 @@ class LoginWithId(APIView):
     def post(self, request):
         user_id = request.data.get('id')
         check_user = User.objects.filter(id=user_id).exists()
-        if check_user == False:
-            return Response({'error': 'User ID does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        if check_user is False:
+            return Response({'error': 'User ID does not exist'},
+                            status=status.HTTP_404_NOT_FOUND)
 
         user = self._userService.authenticatewithid(id=user_id)
         if user is not None:
             return self._userService.createAuthToken(request, user)
         else:
-            return Response({'error': 'invalid details'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'invalid details'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
 
 class seeAllStorageUnits(View):
@@ -254,7 +316,12 @@ class seeAllStorageUnits(View):
     def __init__(self, _deps, *args):
         _storageManagementService = _deps['storageManagementService']
         # Instance of dependency is created in constructor
+<<<<<<< HEAD
         self._storageManagementService: storageManagementService = _storageManagementService()
+=======
+        self._storageManagementService: storageManagementService = (
+                                        _storageManagementService())
+>>>>>>> 752d5cbe640d4793fb6f54f218c2829f0284f26e
 
     def get(self, request):
         if request.method == 'GET':
@@ -277,15 +344,23 @@ class AddInputUnit(View):
             self=self, id=storage_space_id)
         user = request.user
         if request.method == 'POST':
-            if storage_space == None:
+            if storage_space is None:
                 return Http404("Could not find storage space")
             storageManagementService.addToStorage(self=self,
+<<<<<<< HEAD
                                                   space_id=storage_space_id, amount=amount, username=user.username, addOutputUnit=False, time_stamp=time_stamp)
+=======
+                                                  space_id=storage_space_id,
+                                                  amount=amount,
+                                                  username=user.username,
+                                                  addOutputUnit=False)
+>>>>>>> 752d5cbe640d4793fb6f54f218c2829f0284f26e
             return HttpResponse(status=200)
 
 # AddOutputUnit is used to add articles to the storage space in
 # the form of single articles, or smaller parts etc.
-# For example: One output unit could be one single mask or the article -->one meter of paper.
+# For example: One output unit could be one single mask or
+# the article -->one meter of paper.
 # Creates a transaction
 
 
@@ -297,16 +372,31 @@ class GetUserTransactions(View):
     def get(self, request, user_id):
         current_user = User.objects.filter(id=user_id)
 
+<<<<<<< HEAD
         if current_user.exists() == False:
             return Response({'error': 'User ID does not exist'}, status=status.HTTP_404_NOT_FOUND)
 
         all_transactions_by_user = self._userService.get_all_transactions_by_user(
             current_user=current_user)
+=======
+        if not current_user.exists():
+            return Response({'error': 'User ID does not exist'},
+                            status=status.HTTP_404_NOT_FOUND)
+
+        all_transactions_by_user = (
+            self._userService.get_all_transactions_by_user(
+                                current_user=current_user))
+>>>>>>> 752d5cbe640d4793fb6f54f218c2829f0284f26e
 
         if all_transactions_by_user is None:
             raise Http404("Could not find any transactions")
         else:
+<<<<<<< HEAD
             return JsonResponse(list(all_transactions_by_user), safe=False, status=200)
+=======
+            return JsonResponse(list(all_transactions_by_user), safe=False,
+                                status=200)
+>>>>>>> 752d5cbe640d4793fb6f54f218c2829f0284f26e
 
 
 class ReturnUnit(View):
@@ -321,10 +411,17 @@ class ReturnUnit(View):
             self=self, id=storage_space_id)
         user = request.user
         if request.method == 'POST':
-            if storage_space == None:
+            if storage_space is None:
                 return Http404("Could not find storage space")
+<<<<<<< HEAD
             storageManagementService.addToReturnStorage(self=self,
                                                         space_id=storage_space_id, amount=amount, username=user.username, addOutputUnit=True, time_stamp=time_stamp)
+=======
+            storageManagementService.addToReturnStorage(
+                space_id=storage_space_id, amount=amount,
+                username=user.username,
+                addOutputUnit=True)
+>>>>>>> 752d5cbe640d4793fb6f54f218c2829f0284f26e
             return HttpResponse(status=200)
 
 
@@ -337,7 +434,8 @@ class Transactions(APIView):
 
     def get(self, request):
         if request.method == 'GET':
-            allTransactions = self._storageManagementService.getAllTransactions()
+            allTransactions = (
+                self._storageManagementService.getAllTransactions())
         if allTransactions is None:
             raise Http404("Could not find any transactions")
         else:
@@ -345,12 +443,22 @@ class Transactions(APIView):
 
     def post(self, request):
         compartment = self._storageManagementService.get_compartment_by_qr(
+<<<<<<< HEAD
             qr_code=request.data.get("qrCode"))
         if compartment == None:
             return Response({'error': 'Could not find compartment'}, status=status.HTTP_400_BAD_REQUEST)
         else:
             storage = self._storageManagementService.getStorageUnitById(
                 id=compartment.id)
+=======
+                                        qr_code=request.data.get("qrCode"))
+        if compartment is None:
+            return Response({'error': 'Could not find compartment'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        else:
+            storage = self._storageManagementService.getStorageUnitById(
+                                                      id=compartment.id)
+>>>>>>> 752d5cbe640d4793fb6f54f218c2829f0284f26e
             amount = request.data.get("quantity")
             unit = request.data.get("unit")
             user = request.user
@@ -366,6 +474,7 @@ class Transactions(APIView):
                 addOutputUnit = True
 
             if operation == "replenish":
+<<<<<<< HEAD
                 transaction = self._storageManagementService.addToStorage(
                     space_id=compartment.id, amount=amount, username=user.username, addOutputUnit=addOutputUnit, time_stamp=time_stamp)
                 return JsonResponse(TransactionSerializer(transaction).data, status=200)
@@ -377,13 +486,39 @@ class Transactions(APIView):
                 transaction = self._storageManagementService.takeFromCompartment(
                     space_id=compartment.id, amount=amount, username=user.username, addOutputUnit=addOutputUnit, time_stamp=time_stamp)
                 return JsonResponse(TransactionSerializer(transaction).data, status=200)
+=======
+                print("printing username")
+                print(user)
+                transaction = self._storageManagementService.addToStorage(
+                    space_id=compartment.id, amount=amount,
+                    username=user.username, addOutputUnit=addOutputUnit)
+                return JsonResponse(TransactionSerializer(transaction).data,
+                                    status=200)
+            elif operation == "return":
+                transaction = (
+                    self._storageManagementService.addToReturnStorage(
+                                space_id=compartment.id, amount=amount,
+                                username=user.username,
+                                addOutputUnit=addOutputUnit))
+                return JsonResponse(TransactionSerializer(transaction).data,
+                                    status=200)
+            elif operation == "takeout":
+                transaction = (
+                    self._storageManagementService.takeFromCompartment(
+                        space_id=compartment.id, amount=amount,
+                        username=user.username, addOutputUnit=addOutputUnit))
+                return JsonResponse(TransactionSerializer(transaction).data,
+                                    status=200)
+
+>>>>>>> 752d5cbe640d4793fb6f54f218c2829f0284f26e
 
 
 class getStorageValue(View):
     @si.inject
     def __init__(self, _deps):
         _storageManagementService = _deps['storageManagementService']
-        self._storageManagementService: storageManagementService = _storageManagementService()
+        self._storageManagementService: storageManagementService = (
+                                        _storageManagementService())
 
     def get(self, request, storageId):
         if request.method == 'GET':
@@ -401,7 +536,8 @@ class getStorageCost(APIView):
     @si.inject
     def __init__(self, _deps, *args):
         _storageManagementService = _deps['storageManagementService']
-        self._storageManagementService: storageManagementService = _storageManagementService()
+        self._storageManagementService: storageManagementService = (
+                                        _storageManagementService())
 
     def get(self, request, storageId):
         start_date = request.data.get('start_date')
@@ -416,8 +552,10 @@ class getStorageCost(APIView):
                     storageId, start_date, end_date)
             return JsonResponse(value, safe=False, status=200)
 
-# Gets alternative articles for a given article. If only article id is entered, the method returns a list of alternative articles and all
-# their attributes. If an article id and a storage id is entered, the method returns the id for alternative articles and the amount of
+# Gets alternative articles for a given article. If only article id
+# is entered, the method returns a list of alternative articles and all
+# their attributes. If an article id and a storage id is entered, the
+# method returns the id for alternative articles and the amount of
 # the alternative articles in that storage
 
 
@@ -426,9 +564,10 @@ class getArticleAlternatives(View):
     def __init__(self, _deps):
         _articleManagementService = _deps['articleManagementService']
         # Instance of dependency is created in constructor
-        self._storageManagementService: storageManagementService = _deps['storageManagementService'](
-        )
-        self._articleManagementService: articleManagementService = _articleManagementService()
+        self._storageManagementService: storageManagementService = (
+            _deps['storageManagementService']())
+        self._articleManagementService: articleManagementService = (
+                                        _articleManagementService())
 
     def get(self, request, articleId, storageId=None):
         if request.method == 'GET':
@@ -441,17 +580,22 @@ class getArticleAlternatives(View):
                 dict = {'Article: ': None, 'Amount: ': None}
                 for i in article:
                     dict['Article: '] = i.lioId
-                    dict['Amount: '] = self._storageManagementService.searchArticleInStorage(
-                        storageId, i.lioId)
+                    dict['Amount: '] = (
+                        self._storageManagementService.searchArticleInStorage(
+                            storageId, i.lioId))
                     storageList.append(dict.copy())
 
             if article is None:
                 raise Http404("Could not find article")
             else:
                 if storageId is not None:
-                    return JsonResponse(list(storageList), safe=False, status=200)
+                    return JsonResponse(list(storageList),
+                                        safe=False,
+                                        status=200)
                 else:
-                    return JsonResponse(list(article.values()), safe=False, status=200)
+                    return JsonResponse(list(article.values()),
+                                        safe=False,
+                                        status=200)
 
 
 # FR 8.1 start #
@@ -468,37 +612,52 @@ class SearchForArticleInStorages(View):
     def get(self, request, search_string, input_storage) -> dict:
         if request.method == 'GET':
 
-            # Getting the storage unit which is connected to the users cost center.
+            # Getting the storage unit which is connected
+            # to the users cost center.
             user = request.user
             user_info = self._user_service.get_user_info(user.id)
-            user_storage = self._storage_management_service.get_storage_by_costcenter(
-                user_info.cost_center)
+            user_storage = (
+                self._storage_management_service.get_storage_by_costcenter(
+                    user_info.cost_center))
 
-            # If not input storage unit is given, we assume the user wants to search from it's own storage unit
+            # If not input storage unit is given, we assume the user wants to
+            # search from it's own storage unit
             if input_storage is None:
                 storage = user_storage.id
             else:
                 storage = input_storage
 
-            #NOTE: In order to increase testability and reusability I would like to see already existing functions in 
-            # the service- / data access layer being used here. Another tip is to query the "articles" variable
-            # based on storage_unit_id != storage (then duplicates will not have to be removed) 
+            # NOTE: In order to increase testability and reusability I would
+            # like to see already existing functions in
+            # the service- / data access layer being used here. Another tip is
+            # to query the "articles" variable
+            # based on storage_unit_id != storage (then duplicates will not
+            # have to be removed)
 
-            # query for the articles which match the input search string and the chosen storage unit.
-            articles_in_chosen_storage = StorageSpace.objects.filter(article__name__contains=search_string, storage_unit__id=storage).values_list(
-                'article__name', 'id', 'amount', 'storage_unit__name', 'storage_unit__floor', 'storage_unit__building')
-            # query for the articles which only matches the input search string in all storage units.
-            articles = StorageSpace.objects.filter(article__name__contains=search_string).values_list(
-                'article__name', 'id', 'amount', 'storage_unit__name', 'storage_unit__floor', 'storage_unit__building')
+            # query for the articles which match the input search string
+            # and the chosen storage unit.
+            articles_in_chosen_storage = StorageSpace.objects.filter(
+                article__name__contains=search_string,
+                storage_unit__id=storage).values_list(
+                'article__name', 'id', 'amount', 'storage_unit__name',
+                'storage_unit__floor', 'storage_unit__building')
+            # query for the articles which only matches the input search
+            # string in all storage units.
+            articles = StorageSpace.objects.filter(
+                article__name__contains=search_string).values_list(
+                'article__name', 'id', 'amount', 'storage_unit__name',
+                'storage_unit__floor', 'storage_unit__building')
 
-            # sort the articles which does not match with the chosen storage unit.
+            # sort the articles which does not match with
+            # the chosen storage unit.
             sorted_articles = sorted(
                 list(articles), key=itemgetter(5, 4))
 
             # chain the querysets together.
             data = list(chain(articles_in_chosen_storage, sorted_articles))
 
-            # ugly way to remove duplicates from the data. Can't use set() since order has to be preserved
+            # ugly way to remove duplicates from the data. Can't use set()
+            # since order has to be preserved
             data2 = []
             for article in data:
                 if article not in data2:
