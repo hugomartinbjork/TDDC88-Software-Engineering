@@ -12,7 +12,8 @@ urlPatterns = [
     path('login/', views.Login.as_view()),
     path('loginwithid/', views.LoginWithId.as_view()),
     path('storages/', views.SeeAllStorageUnits.as_view()),
-    path('user/<int:user_id>/transactions/', views.GetUserTransactions.as_view()),
+    path('user/<int:user_id>/transactions/',
+         views.GetUserTransactions.as_view()),
     path('transactions/addinputunit/<str:storage_space_id>/<int:amount>/',
          csrf_exempt(views.AddInputUnit.as_view())),
     path('transactions/returnunit/<str:storage_space_id>/<int:amount>/',
@@ -20,10 +21,10 @@ urlPatterns = [
     path('storage/<str:storage_id>/value', views.GetStorageValue.as_view()),
     # alternative articles if storage is not sent as input
     path('alternativearticles/<str:article_id>/',
-         views.getArticleAlternatives.as_view()),
+         views.GetArticleAlternatives.as_view()),
     # alternative articles if a storage is sent as input
     path('alternativearticles/<str:article_id>/<str:storage_id>/',
-         views.getArticleAlternatives.as_view()),
+         views.GetArticleAlternatives.as_view()),
     path('storage/<str:storage_id>/cost', views.GetStorageCost.as_view()),
     path('searcharticles/<str:search_string>/<str:input_storage>/',
          views.SearchForArticleInStorages.as_view()),

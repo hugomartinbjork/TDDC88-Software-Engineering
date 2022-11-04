@@ -459,7 +459,7 @@ class GetStorageCost(APIView):
 # the alternative articles in that storage
 
 
-class getArticleAlternatives(View):
+class GetArticleAlternatives(View):
     @si.inject
     def __init__(self, _deps):
         article_management_service = _deps['ArticleManagementService']
@@ -476,14 +476,14 @@ class getArticleAlternatives(View):
                 article_id)
 
             if storage_id is not None:
-                storageList = []
+                storage_list = []
                 dict = {'Article: ': None, 'Amount: ': None}
                 for i in article:
                     dict['Article: '] = i.lio_id
                     dict['Amount: '] = (
                         self.storage_management_service.search_article_in_storage(
                             storage_id, i.lio_id))
-                    storageList.append(dict.copy())
+                    storage_list.append(dict.copy())
 
             if article is None:
                 raise Http404("Could not find article")
