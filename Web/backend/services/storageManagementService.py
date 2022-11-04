@@ -100,8 +100,8 @@ class storageManagementService():
             id=space_id)
         storage_unit_id = storage_space.storage_unit
         article = Article.objects.get(lioId=storage_space.article.lioId)
-        inputOutput = InputOutput.objects.get(article=article)
-        converter = inputOutput.outputUnitPerInputUnit
+        # inputOutput = InputOutput.objects.get(article=article)
+        converter = 2
         user = User.objects.get(username=username)
         if (addOutputUnit):
             amount_in_storage = StorageSpace.objects.get(
@@ -172,8 +172,8 @@ class storageManagementService():
     def takeFromCompartment(self, space_id, amount, username, addOutputUnit, time_stamp):
         compartment = self._storageAccess.get_compartment_by_id(id=space_id)
         article = Article.objects.get(lioId=compartment.article.lioId)
-        inputOutput = InputOutput.objects.get(article=article)
-        converter = inputOutput.outputUnitPerInputUnit
+       #inputOutput = InputOutput.objects.get(article=article)
+        converter = 2
         user = User.objects.get(username=username)
         if(addOutputUnit):
             amount_in_storage = StorageSpace.objects.get(

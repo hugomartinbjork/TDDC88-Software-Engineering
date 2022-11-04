@@ -33,8 +33,8 @@ from django.contrib.auth.models import User
 from rest_framework.decorators import renderer_classes, api_view
 from django.http import HttpResponse
 from itertools import chain
+from datetime import date
 from django.utils.timezone import now
-
 # Create your views here.
 
 
@@ -358,7 +358,7 @@ class Transactions(APIView):
             time_stamp = request.data.get("time_stamp")
 
             if time_stamp == "":
-                time_stamp = now
+                time_stamp = date.today()
 
             if unit == "output":
                 addOutputUnit = False
@@ -366,8 +366,6 @@ class Transactions(APIView):
                 addOutputUnit = True
 
             if operation == "replenish":
-                print("printing username")
-                print(user)
                 transaction = self._storageManagementService.addToStorage(
                     space_id=compartment.id, amount=amount, username=user.username, addOutputUnit=addOutputUnit, time_stamp=time_stamp)
                 return JsonResponse(TransactionSerializer(transaction).data, status=200)

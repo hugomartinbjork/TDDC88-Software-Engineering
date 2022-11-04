@@ -74,7 +74,7 @@ class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
         fields = ('id', 'storage_unit', 'by_user', 'article',
-                  'amount', 'time_of_transaction', 'operation')
+                  'amount', 'time_stamp', 'operation')
 
 
 class AlternativeNameSerializer(serializers.ModelSerializer):

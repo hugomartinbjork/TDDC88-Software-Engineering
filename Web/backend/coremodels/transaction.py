@@ -1,7 +1,7 @@
 from django.db import models
 from datetime import datetime
 from django.utils.timezone import now
-from django.utils.dateparse import parse_datetime
+from django.utils.dateparse import parse_date
 # from sqlalchemy import PrimaryKeyConstraint
 from backend.coremodels.storage_unit import StorageUnit
 from django.contrib.auth.models import User
@@ -18,7 +18,7 @@ class Transaction(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     amount = models.PositiveSmallIntegerField(default=0)
     time_stamp = models.DateField(
-        default=now, null=True, blank=True)
+        default=now(), null=True, blank=True)
     operation = models.IntegerField(
         choices=TransactionOperator.choices, default=0, null=False)
 
