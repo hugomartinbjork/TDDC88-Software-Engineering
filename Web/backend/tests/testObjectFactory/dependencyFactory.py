@@ -4,6 +4,7 @@ import _ast
 
 
 def get_directory_class_names(directory):
+    '''Getting directory class names.'''
     class_names = []
     for file in os.listdir(directory):
         if file.endswith(".py"):
@@ -17,6 +18,7 @@ def get_directory_class_names(directory):
 
 
 class DependencyFactory():
+    '''Dependency factory.'''
     def __init__(self) -> None:
         servicepath = os.path.abspath(os.path.join(os.path.dirname(
                                 __file__), '..', '..', 'services'))
@@ -34,11 +36,12 @@ class DependencyFactory():
         self.all_dependencies = {**service_dictionary, **access_dictionary}
 
     def complete_dependency_dictionary(self, incomplete_dependency_dictionary):
+        '''Complete dependency dictionary.'''
         temp_dictionary = self.all_dependencies.copy()
         temp_dictionary.update(incomplete_dependency_dictionary)
         return temp_dictionary
 
 
-#  to mimic a dependency that is not being used
 class random_callable():
+    '''Mimics a dependency that is not being used.'''
     pass

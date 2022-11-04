@@ -17,6 +17,7 @@ dependency_factory = DependencyFactory()
 
 
 class OrderServiceCalculateEtaTestCase(TestCase):
+    '''Test case to calculate estimated time to arrival.'''
     def setUp(self) -> None:
         central_storage_mock = CentralStorageAccess
         # When checking the article stock, the stub will return 100 as the 
@@ -38,6 +39,7 @@ class OrderServiceCalculateEtaTestCase(TestCase):
         self.order_service = OrderService(mocked_dependencies)
 
     def test_order_less_than_in_stock(self):
+        '''Test.'''
         calculated_wait_time = (
             self.order_service.calculate_expected_wait("123", 10))
         # When we have enough in the central storage,
@@ -45,6 +47,7 @@ class OrderServiceCalculateEtaTestCase(TestCase):
         self.assertEqual(calculated_wait_time, 2)
 
     def test_order_more_than_in_stock(self):
+        '''Test.'''
         calculated_wait_time = (
             self.order_service.calculate_expected_wait("123", 101))
         # When we don't have enough in the central
@@ -53,6 +56,7 @@ class OrderServiceCalculateEtaTestCase(TestCase):
 
 
 class StorageServiceEconomyTest(TestCase):
+    '''Storage service economy test.'''
     def setUp(self):
         transacted_article = create_article(price=10)
         cost_center = create_costcenter(id="123")
@@ -88,6 +92,7 @@ class StorageServiceEconomyTest(TestCase):
         self.storage_service = StorageManagementService(mocked_dependencies)
 
     def test_sum_transactions_and_withdrawals(self):
+        '''Test sym of transactions and withdrawals.'''
         economyresult = self.storage_service.get_storage_cost(
                                 "", "2000-06-15", "2000-08-15")
         self.assertAlmostEquals(economyresult, 40)

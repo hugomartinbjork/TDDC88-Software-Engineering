@@ -25,6 +25,7 @@ class ArticleAccess():
             return None
 
     def get_supplier(self, article: Article) -> Supplier:
+        '''Retrieve supplier for an article.'''
         try:
             supplier = ArticleHasSupplier.objects.get(
                         article=article).article_supplier
@@ -33,6 +34,7 @@ class ArticleAccess():
             return None
 
     def get_supplier_article_nr(self, article: Article) -> Supplier:
+        '''Returns supplier_article_nr for an article.'''
         try:
             supplier_article_nr = ArticleHasSupplier.objects.get(
                                     article=article).supplier_article_nr

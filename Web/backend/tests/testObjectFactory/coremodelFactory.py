@@ -12,6 +12,7 @@ import uuid
 def create_transaction(
     id=None, storage_unit=None, by_user=None, article=None,
         amount=1, time_of_transaction=None, operation=1):
+    '''Create new transaction.'''
 
     if id is None:
         id = "1337"
@@ -37,6 +38,7 @@ def create_storageunit(id="1337",
                        building="testbuilding",
                        floor="testFloor",
                        costCenter=None):
+    '''Create new storage-unit.'''
 
     if costCenter is None:
         costCenter = create_costcenter()
@@ -49,12 +51,14 @@ def create_storageunit(id="1337",
 
 def create_user(first_name="Elias", is_superuser=False,
                 last_name="Eliasson", username="Elias123"):
+    '''Creating new user.'''
     user = User(first_name=first_name, is_superuser=is_superuser,
                 last_name=last_name, username=username)
     return user
 
 
 def create_costcenter(name="testCostCenter", id="1337"):
+    '''Creating new cost-center.'''
     cost_center = CostCenter(name=name, id=id)
     return cost_center
 
@@ -63,6 +67,7 @@ def create_article(lio_id="1337", description="testdescription",
                    price=0, name="testarticle", Z41=False, image=None,
                    article_group=[], alternative_articles=[],
                    refill_unit=None, takeout_unit=None):
+    '''Creating new article.'''
 
     article = Article(lio_id=lio_id, description=description,
                       price=price, name=name, Z41=Z41, image=image,

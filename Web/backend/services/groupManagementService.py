@@ -5,8 +5,10 @@ from backend.__init__ import serviceInjector as si
 
 @si.register(name='GroupManagementService')
 class GroupManagementService():
+    '''Group management service.'''
 
     def get_group_by_id(self, id: str) -> GroupInfo:
+        '''Returns group from id.'''
         try:
             group = GroupInfo.objects.get(id=id)
             return group

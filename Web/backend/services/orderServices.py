@@ -16,6 +16,7 @@ from ..dataAccess.orderAccess import OrderAccess
 
 @si.register(name='OrderService')
 class OrderService():
+    '''Order service.'''
     @di.inject
     def __init__(self, _deps, *args):
         self.order_access: OrderAccess = _deps["OrderAccess"]()
@@ -24,13 +25,15 @@ class OrderService():
 
 # Returns None if the order does not exist. Otherwise returns the order.
     def has_order(self, storage_unit_id, article_id) -> Order:
+        '''Returns order from storage unit id and article id.'''
         return self.order_access.get_order_by_article_and_storage(
             storage_unit_id=storage_unit_id, article_id=article_id)
 
     # Updates the storage space amount with the amount in the order.
     # If order_arrived returns None, return error 404 in view.
     def order_arrived(self, order_id) -> Order:
-        order = self.order_access.get_order_by_id(id)
+        '''Order arrived.'''
+        order = self.order_access.get_order_by_id(order_id)
 
         if order is None:
             return None
@@ -54,6 +57,7 @@ class OrderService():
     # Gets expected time for order to arrive from central storage. Returns 14
     # days if the article does not exist.
     def calculate_expected_wait(self, article_id, amount) -> int:
+        '''Calculate expected wait.'''
         central_storage_stock = (
                         self.central_storage_access.get_stock_by_article_id(
                             article_id=article_id))
@@ -65,11 +69,13 @@ class OrderService():
             return 14
 
     def get_eta(self, order_id):
+        '''Return estimated time to arrival of order.'''
         return self.order_access.get_eta(order_id)
 
     # Creates an order, saves in in the database and then returns said order.
     # If the order can't be created None is returned.
     def place_order(self, storage_unit_id, article_id, amount):
+        '''Place order.'''
         expected_wait = OrderService.calculate_expected_wait(
             self, article_id=article_id, amount=amount)
         order = self.order_access.create_order(
@@ -84,6 +90,7 @@ class OrderService():
     # If there is, that order is returned
     def place_order_if_no_order(self, storage_unit_id: string,
                                 article_id: string, amount: int) -> Order:
+        '''Place order if no order.'''
         current_order = self.order_access.get_order_by_article_and_storage(
             storage_unit_id=storage_unit_id, article_id=article_id)
         if (current_order is None):
@@ -93,18 +100,24 @@ class OrderService():
         return current_order
 
     def get_order_by_id(self, id: int) -> Order:
+        '''Returns order using id.'''
         return self.order_access.get_order_by_id(id)
 
     def get_article_id_by_id(self, id: int) -> Article:
+        '''Returns article using id.'''
         return self.order_access.get_ordered_article(id)
 
     def get_storage_unit_id_by_id(self, id: int) -> StorageUnit:
+        '''Returns storage unit using id.'''
         return self.order_access.get_to_storage_unit(id)
 
     def get_amount_id_by_id(self, id: int) -> int:
+        '''Get amount id by id.'''
         return self.order_access.get_amount(id)
 
-    def text_file(order_name, article_id, storage_unit, eta, time_of_arrival):
+    def text_file(order_name, article_id, storage_unit,
+                  eta, time_of_arrival):
+        '''Makes text file and returns amount.'''
         utils.make_text_file(order_name, article_id, storage_unit,
                              eta, time_of_arrival)
         article = Article.objects.filter(lio_id=article_id).first()

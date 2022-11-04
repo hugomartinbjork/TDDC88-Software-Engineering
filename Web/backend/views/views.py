@@ -44,6 +44,7 @@ from django.utils.timezone import now
 
 
 class Article(View):
+    '''Article view.'''
     # Dependencies are injected, I hope that we will be able to mock
     # (i.e. make stubs of) these for testing
     @si.inject
@@ -52,6 +53,7 @@ class Article(View):
                                 _deps['ArticleManagementService']())
 
     def get(self, request, article_id):
+        '''Get.'''
         if request.method == 'GET':
             article = self.article_management_service.get_article_by_lio_id(
                 article_id)
@@ -97,6 +99,7 @@ class Article(View):
 
 
 class Group(View):
+    '''Group.'''
     # Dependencies are injected, I hope that we will be able to mock
     # (i.e. make stubs of) these for testing
     @si.inject
@@ -105,6 +108,7 @@ class Group(View):
                               _deps['GroupManagementService']())
 
     def get(self, request, groupId):
+        '''Get.'''
         if request.method == 'GET':
             group = self.group_management_service.get_group_by_id(groupId)
             if group is None:
@@ -114,6 +118,7 @@ class Group(View):
 
 
 class Storage(View):
+    '''Storage view.'''
     # Dependencies are injected, I hope that we will be able to mock
     # (i.e. make stubs of) these for testing
     @si.inject
@@ -122,6 +127,7 @@ class Storage(View):
                                 _deps['StorageManagementService']())
 
     def get(self, request, storage_id):
+        '''Return storage unit using id.'''
         if request.method == 'GET':
             storage = (
                 self.storage_management_service.get_storage_unit_by_id(
@@ -135,12 +141,14 @@ class Storage(View):
 
 
 class StorageSpace(View):
+    '''Storage-space view.'''
     def __init__(self, _deps, *args):
         self.order_service: OrderService = _deps['OrderService']()
         self.storage_management_service: StorageManagementService = (
                                 _deps['StorageManagementService']())
 
     def get(self, request, storage_space_id):
+        '''Returns compartment content as well as orders.'''
         altered_dict = (
             self.storage_management_service.get_compartment_content_and_orders(
                                                            storage_space_id))
@@ -150,6 +158,7 @@ class StorageSpace(View):
 
 
 class Compartment(View):
+    '''Compartment view.'''
     # Dependencies are injected, I hope that we will be able to mock
     # (i.e. make stubs of) these for testing
     @si.inject
@@ -158,10 +167,12 @@ class Compartment(View):
             _deps['StorageManagementService']())
 
     def get(self, request, qr_code):
+        '''Returns compartment using qr code.'''
         print("lets get it")
         if request.method == 'GET':
-            compartment = self.storage_management_service.get_compartment_by_qr(
-                qr_code)
+            compartment = (
+                self.storage_management_service.get_compartment_by_qr(
+                    qr_code))
             if compartment is None:
                 return Http404("Could not find compartment")
             else:
@@ -171,6 +182,7 @@ class Compartment(View):
                 return HttpResponseBadRequest
 
     def post(self, request):
+        '''Post compartment.'''
         if request.method == 'POST':
             json_body = request.POST
             storage_id = json_body['storage_id']
@@ -187,6 +199,7 @@ class Compartment(View):
 
 
 class Order(View):
+    '''Order view.'''
     @si.inject
     def __init__(self, _deps, *args):
         self.order_service: OrderService = _deps['OrderService']()

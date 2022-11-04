@@ -14,13 +14,16 @@ from backend.coremodels.user_info import UserInfo
 
 @si.register()
 class UserService(BaseBackend):
+    '''User service.'''
     def authenticate_with_id(self, id):
+        '''Authenticate using id.'''
         try:
             return User.objects.get(pk=id)
         except User.DoesNotExist:
             return None
 
     def create_auth_token(self, request, user):
+        '''Create authentication token.'''
         login(request, user)
         token, created = Token.objects.get_or_create(user=request.user)
         data = {
@@ -30,6 +33,7 @@ class UserService(BaseBackend):
                         status=status.HTTP_200_OK)
 
     def get_all_transactions_by_user(self, current_user) -> dict:
+        '''Return every transaction mabe by user.'''
         user_convert = list(current_user)
         all_transactions = Transaction.objects.filter(
             by_user=user_convert[0]).all().values()
@@ -37,6 +41,7 @@ class UserService(BaseBackend):
         return all_transactions
 
     def get_user_info(self, user_id):
+        '''Return user information.'''
         try:
             user_info = UserInfo.objects.get(user=user_id)
             return user_info

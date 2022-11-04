@@ -6,7 +6,10 @@ from ..__init__ import dataAccessInjector as di
 
 @di.register(name="UserAccess")
 class UserAccess():
+    '''User access.'''
+
     def get_user_cost_center(self, user: User) -> CostCenter:
+        '''Return cost center of user.'''
         try:
             user_info = UserInfo.objects.get(user=user)
             cost_center = user_info.cost_center

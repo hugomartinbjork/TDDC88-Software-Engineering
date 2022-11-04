@@ -18,6 +18,7 @@ from ..__init__ import dataAccessInjector as di
 
 @si.register(name='StorageManagementService')
 class StorageManagementService():
+    '''Storage management service.'''
     @di.inject
     def __init__(self, _deps, *args):
         self.storage_access: StorageAccess = _deps["StorageAccess"]()
@@ -25,29 +26,37 @@ class StorageManagementService():
         self.user_access: UserAccess = _deps["UserAccess"]()
 
     def get_storage_unit_by_id(self, id: str) -> StorageUnit:
+        '''Returns storage unit using id.'''
         return self.storage_access.get_storage(id)
 
     def get_storage_space_by_id(self, id: str) -> StorageSpace:
+        '''Returns storage space using id.'''
         return self.storage_access.get_compartment_by_id(id)
 
     def get_storage_space_by_article(self, article: Article) -> StorageSpace:
+        '''Returns storage space using article.'''
         return self.storage_access.get_compartment_by_id(id)
 
     def set_storage(self, id: str, amount: int) -> int:
+        '''Set storage value. Returns amount.'''
         return self.storage_access.set_storage_amount(compartment_id=id,
                                                       amount=amount)
 
     def get_stock(self, id: str, article_id: str) -> int:
+        '''Return stock.'''
         return self.storage_access.get_compartment_stock(compartment_id=id,
                                                          article_id=article_id)
 
     def get_storage_unit_stock(self, id: str) -> dict:
+        '''Returns dictionary containing stocks in storage.'''
         return self.storage_access.get_storage_stock(storage_id=id)
 
     def get_all_storage_units(self) -> dict:
+        '''Return every storage unit.'''
         return self.storage_access.get_all_storage_units()
 
     def get_storage_value(self, id: str) -> int:
+        '''Return total storage value using id.'''
         compartments = self.storage_access.get_compartments_by_storage(
             storage_id=id)
         value = 0
@@ -56,6 +65,7 @@ class StorageManagementService():
         return value
 
     def get_all_transactions(self) -> dict:
+        '''Returns every transaction.'''
         return self.storage_access.get_all_transactions()
 
     # Storage is not connected to a costcenter atm
@@ -63,6 +73,7 @@ class StorageManagementService():
     # from transactions for one storage_compartment
     def get_storage_cost(self, storage_id: str, start_date: str,
                          end_date: str) -> int:
+        '''Get storage cost.'''
         start_date_date = parse_date(start_date)
         end_date_date = parse_date(end_date)
         transactions = self.storage_access.get_transaction_by_storage(
@@ -91,6 +102,7 @@ class StorageManagementService():
         return sum_value
 
     def get_storage_by_costcenter(self, cost_center: str) -> StorageUnit:
+        '''Get storage using cost-center.'''
         return self.storage_access.get_storage_by_costcenter(cost_center)
 
 # FR 10.1.3 #
@@ -101,6 +113,7 @@ class StorageManagementService():
 
     def add_to_storage(self, space_id: str, amount: int, username: str,
                        add_output_unit: bool) -> Transaction:
+        '''Add to storage.'''
         storage_space = self.storage_access.get_compartment_by_id(
             id=space_id)
         storage_unit_id = storage_space.storage_unit
@@ -139,6 +152,7 @@ class StorageManagementService():
     def add_to_return_storage(self, space_id: str, amount: int,
                               username: str, add_output_unit: bool,
                               time_of_transaction) -> Transaction:
+        '''Add return to storage.'''
         storage_space = StorageSpace.objects.get(id=space_id)
         storage_unit_id = storage_space.storage_unit
         amount = amount
@@ -184,6 +198,7 @@ class StorageManagementService():
 
     def take_from_Compartment(self, space_id, amount, username,
                               add_output_unit, time_of_transaction):
+        '''Take from compartment. Return transaction.'''
         compartment = self.storage_access.get_compartment_by_id(id=space_id)
         article = Article.objects.get(lio_id=compartment.article.lio_id)
 # inputOutput = InputOutput.objects.get(article=article)
@@ -216,16 +231,20 @@ class StorageManagementService():
             return new_transaction
 
     def get_article_in_storage_space(self, storage_space_id: str) -> Article:
+        '''Get article in storage space.'''
         return self.storage_access.get_article_in_storage_space(
                                     storage_space_id=storage_space_id)
 
     def search_article_in_storage(self, storageUnitId: str,
                                   articleId: str) -> int:
+        '''Search for article in storage.'''
         return self.storage_access.search_article_in_storage(
             storageUnitId=storageUnitId, articleId=articleId)
 # FR 10.1.3 #
 
     def get_compartment_content_and_orders(self, compartment_id):
+        '''Get content of compartment as well as orders using 
+            compartment id.'''
         compartment = self.storage_access.get_compartment_by_id(
             id=compartment_id)
         altered_dict = {}
@@ -238,7 +257,7 @@ class StorageManagementService():
             return None
         altered_dict.update(compartment_serializer.data)
 
-        order = self._orderAccess.get_order_by_article_and_storage(
+        order = self.order_access.get_order_by_article_and_storage(
             compartment.storage_unit.id, compartment.article.lio_id)
         if order is not None:
             order_serializer = OrderSerializer(order)
@@ -252,6 +271,7 @@ class StorageManagementService():
     # FR 9.4.1 och FR 9.4.2 ##
     def create_compartment(self, storage_id: str, placement: str,
                            qr_code: str) -> StorageSpace:
+        '''Create new compartment.'''
 
         print(storage_id)
         compartment = self.storage_access.create_compartment(
@@ -260,6 +280,7 @@ class StorageManagementService():
         return compartment
 
     def get_compartment_by_qr(self, qr_code: str) -> StorageSpace:
+        '''Return compartment using qr code.'''
         compartment = self.storage_access.get_compartment_by_qr(
             qr_code=qr_code)
         return compartment
