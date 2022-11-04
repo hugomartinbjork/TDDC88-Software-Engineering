@@ -285,7 +285,7 @@ class AddInputUnit(View):
         self._storageManagementService = storageManagementService()
         self._userService: userService = _deps['userService']()
 
-    def post(self, request, storage_space_id, amount, time_stamp):
+    def post(self, request, storage_space_id, amount, time_of_transaction):
         storage_space = storageManagementService.getStorageSpaceById(
             self=self, id=storage_space_id)
         user = request.user
@@ -293,7 +293,7 @@ class AddInputUnit(View):
             if storage_space is None:
                 return Http404("Could not find storage space")
             storageManagementService.addToStorage(self=self,
-                                                  space_id=storage_space_id, amount=amount, username=user.username, addOutputUnit=False, time_stamp=time_stamp)
+                                                  space_id=storage_space_id, amount=amount, username=user.username, addOutputUnit=False, time_of_transaction=time_of_transaction)
             return HttpResponse(status=200)
 
 # AddOutputUnit is used to add articles to the storage space in
@@ -330,7 +330,7 @@ class ReturnUnit(View):
         self._storageManagementService = storageManagementService()
         self._userService: userService = _deps['userService']()
 
-    def post(self, request, storage_space_id, amount, time_stamp=now):
+    def post(self, request, storage_space_id, amount, time_of_transaction=now):
         storage_space = storageManagementService.getStorageSpaceById(
             self=self, id=storage_space_id)
         user = request.user
@@ -338,7 +338,7 @@ class ReturnUnit(View):
             if storage_space is None:
                 return Http404("Could not find storage space")
             storageManagementService.addToReturnStorage(self=self,
-                                                        space_id=storage_space_id, amount=amount, username=user.username, addOutputUnit=True, time_stamp=time_stamp)
+                                                        space_id=storage_space_id, amount=amount, username=user.username, addOutputUnit=True, time_of_transaction=time_of_transaction)
             return HttpResponse(status=200)
 
 
@@ -370,10 +370,10 @@ class Transactions(APIView):
             unit = request.data.get("unit")
             user = request.user
             operation = request.data.get("operation")
-            time_stamp = request.data.get("time_stamp")
+            time_of_transaction = request.data.get("time_of_transaction")
 
-            if time_stamp == "":
-                time_stamp = date.today()
+            if time_of_transaction == "":
+                time_of_transaction = date.today()
 
             if unit == "output":
                 addOutputUnit = False
@@ -382,15 +382,15 @@ class Transactions(APIView):
 
             if operation == "replenish":
                 transaction = self._storageManagementService.addToStorage(
-                    space_id=compartment.id, amount=amount, username=user.username, addOutputUnit=addOutputUnit, time_stamp=time_stamp)
+                    space_id=compartment.id, amount=amount, username=user.username, addOutputUnit=addOutputUnit, time_of_transaction=time_of_transaction)
                 return JsonResponse(TransactionSerializer(transaction).data, status=200)
             elif operation == "return":
                 transaction = self._storageManagementService.addToReturnStorage(
-                    space_id=compartment.id, amount=amount, username=user.username, addOutputUnit=addOutputUnit, time_stamp=time_stamp)
+                    space_id=compartment.id, amount=amount, username=user.username, addOutputUnit=addOutputUnit, time_of_transaction=time_of_transaction)
                 return JsonResponse(TransactionSerializer(transaction).data, status=200)
             elif operation == "takeout":
                 transaction = self._storageManagementService.takeFromCompartment(
-                    space_id=compartment.id, amount=amount, username=user.username, addOutputUnit=addOutputUnit, time_stamp=time_stamp)
+                    space_id=compartment.id, amount=amount, username=user.username, addOutputUnit=addOutputUnit, time_of_transaction=time_of_transaction)
                 return JsonResponse(TransactionSerializer(transaction).data, status=200)
 
 
