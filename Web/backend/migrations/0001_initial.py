@@ -19,34 +19,40 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Article',
             fields=[
-                ('lio_id', models.CharField(max_length=15, primary_key=True, serialize=False)),
+                ('lio_id', models.CharField(max_length=15,
+                 primary_key=True, serialize=False)),
                 ('description', models.CharField(max_length=100, null=True)),
                 ('price', models.IntegerField(null=True)),
                 ('name', models.CharField(max_length=30)),
-                ('sanitation_level', models.CharField(default=0, max_length=30, null=True)),
+                ('sanitation_level', models.CharField(
+                    default=0, max_length=30, null=True)),
                 ('image', models.ImageField(blank=True, null=True, upload_to='')),
                 ('alternative_names', models.TextField(blank=True, null=True)),
-                ('alternative_articles', models.ManyToManyField(blank=True, to='backend.article')),
+                ('alternative_articles', models.ManyToManyField(
+                    blank=True, to='backend.article')),
             ],
         ),
         migrations.CreateModel(
             name='CostCenter',
             fields=[
                 ('name', models.CharField(max_length=30)),
-                ('id', models.CharField(max_length=30, primary_key=True, serialize=False)),
+                ('id', models.CharField(max_length=30,
+                 primary_key=True, serialize=False)),
             ],
         ),
         migrations.CreateModel(
             name='GroupInfo',
             fields=[
-                ('id', models.CharField(max_length=30, primary_key=True, serialize=False)),
+                ('id', models.CharField(max_length=30,
+                 primary_key=True, serialize=False)),
                 ('group_name', models.CharField(max_length=30)),
             ],
         ),
         migrations.CreateModel(
             name='StorageUnit',
             fields=[
-                ('id', models.CharField(max_length=15, primary_key=True, serialize=False)),
+                ('id', models.CharField(max_length=15,
+                 primary_key=True, serialize=False)),
                 ('name', models.CharField(max_length=30)),
                 ('building', models.CharField(max_length=30)),
                 ('floor', models.CharField(max_length=30)),
@@ -55,41 +61,59 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='UserInfo',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('cost_center', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='backend.costcenter')),
-                ('group', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='auth.group')),
-                ('user', models.OneToOneField(default='test', on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
+                ('cost_center', models.ForeignKey(
+                    null=True, on_delete=django.db.models.deletion.CASCADE, to='backend.costcenter')),
+                ('group', models.ForeignKey(
+                    null=True, on_delete=django.db.models.deletion.CASCADE, to='auth.group')),
+                ('user', models.OneToOneField(default='test',
+                 on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(
             name='Transaction',
             fields=[
-                ('id', models.CharField(max_length=15, primary_key=True, serialize=False)),
+                ('id', models.CharField(max_length=15,
+                 primary_key=True, serialize=False)),
                 ('amount', models.PositiveSmallIntegerField(default=0)),
                 ('time_of_transaction', models.DateTimeField(auto_now_add=True)),
-                ('operation', models.IntegerField(choices=[(1, 'Takeout'), (2, 'Return'), (3, 'Replenish'), (4, 'Adjust')], default=0)),
-                ('article', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='backend.article')),
-                ('by_user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('storage_unit', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='backend.storageunit')),
+                ('operation', models.IntegerField(choices=[
+                 (1, 'Takeout'), (2, 'Return'), (3, 'Replenish'), (4, 'Adjust')], default=0)),
+                ('article', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE, to='backend.article')),
+                ('by_user', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('storage_unit', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE, to='backend.storageunit')),
             ],
         ),
         migrations.CreateModel(
             name='StorageSpace',
             fields=[
-                ('id', models.CharField(max_length=15, primary_key=True, serialize=False)),
+                ('id', models.CharField(max_length=15,
+                 primary_key=True, serialize=False)),
                 ('order_point', models.PositiveSmallIntegerField(default=0)),
-                ('standard_order_amount', models.PositiveSmallIntegerField(default=0)),
-                ('maximal_capacity', models.PositiveSmallIntegerField(default=0)),
+                ('standard_order_amount',
+                 models.PositiveSmallIntegerField(default=0)),
+                ('maximal_capacity',
+                 models.PositiveSmallIntegerField(default=0)),
                 ('amount', models.PositiveSmallIntegerField(default=0)),
-                ('article', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='backend.article')),
-                ('storage_unit', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='backend.storageunit')),
+                ('article', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE,
+                    to='backend.article')),
+                ('storage_unit', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE,
+                    to='backend.storageunit')),
             ],
         ),
         migrations.CreateModel(
             name='QRCode',
             fields=[
-                ('id', models.CharField(max_length=15, primary_key=True, serialize=False)),
-                ('storage_space', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='backend.storagespace')),
+                ('id', models.CharField(max_length=15,
+                 primary_key=True, serialize=False)),
+                ('storage_space', models.ForeignKey(
+                    null=True, on_delete=django.db.models.deletion.CASCADE, to='backend.storagespace')),
             ],
         ),
         migrations.CreateModel(
@@ -97,11 +121,16 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(primary_key=True, serialize=False)),
                 ('amount', models.PositiveIntegerField(default=None)),
-                ('expected_wait', models.PositiveSmallIntegerField(default=0)),
-                ('order_time', models.DateTimeField(default=datetime.datetime.now)),
+                ('expected_Wait', models.PositiveSmallIntegerField(default=0)),
+                ('order_time', models.DateTimeField(
+                    default=datetime.datetime.now)),
                 ('has_arrived', models.BooleanField(default=False)),
-                ('of_article', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='backend.article')),
-                ('to_storage_unit', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='backend.storageunit')),
+                ('of_article', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE,
+                    to='backend.article')),
+                ('to_storage_unit', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE,
+                    to='backend.storageunit')),
             ],
         ),
         migrations.CreateModel(
@@ -110,8 +139,11 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(primary_key=True, serialize=False)),
                 ('input_unit_name', models.CharField(max_length=30)),
                 ('output_unit_name', models.CharField(max_length=30)),
-                ('output_unit_per_input_unit', models.PositiveIntegerField(default=0)),
-                ('article', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='backend.article')),
+                ('output_unit_per_input_unit',
+                 models.PositiveIntegerField(default=0)),
+                ('article', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE,
+                    to='backend.article')),
             ],
         ),
         migrations.CreateModel(
@@ -119,7 +151,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(primary_key=True, serialize=False)),
                 ('amount', models.PositiveSmallIntegerField(default=0)),
-                ('article', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='backend.article')),
+                ('article', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE, to='backend.article')),
             ],
         ),
         migrations.AddField(
