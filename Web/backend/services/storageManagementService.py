@@ -22,7 +22,7 @@ class StorageManagementService():
     def __init__(self, _deps):
         self.storage_access: StorageAccess = _deps["StorageAccess"]()
         self.order_access: OrderAccess = _deps["OrderAccess"]()
-        self._userAccess: UserAccess = _deps["UserAccess"]()
+        self.user_access: UserAccess = _deps["UserAccess"]()
 
     def get_storage_unit_by_id(self, id: str) -> StorageUnit:
         return self.storage_access.get_storage(id)
@@ -74,13 +74,13 @@ class StorageManagementService():
         for transaction in transactions:
             transaction_date = transaction.time_of_transaction
             transaction_date_date = transaction_date  # .date()
-            user_cost_center = self._userAccess.get_user_cost_center(
+            user_cost_center = self.user_access.get_user_cost_center(
                 transaction.by_user)
             if (user_cost_center == transaction.storage_unit.cost_center):
                 if (start_date_date <= transaction_date_date
                         and end_date_date >= transaction_date_date):
                     # transaction_user = transaction.by_user
-                    # cost_center = self._userAccess.get_user_cost_center(
+                    # cost_center = self.user_access.get_user_cost_center(
                     #                                   user=transaction_user)
                     # if cost_center == transaction.storage_id.cost_center
                     if transaction.operation == 1:
@@ -102,7 +102,7 @@ class StorageManagementService():
 # TODO to the original author
 
     def add_to_storage(self, space_id: str, amount: int, username: str,
-        add_output_unit: bool) -> Transaction:
+                       add_output_unit: bool) -> Transaction:
         storage_space = self.storage_access.get_compartment_by_id(
             id=space_id)
         storage_unit_id = storage_space.storage_unit
@@ -124,7 +124,7 @@ class StorageManagementService():
         else:
             StorageSpace.objects.update(amount=amount_in_storage)
             new_transaction = Transaction.objects.create(
-                storage_unit=storage_unit_id, article=article, operation=3, by_user=user, amount=new_amount, time_stamp=time_stamp)
+                storage_unit=storage_unit_id, article=article, operation=3, by_user=user, amount=new_amount, time_of_transaction=time_of_transaction)
             new_transaction.save()
             print("New add transaction created:")
             print(new_transaction)
@@ -136,8 +136,9 @@ class StorageManagementService():
 # Leaving this
 # TODO to the original author
 
-    def addToReturnStorage(self, space_id: str, amount: int, username: str,
-                           add_output_unit: bool, time_stamp) -> Transaction:
+    def add_to_return_storage(self, space_id: str, amount: int,
+                              username: str, add_output_unit: bool,
+                              time_of_transaction) -> Transaction:
         storage_space = StorageSpace.objects.get(id=space_id)
         storage_unit_id = storage_space.storage_unit
         amount = amount
@@ -173,14 +174,14 @@ class StorageManagementService():
             StorageSpace.objects.update(amount=amount_in_storage)
             print("skapar ny transaction")
             new_transaction = Transaction.objects.create(
-                storage_unit=storage_unit_id, article=article, operation=2, by_user=user, amount=new_amount, time_stamp=time_stamp)
+                storage_unit=storage_unit_id, article=article, operation=2, by_user=user, amount=new_amount, time_of_transaction=time_of_transaction)
             new_transaction.save()
             print("New return transaction created:")
             print(new_transaction)
             return new_transaction
 
     def take_from_Compartment(self, space_id, amount, username,
-                              add_output_unit, time_stamp):
+                              add_output_unit, time_of_transaction):
         compartment = self.storage_access.get_compartment_by_id(id=space_id)
         article = Article.objects.get(lio_id=compartment.article.lio_id)
 # inputOutput = InputOutput.objects.get(article=article)
@@ -206,7 +207,7 @@ class StorageManagementService():
             new_transaction = Transaction.objects.create(
                 storage_unit=compartment.storage_unit, article=article,
                 operation=1, by_user=user, amount=new_amount,
-                time_stamp=time_stamp)
+                time_of_transaction=time_of_transaction)
             new_transaction.save()
             print("New add transaction created:")
             print(new_transaction)

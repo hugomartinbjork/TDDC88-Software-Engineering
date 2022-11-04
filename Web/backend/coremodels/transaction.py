@@ -17,7 +17,7 @@ class Transaction(models.Model):
     by_user = models.ForeignKey(User, on_delete=models.CASCADE)
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     amount = models.PositiveSmallIntegerField(default=0)
-    time_stamp = models.DateField(
+    time_of_transaction = models.DateField(
         default=now(), null=True, blank=True)
     operation = models.IntegerField(
         choices=TransactionOperator.choices, default=0, null=False)
