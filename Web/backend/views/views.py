@@ -8,7 +8,6 @@ from django.shortcuts import render
 from rest_framework import generics
 from django.http import Http404, JsonResponse, HttpResponseBadRequest
 from backend.coremodels.transaction import Transaction
-from backend.dataAccess.storageAccess import storageAccess
 from ..serializers import AlternativeNameSerializer, StorageUnitSerializer, ArticleSerializer, GroupSerializer, QRCodeSerializer, OrderSerializer, StorageSpaceSerializer, TransactionSerializer
 # This import is important for now, since the dependency in articlemanagmentservice will not be stored in the serviceInjector otherwise however, I'm
 # hoping to be able to change this since it looks kind of trashy
@@ -260,7 +259,6 @@ class AddInputUnit(View):
     def __init__(self, _deps):
         storageManagementService = _deps['storageManagementService']
         self._storageManagementService = storageManagementService()
-        self._storageAccess = storageAccess()
         self._userService: userService = _deps['userService']()
 
     def post(self, request, storage_space_id, amount):
@@ -301,10 +299,8 @@ class GetUserTransactions(View):
 class ReturnUnit(View):
     @si.inject
     def __init__(self, _deps):
-        #storageAccess = _deps['storageAccess']
         storageManagementService = _deps['storageManagementService']
         self._storageManagementService = storageManagementService()
-        self._storageAccess = storageAccess()
         self._userService: userService = _deps['userService']()
 
     def post(self, request, storage_space_id, amount):
@@ -323,7 +319,6 @@ class Transactions(APIView):
     def __init__(self, _deps):
         storageManagementService = _deps['storageManagementService']
         self._storageManagementService = storageManagementService()
-        self._storageAccess = storageAccess()
         self._userService: userService = _deps['userService']()
 
     def get(self, request):
