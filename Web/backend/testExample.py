@@ -1,19 +1,19 @@
 from django.test import TestCase
 from unittest.mock import MagicMock, Mock
 from .services.orderServices import OrderService
-from .dataAccess.centralStorageAccess import centralStorageAccess
+from .dataAccess.CentralStorageAccess import CentralStorageAccess
 
 class Order_service_calculate_eta_test_case(TestCase):
     def setUp(self) -> None:
-        central_storage_mock = centralStorageAccess
+        central_storage_mock = CentralStorageAccess
         #When checking the article stock, the stub will return 100 as the amount of the article found
         #in the central storage. 
-        central_storage_mock.getStockByArticleId = MagicMock(return_value = 100)
+        central_storage_mock.get_stock_by_article_id = MagicMock(return_value = 100)
 
         #These should be the data access dependencies that the tested service is using
         mocked_dependencies = {
-            "centralStorageAccess" : central_storage_mock,
-            "orderAccess" : randomCallable,
+            "CentralStorageAccess" : central_storage_mock,
+            "OrderAccess" : randomCallable,
         }
         # An instance of OrderService is created with the mocked dependencies
         # inserted as the _deps argument, This requires the OrderService constructor

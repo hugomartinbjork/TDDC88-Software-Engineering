@@ -5,7 +5,7 @@ from backend.coremodels.article import Article
 from backend.coremodels.article import GroupInfo
 from backend.coremodels.qr_code import QRCode
 from backend.coremodels.storage_unit import StorageUnit
-# from backend.coremodels.storageComponent import storageUnit
+# from backend.coremodels.storageComponent import storage_unit
 from backend.coremodels.cost_center import CostCenter
 from backend.coremodels.user_info import UserInfo
 from backend.coremodels.storage_space import StorageSpace
@@ -17,7 +17,7 @@ from backend.coremodels.transaction import Transaction
 class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
-        fields = ('name', 'lioId', 'description', 'article_group', 'image', 'Z41', 'price',
+        fields = ('name', 'lio_id', 'description', 'article_group', 'image', 'Z41', 'price',
                   'alternative_articles')
 
 
@@ -29,7 +29,7 @@ class StorageUnitSerializer(serializers.ModelSerializer):
 
 # class StorageUnitSerializer(serializers.ModelSerializer):
 #     class Meta:
-#         model = storageUnit
+#         model = storage_unit
 #         fields = ('currentStock', 'article', 'storage',)
 
 class CostCenterSerializer(serializers.ModelSerializer):
@@ -47,7 +47,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
 class StorageSpaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = StorageSpace
-        fields = ('id', 'storage_unit', 'article', 'orderpoint', 'standard_order_amount',
+        fields = ('id', 'storage_unit', 'article', 'order_point', 'standard_order_amount',
                   'maximal_capacity', 'amount')
 
 
@@ -66,8 +66,8 @@ class QRCodeSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ('id', 'ofArticle', 'toStorageUnit',
-                  'expectedWait', 'orderTime')
+        fields = ('id', 'of_article', 'to_storage_unit',
+                  'expected_wait', 'order_time')
 
 
 class TransactionSerializer(serializers.ModelSerializer):

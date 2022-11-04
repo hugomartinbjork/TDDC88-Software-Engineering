@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Article',
             fields=[
-                ('lioId', models.CharField(max_length=15, primary_key=True, serialize=False)),
+                ('lio_id', models.CharField(max_length=15, primary_key=True, serialize=False)),
                 ('description', models.CharField(max_length=100, null=True)),
                 ('price', models.IntegerField(null=True)),
                 ('name', models.CharField(max_length=30)),
@@ -77,7 +77,7 @@ class Migration(migrations.Migration):
             name='StorageSpace',
             fields=[
                 ('id', models.CharField(max_length=15, primary_key=True, serialize=False)),
-                ('orderpoint', models.PositiveSmallIntegerField(default=0)),
+                ('order_point', models.PositiveSmallIntegerField(default=0)),
                 ('standard_order_amount', models.PositiveSmallIntegerField(default=0)),
                 ('maximal_capacity', models.PositiveSmallIntegerField(default=0)),
                 ('amount', models.PositiveSmallIntegerField(default=0)),
@@ -97,20 +97,20 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(primary_key=True, serialize=False)),
                 ('amount', models.PositiveIntegerField(default=None)),
-                ('expectedWait', models.PositiveSmallIntegerField(default=0)),
-                ('orderTime', models.DateTimeField(default=datetime.datetime.now)),
-                ('hasArrived', models.BooleanField(default=False)),
-                ('ofArticle', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='backend.article')),
-                ('toStorageUnit', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='backend.storageunit')),
+                ('expected_wait', models.PositiveSmallIntegerField(default=0)),
+                ('order_time', models.DateTimeField(default=datetime.datetime.now)),
+                ('has_arrived', models.BooleanField(default=False)),
+                ('of_article', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='backend.article')),
+                ('to_storage_unit', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='backend.storageunit')),
             ],
         ),
         migrations.CreateModel(
             name='InputOutput',
             fields=[
                 ('id', models.AutoField(primary_key=True, serialize=False)),
-                ('inputUnitName', models.CharField(max_length=30)),
-                ('outputUnitName', models.CharField(max_length=30)),
-                ('outputUnitPerInputUnit', models.PositiveIntegerField(default=0)),
+                ('input_unit_name', models.CharField(max_length=30)),
+                ('output_unit_name', models.CharField(max_length=30)),
+                ('output_unit_per_input_unit', models.PositiveIntegerField(default=0)),
                 ('article', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='backend.article')),
             ],
         ),

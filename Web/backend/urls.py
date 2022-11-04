@@ -4,10 +4,10 @@ from backend.views import views
 from django.views.decorators.csrf import csrf_exempt
 
 urlPatterns = [
-    path('articles/lio/<str:articleId>/', views.article.as_view()),
+    path('articles/lio/<str:article_id>/', views.article.as_view()),
     path('group/<str:groupId>/', views.group.as_view()),
-    path('storage/<int:storageId>/', views.storage.as_view()),
-    path('storagespace/<int:storageSpaceId>/', views.storageSpace.as_view()),
+    path('storage/<int:storage_id>/', views.storage.as_view()),
+    path('storagespace/<int:storage_space_id>/', views.storageSpace.as_view()),
     path('order/<int:id>/', csrf_exempt(views.order.as_view())),
     path('login/', views.Login.as_view()),
     path('loginwithid/', views.LoginWithId.as_view()),
@@ -17,14 +17,14 @@ urlPatterns = [
          csrf_exempt(views.AddInputUnit.as_view())),
     path('transactions/returnunit/<str:storage_space_id>/<int:amount>/',
          views.ReturnUnit.as_view()),
-    path('storage/<str:storageId>/value', views.getStorageValue.as_view()),
+    path('storage/<str:storage_id>/value', views.getStorageValue.as_view()),
     # alternative articles if storage is not sent as input
-    path('alternativearticles/<str:articleId>/',
+    path('alternativearticles/<str:article_id>/',
          views.getArticleAlternatives.as_view()),
     # alternative articles if a storage is sent as input
-    path('alternativearticles/<str:articleId>/<str:storageId>/',
+    path('alternativearticles/<str:article_id>/<str:storage_id>/',
          views.getArticleAlternatives.as_view()),
-    path('storage/<str:storageId>/cost', views.getStorageCost.as_view()),
+    path('storage/<str:storage_id>/cost', views.getStorageCost.as_view()),
     path('searcharticles/<str:search_string>/<str:input_storage>/',
          views.SearchForArticleInStorages.as_view()),
     path('compartments/', views.Compartment.as_view()),

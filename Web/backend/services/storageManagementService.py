@@ -1,8 +1,8 @@
 # from requests import request
 # from Web.backend.views.views import Compartment
-from backend.dataAccess.orderAccess import orderAccess
-from backend.dataAccess.storageAccess import storageAccess
-from backend.dataAccess.userAccess import userAccess
+from backend.dataAccess.orderAccess import OrderAccess
+from backend.dataAccess.storageAccess import StorageAccess
+from backend.dataAccess.userAccess import UserAccess
 from backend.serializers import OrderSerializer, StorageSpaceSerializer
 from backend.coremodels.article import Article
 from backend.coremodels.storage_unit import StorageUnit
@@ -16,47 +16,47 @@ from backend.__init__ import serviceInjector as si
 from ..__init__ import dataAccessInjector as di
 
 
-@si.register(name='storageManagementService')
-class storageManagementService():
+@si.register(name='StorageManagementService')
+class StorageManagementService():
     @di.inject
     def __init__(self, _deps):
-        self._storageAccess: storageAccess = _deps["storageAccess"]()
-        self._orderAccess: orderAccess = _deps["orderAccess"]()
-        self._userAccess: userAccess = _deps["userAccess"]()
+        self.storage_access: StorageAccess = _deps["StorageAccess"]()
+        self.order_access: OrderAccess = _deps["OrderAccess"]()
+        self._userAccess: UserAccess = _deps["UserAccess"]()
 
-    def getStorageUnitById(self, id: str) -> StorageUnit:
-        return self._storageAccess.get_storage(id)
+    def get_storage_unit_by_id(self, id: str) -> StorageUnit:
+        return self.storage_access.get_storage(id)
 
-    def getStorageSpaceById(self, id: str) -> StorageSpace:
-        return self._storageAccess.get_compartment_by_id(id)
+    def get_storage_space_by_id(self, id: str) -> StorageSpace:
+        return self.storage_access.get_compartment_by_id(id)
 
     def getStorageSpaceByArticle(self, article: Article) -> StorageSpace:
-        return self._storageAccess.get_compartment_by_id(id)
+        return self.storage_access.get_compartment_by_id(id)
 
     def setStorage(self, id: str, amount: int) -> int:
-        return self._storageAccess.set_storage_amount(compartmendId=id,
+        return self.storage_access.set_storage_amount(compartmendId=id,
                                                       amount=amount)
 
     def getStock(self, id: str, article_id: str) -> int:
-        return self._storageAccess.get_compartment_stock(compartmentId=id,
+        return self.storage_access.get_compartment_stock(compartment_id=id,
                                                          article_id=article_id)
 
     def getStorageUnitStock(self, id: str) -> dict:
-        return self._storageAccess.get_storage_stock(storageId=id)
+        return self.storage_access.get_storage_stock(storage_id=id)
 
     def getAllStorageUnits(self) -> dict:
-        return self._storageAccess.get_all_storage_units()
+        return self.storage_access.get_all_storage_units()
 
     def getStorageValue(self, id: str) -> int:
-        compartments = self._storageAccess.get_compartments_by_storage(
-            storageId=id)
+        compartments = self.storage_access.get_compartments_by_storage(
+            storage_id=id)
         value = 0
         for compartment in compartments:
             value += compartment.article.price * compartment.amount
         return value
 
     def getAllTransactions(self) -> dict:
-        return self._storageAccess.get_all_transactions()
+        return self.storage_access.get_all_transactions()
 
     # Storage is not connected to a costcenter atm
     # For now this is sum och costs (takeout-return)
@@ -65,8 +65,8 @@ class storageManagementService():
                        end_date: str) -> int:
         start_date_date = parse_date(start_date)
         end_date_date = parse_date(end_date)
-        transactions = self._storageAccess.get_transaction_by_storage(
-            storageId=storage_id)
+        transactions = self.storage_access.get_transaction_by_storage(
+            storage_id=storage_id)
         print(transactions)
         sum_value = 0
         takeout_value = 0
@@ -91,7 +91,7 @@ class storageManagementService():
         return sum_value
 
     def get_storage_by_costcenter(self, cost_center: str) -> StorageUnit:
-        return self._storageAccess.get_storage_by_costcenter(cost_center)
+        return self.storage_access.get_storage_by_costcenter(cost_center)
 
 # FR 10.1.3 #
 
@@ -102,12 +102,12 @@ class storageManagementService():
 
     def addToStorage(self, space_id: str, amount: int, username: str,
                      addOutputUnit: bool) -> Transaction:
-        storage_space = self._storageAccess.get_compartment_by_id(
+        storage_space = self.storage_access.get_compartment_by_id(
             id=space_id)
         storage_unit_id = storage_space.storage_unit
-        article = Article.objects.get(lioId=storage_space.article.lioId)
+        article = Article.objects.get(lio_id=storage_space.article.lio_id)
         inputOutput = InputOutput.objects.get(article=article)
-        converter = inputOutput.outputUnitPerInputUnit
+        converter = inputOutput.output_unit_per_input_unit
         user = User.objects.get(username=username)
         if (addOutputUnit):
             amount_in_storage = StorageSpace.objects.get(
@@ -143,7 +143,7 @@ class storageManagementService():
         storage_space = StorageSpace.objects.get(id=space_id)
         storage_unit_id = storage_space.storage_unit
         amount = amount
-        article = Article.objects.get(lioId=storage_space.article.lioId)
+        article = Article.objects.get(lio_id=storage_space.article.lio_id)
         user = User.objects.get(username=username)
         medical_employee = User.objects.get(username=username).groups.filter(
             name='medical employee').exists()
@@ -151,11 +151,11 @@ class storageManagementService():
         if (inputOutputCheck):
             print("inne i första if")
             inputOutput = InputOutput.objects.get(article=article)
-            converter = inputOutput.outputUnitPerInputUnit
+            converter = inputOutput.output_unit_per_input_unit
         else:
             print("inne i else")
             inputOutput = InputOutput.objects.create(article=article)
-            converter = inputOutput.outputUnitPerInputUnit
+            converter = inputOutput.output_unit_per_input_unit
 
         if (medical_employee and article.sanitation_level == 'Z41'):
             return None
@@ -182,10 +182,10 @@ class storageManagementService():
             return new_transaction
 
     def takeFromCompartment(self, space_id, amount, username, addOutputUnit):
-        compartment = self._storageAccess.get_compartment_by_id(id=space_id)
-        article = Article.objects.get(lioId=compartment.article.lioId)
+        compartment = self.storage_access.get_compartment_by_id(id=space_id)
+        article = Article.objects.get(lio_id=compartment.article.lio_id)
         inputOutput = InputOutput.objects.get(article=article)
-        converter = inputOutput.outputUnitPerInputUnit
+        converter = inputOutput.output_unit_per_input_unit
         user = User.objects.get(username=username)
         if (addOutputUnit):
             amount_in_storage = StorageSpace.objects.get(
@@ -213,19 +213,19 @@ class storageManagementService():
             print(new_transaction)
             return new_transaction
 
-    def getArticleInStorageSpace(self, storageSpaceId: str) -> Article:
-        return self._storageAccess.getArticleInStorageSpace(
-                                    storageSpaceId=storageSpaceId)
+    def get_article_in_storage_space(self, storage_space_id: str) -> Article:
+        return self.storage_access.get_article_in_storage_space(
+                                    storage_space_id=storage_space_id)
 
-    def searchArticleInStorage(self, storageUnitId: str,
-                               articleId: str) -> int:
-        return self._storageAccess.searchArticleInStorage(
-                    storageUnitId=storageUnitId, articleId=articleId)
+    def search_article_in_storage(self, storage_unit_id: str,
+                                  article_id: str) -> int:
+        return self.storage_access.search_article_in_storage(
+                    storage_unit_id=storage_unit_id, article_id=article_id)
 # FR 10.1.3 #
 
-    def getCompartmentContentAndOrders(self, compartmentId):
-        compartment = self._storageAccess.get_compartment_by_id(
-                                                id=compartmentId)
+    def getCompartmentContentAndOrders(self, compartment_id):
+        compartment = self.storage_access.get_compartment_by_id(
+                                                id=compartment_id)
         alteredDict = {}
 
         if compartment is None:
@@ -236,12 +236,12 @@ class storageManagementService():
             return None
         alteredDict.update(compartmentSerializer.data)
 
-        order = self._orderAccess.get_order_by_article_and_storage(
+        order = self.order_access.get_order_by_article_and_storage(
                                 compartment.storage_unit.id,
-                                compartment.article.lioId)
+                                compartment.article.lio_id)
         if order is not None:
             orderSerializer = OrderSerializer(order)
-            eta = self._orderAccess.get_eta(order.id)
+            eta = self.order_access.get_eta(order.id)
             orderDictionary = {"ETA": eta}
             if orderSerializer.is_valid:
                 orderDictionary.update(orderSerializer.data)
@@ -253,13 +253,13 @@ class storageManagementService():
                            qr_code: str) -> StorageSpace:
 
         print(storage_id)
-        compartment = self._storageAccess.create_compartment(
+        compartment = self.storage_access.create_compartment(
             storage_id=storage_id, placement=placement, qr_code=qr_code
         )
         return compartment
 
     def get_compartment_by_qr(self, qr_code: str) -> StorageSpace:
-        compartment = self._storageAccess.get_compartment_by_qr(
+        compartment = self.storage_access.get_compartment_by_qr(
             qr_code=qr_code)
         return compartment
 

@@ -7,7 +7,7 @@ from backend.operations.enumerator import UnitOperator
 
 
 class Article(models.Model):
-    lioId = models.CharField(max_length=15, primary_key=True)
+    lio_id = models.CharField(max_length=15, primary_key=True)
     description = models.CharField(max_length=100, null=True)
     price = models.IntegerField(null=True)
     name = models.CharField(max_length=30)

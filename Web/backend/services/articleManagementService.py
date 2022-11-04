@@ -2,24 +2,24 @@ from backend.coremodels.supplier import Supplier
 from backend.coremodels.article import Article
 from backend.__init__ import serviceInjector as si
 from ..__init__ import dataAccessInjector as di
-from ..dataAccess.articleAccess import articleAccess
+from ..dataAccess.articleAccess import ArticleAccess
 
 
-@si.register(name='articleManagementService')
-class articleManagementService():
+@si.register(name='ArticleManagementService')
+class ArticleManagementService():
 
     @di.inject
     def __init__(self, _deps, *args):
-        self._articleOperations: articleAccess = _deps["articleAccess"]()
+        self.article_operations: ArticleAccess = _deps["ArticleAccess"]()
 
-    def getArticleByLioId(self, lioId: str) -> Article:
-        return self._articleOperations.getArticleByLioId(lioId)
+    def get_article_by_lioId(self, lio_id: str) -> Article:
+        return self.article_operations.get_article_by_lioId(lio_id)
 
-    def getAlternativeArticles(self, lioId: str) -> Article:
-        return self._articleOperations.getAlternativeArticles(lioId)
+    def get_alternative_articles(self, lio_id: str) -> Article:
+        return self.article_operations.get_alternative_articles(lio_id)
 
-    def getSupplier(self, article: Article) -> Supplier:
-        return self._articleOperations.getSupplier(article)
+    def get_supplier(self, article: Article) -> Supplier:
+        return self.article_operations.get_supplier(article)
 
-    def getSupplierArticleNr(self, article: Article) -> str:
-        return self._articleOperations.getSupplierArticleNr(article)
+    def get_supplier_article_nr(self, article: Article) -> str:
+        return self.article_operations.get_supplier_article_nr(article)

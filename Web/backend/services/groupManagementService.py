@@ -3,10 +3,10 @@ from backend.__init__ import serviceInjector as si
 # from ..__init__ import dataAccessInjector as di
 
 
-@si.register(name='groupManagementService')
-class groupManagementService():
+@si.register(name='GroupManagementService')
+class GroupManagementService():
 
-    def getGroupById(self, id: str) -> GroupInfo:
+    def get_group_by_id(self, id: str) -> GroupInfo:
         try:
             group = GroupInfo.objects.get(id=id)
             return group
