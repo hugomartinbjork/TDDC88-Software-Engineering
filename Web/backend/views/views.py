@@ -7,10 +7,15 @@ import json
 # from django.shortcuts import render
 # from rest_framework import generics
 from django.http import Http404, JsonResponse, HttpResponseBadRequest
-from backend.coremodels.transaction import Transaction
-from ..serializers import AlternativeNameSerializer, StorageUnitSerializer, ArticleSerializer, GroupSerializer, QRCodeSerializer, OrderSerializer, StorageSpaceSerializer, TransactionSerializer
-# This import is important for now, since the dependency in articlemanagmentservice will not be stored in the serviceInjector otherwise however, I'm
-# hoping to be able to change this since it looks kind of trashy
+# from backend.coremodels.transaction import Transaction
+from ..serializers import AlternativeNameSerializer, StorageUnitSerializer
+from ..serializers import ArticleSerializer, OrderSerializer
+from ..serializers import StorageSpaceSerializer, TransactionSerializer
+# from ..serializers import GroupSerializer, QRCodeSerializer
+#  This import is important for now, since the dependency
+# in articlemanagmentservice will not be stored in the serviceInjector
+# otherwise however, I'm hoping to be able to change this since
+# it looks kind of trashy
 from backend.services.articleManagementService import articleManagementService
 from backend.services.userService import userService
 from backend.services.groupManagementService import groupManagementService
@@ -403,7 +408,8 @@ class Transactions(APIView):
                     self._storageManagementService.takeFromCompartment(
                         space_id=compartment.id, amount=amount,
                         username=user.username, addOutputUnit=addOutputUnit))
-                return JsonResponse(TransactionSerializer(transaction).data, status=200)
+                return JsonResponse(TransactionSerializer(transaction).data,
+                                    status=200)
 
 
 class getStorageValue(View):
@@ -520,18 +526,29 @@ class SearchForArticleInStorages(View):
             else:
                 storage = input_storage
 
-            #NOTE: In order to increase testability and reusability I would like to see already existing functions in 
-            # the service- / data access layer being used here. Another tip is to query the "articles" variable
-            # based on storage_unit_id != storage (then duplicates will not have to be removed) 
+            # NOTE: In order to increase testability and reusability I would
+            # like to see already existing functions in
+            # the service- / data access layer being used here. Another tip is
+            # to query the "articles" variable
+            # based on storage_unit_id != storage (then duplicates will not
+            # have to be removed)
 
-            # query for the articles which match the input search string and the chosen storage unit.
-            articles_in_chosen_storage = StorageSpace.objects.filter(article__name__contains=search_string, storage_unit__id=storage).values_list(
-                'article__name', 'id', 'amount', 'storage_unit__name', 'storage_unit__floor', 'storage_unit__building')
-            # query for the articles which only matches the input search string in all storage units.
-            articles = StorageSpace.objects.filter(article__name__contains=search_string).values_list(
-                'article__name', 'id', 'amount', 'storage_unit__name', 'storage_unit__floor', 'storage_unit__building')
+            # query for the articles which match the input search string
+            # and the chosen storage unit.
+            articles_in_chosen_storage = StorageSpace.objects.filter(
+                article__name__contains=search_string,
+                storage_unit__id=storage).values_list(
+                'article__name', 'id', 'amount', 'storage_unit__name',
+                'storage_unit__floor', 'storage_unit__building')
+            # query for the articles which only matches the input search
+            # string in all storage units.
+            articles = StorageSpace.objects.filter(
+                article__name__contains=search_string).values_list(
+                'article__name', 'id', 'amount', 'storage_unit__name',
+                'storage_unit__floor', 'storage_unit__building')
 
-            # sort the articles which does not match with the chosen storage unit.
+            # sort the articles which does not match with
+            # the chosen storage unit.
             sorted_articles = sorted(
                 list(articles), key=itemgetter(5, 4))
 
