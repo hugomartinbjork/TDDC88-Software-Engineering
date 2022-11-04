@@ -55,16 +55,26 @@ class StorageSpaceCreationTest(TestCase):
 # Testing FR4.3
 class FR4_3_Test(TestCase):
     def setUp(self):
-        Article.objects.create(lioId="1")
-        StorageUnit.objects.create(id="1")
-        StorageSpace.objects.create(id="1", storage_unit = StorageUnit.objects.get(id="1"), article = Article.objects.get(lioId="1"))
-        StorageSpace.objects.create(id="2", storage_unit = StorageUnit.objects.get(id="1"), article = Article.objects.get(lioId="1"))
+        #create 2 storage spaces in the same storage units containing the same article
+        self.article_in_storagespace = Article.objects.create(lioId="1")
+        self.storageunit_in_storagespace = StorageUnit.objects.create(id="1")
+        self.article_management_service : articleManagementService = articleManagementService()
+        self.storage_management_service : storageManagementService = storageManagementService()
+        self.storagespace = StorageSpace.objects.create(id="1", storage_unit = self.storage_management_service.getStorageUnitById(id="1"), article = self.article_management_service.getArticleByLioId(lioId="1"))
+        self.storagespace = StorageSpace.objects.create(id="2", storage_unit = self.storage_management_service.getStorageUnitById(id="1"), article = self.article_management_service.getArticleByLioId(lioId="1"))
+       
+
+        #create a second article in third storage space but in same storage unit
+        self.article_in_storagespace = Article.objects.create(lioId="2")
+        self.storagespace = StorageSpace.objects.create(id="3", storage_unit = self.storage_management_service.getStorageUnitById(id="1"), article = self.article_management_service.getArticleByLioId(lioId="2"))
 
     def test_FR4_3(self):
-        storageunit = StorageUnit.objects.get(id="1")
-        storagespace1 = StorageSpace.objects.get(id="1")
-        storagespace2 = StorageSpace.objects.get(id="2")
-        article1 = Article.objects.get(lioId="1")
+
+        #Test that we can find/have the same article in different storage spaces in the same unit
+        storageunit = self.storage_management_service.getStorageUnitById(id="1")
+        storagespace1 = self.storage_management_service.getStorageSpaceById(id="1")
+        storagespace2 = self.storage_management_service.getStorageSpaceById(id="2")
+        article1 = self.article_management_service.getArticleByLioId("1")
         self.assertEqual(storagespace1.article, article1)
         self.assertEqual(storagespace2.article, article1)
         self.assertEqual(storagespace1.storage_unit, storageunit)
