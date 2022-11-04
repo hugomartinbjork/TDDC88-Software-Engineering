@@ -30,24 +30,24 @@ class StorageManagementService():
     def get_storage_space_by_id(self, id: str) -> StorageSpace:
         return self.storage_access.get_compartment_by_id(id)
 
-    def getStorageSpaceByArticle(self, article: Article) -> StorageSpace:
+    def get_storage_space_by_article(self, article: Article) -> StorageSpace:
         return self.storage_access.get_compartment_by_id(id)
 
-    def setStorage(self, id: str, amount: int) -> int:
-        return self.storage_access.set_storage_amount(compartmendId=id,
+    def set_storage(self, id: str, amount: int) -> int:
+        return self.storage_access.set_storage_amount(compartment_id=id,
                                                       amount=amount)
 
-    def getStock(self, id: str, article_id: str) -> int:
+    def get_stock(self, id: str, article_id: str) -> int:
         return self.storage_access.get_compartment_stock(compartment_id=id,
                                                          article_id=article_id)
 
-    def getStorageUnitStock(self, id: str) -> dict:
+    def get_storage_unit_stock(self, id: str) -> dict:
         return self.storage_access.get_storage_stock(storage_id=id)
 
-    def getAllStorageUnits(self) -> dict:
+    def get_all_storage_units(self) -> dict:
         return self.storage_access.get_all_storage_units()
 
-    def getStorageValue(self, id: str) -> int:
+    def get_storage_value(self, id: str) -> int:
         compartments = self.storage_access.get_compartments_by_storage(
             storage_id=id)
         value = 0
@@ -55,14 +55,14 @@ class StorageManagementService():
             value += compartment.article.price * compartment.amount
         return value
 
-    def getAllTransactions(self) -> dict:
+    def get_all_transactions(self) -> dict:
         return self.storage_access.get_all_transactions()
 
     # Storage is not connected to a costcenter atm
     # For now this is sum och costs (takeout-return)
     # from transactions for one storage_compartment
-    def getStorageCost(self, storage_id: str, start_date: str,
-                       end_date: str) -> int:
+    def get_storage_cost(self, storage_id: str, start_date: str,
+                         end_date: str) -> int:
         start_date_date = parse_date(start_date)
         end_date_date = parse_date(end_date)
         transactions = self.storage_access.get_transaction_by_storage(
@@ -100,16 +100,16 @@ class StorageManagementService():
 # Leaving this
 # TODO to the original author
 
-    def addToStorage(self, space_id: str, amount: int, username: str,
-                     addOutputUnit: bool) -> Transaction:
+    def add_to_storage(self, space_id: str, amount: int, username: str,
+                       add_output_unit: bool) -> Transaction:
         storage_space = self.storage_access.get_compartment_by_id(
             id=space_id)
         storage_unit_id = storage_space.storage_unit
         article = Article.objects.get(lio_id=storage_space.article.lio_id)
-        inputOutput = InputOutput.objects.get(article=article)
-        converter = inputOutput.output_unit_per_input_unit
+        input_output = InputOutput.objects.get(article=article)
+        converter = input_output.output_unit_per_input_unit
         user = User.objects.get(username=username)
-        if (addOutputUnit):
+        if (add_output_unit):
             amount_in_storage = StorageSpace.objects.get(
                 id=space_id).amount + amount
             new_amount = amount
@@ -138,8 +138,8 @@ class StorageManagementService():
 # Leaving this
 # TODO to the original author
 
-    def addToReturnStorage(self, space_id: str, amount: int, username: str,
-                           addOutputUnit: bool) -> Transaction:
+    def add_to_return_storage(self, space_id: str, amount: int, username: str,
+                              add_output_unit: bool) -> Transaction:
         storage_space = StorageSpace.objects.get(id=space_id)
         storage_unit_id = storage_space.storage_unit
         amount = amount
@@ -147,26 +147,27 @@ class StorageManagementService():
         user = User.objects.get(username=username)
         medical_employee = User.objects.get(username=username).groups.filter(
             name='medical employee').exists()
-        inputOutputCheck = InputOutput.objects.filter(article=article).exists()
-        if (inputOutputCheck):
+        input_output_check = InputOutput.objects.filter(
+                                article=article).exists()
+        if (input_output_check):
             print("inne i första if")
-            inputOutput = InputOutput.objects.get(article=article)
-            converter = inputOutput.output_unit_per_input_unit
+            input_output = InputOutput.objects.get(article=article)
+            converter = input_output.output_unit_per_input_unit
         else:
             print("inne i else")
-            inputOutput = InputOutput.objects.create(article=article)
-            converter = inputOutput.output_unit_per_input_unit
+            input_output = InputOutput.objects.create(article=article)
+            converter = input_output.output_unit_per_input_unit
 
         if (medical_employee and article.sanitation_level == 'Z41'):
             return None
 
-        if (addOutputUnit):
+        if (add_output_unit):
             amount_in_storage = StorageSpace.objects.get(
                 id=space_id).amount + amount
             new_amount = amount
         else:
             amount_in_storage = StorageSpace.objects.get(
-                id=id).amount + amount*converter
+                id=id).amount + amount * converter
             new_amount = amount * converter
         if (amount_in_storage < 0):
             return None
@@ -181,13 +182,14 @@ class StorageManagementService():
             print(new_transaction)
             return new_transaction
 
-    def takeFromCompartment(self, space_id, amount, username, addOutputUnit):
+    def take_from_compartment(self, space_id, amount, username,
+                              add_output_unit):
         compartment = self.storage_access.get_compartment_by_id(id=space_id)
         article = Article.objects.get(lio_id=compartment.article.lio_id)
-        inputOutput = InputOutput.objects.get(article=article)
-        converter = inputOutput.output_unit_per_input_unit
+        input_output = InputOutput.objects.get(article=article)
+        converter = input_output.output_unit_per_input_unit
         user = User.objects.get(username=username)
-        if (addOutputUnit):
+        if (add_output_unit):
             amount_in_storage = StorageSpace.objects.get(
                 id=space_id).amount - amount
             new_amount = amount
@@ -223,30 +225,30 @@ class StorageManagementService():
                     storage_unit_id=storage_unit_id, article_id=article_id)
 # FR 10.1.3 #
 
-    def getCompartmentContentAndOrders(self, compartment_id):
+    def get_compartment_content_and_orders(self, compartment_id):
         compartment = self.storage_access.get_compartment_by_id(
                                                 id=compartment_id)
-        alteredDict = {}
+        altered_dict = {}
 
         if compartment is None:
             return None
 
-        compartmentSerializer = StorageSpaceSerializer(compartment)
-        if not compartmentSerializer.is_valid:
+        compartment_serializer = StorageSpaceSerializer(compartment)
+        if not compartment_serializer.is_valid:
             return None
-        alteredDict.update(compartmentSerializer.data)
+        altered_dict.update(compartment_serializer.data)
 
         order = self.order_access.get_order_by_article_and_storage(
                                 compartment.storage_unit.id,
                                 compartment.article.lio_id)
         if order is not None:
-            orderSerializer = OrderSerializer(order)
+            order_serializer = OrderSerializer(order)
             eta = self.order_access.get_eta(order.id)
-            orderDictionary = {"ETA": eta}
-            if orderSerializer.is_valid:
-                orderDictionary.update(orderSerializer.data)
-            alteredDict['Order'] = orderDictionary
-            return alteredDict
+            order_dictionary = {"ETA": eta}
+            if order_serializer.is_valid:
+                order_dictionary.update(order_serializer.data)
+            altered_dict['Order'] = order_dictionary
+            return altered_dict
 
     # FR 9.4.1 och FR 9.4.2 ##
     def create_compartment(self, storage_id: str, placement: str,

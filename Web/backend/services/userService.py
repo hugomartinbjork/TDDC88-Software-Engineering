@@ -13,14 +13,14 @@ from backend.coremodels.user_info import UserInfo
 
 
 @si.register()
-class userService(BaseBackend):
-    def authenticatewithid(self, id):
+class UserService(BaseBackend):
+    def authenticate_with_id(self, id):
         try:
             return User.objects.get(pk=id)
         except User.DoesNotExist:
             return None
 
-    def createAuthToken(self, request, user):
+    def create_auth_token(self, request, user):
         login(request, user)
         token, created = Token.objects.get_or_create(user=request.user)
         data = {
