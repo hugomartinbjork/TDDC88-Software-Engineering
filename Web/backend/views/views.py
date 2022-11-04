@@ -11,7 +11,8 @@ from django.http import Http404, JsonResponse, HttpResponseBadRequest
 from ..serializers import AlternativeNameSerializer, StorageUnitSerializer
 from ..serializers import ArticleSerializer, OrderSerializer
 from ..serializers import StorageSpaceSerializer, TransactionSerializer
-# from ..serializers import GroupSerializer, QRCodeSerializer
+from ..serializers import GroupSerializer
+# from QRCodeSerializer
 #  This import is important for now, since the dependency
 # in articlemanagmentservice will not be stored in the serviceInjector
 # otherwise however, I'm hoping to be able to change this since
@@ -205,6 +206,7 @@ class Order(View):
         self.order_service: OrderService = _deps['OrderService']()
 
     def get(self, request, id):
+        '''Return order using id.'''
         if request.method == 'GET':
             order = self.order_service.get_order_by_id(id)
             if order is None:
@@ -215,6 +217,7 @@ class Order(View):
             return HttpResponseBadRequest
 
     def post(self, request, id):
+        '''Place order if no order. Returns order.'''
         if request.method == 'POST':
             json_body = json.loads(request.body)
             article = json_body['of_article']
@@ -232,12 +235,14 @@ class Order(View):
 
 
 class Login(APIView):
+    '''Login view.'''
     # Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing
     @si.inject
     def __init__(self, _deps, *args):
         self.user_service: UserService = _deps['UserService']()
 
     def post(self, request):
+        '''Login post. Returns token.'''
         username = request.data.get('username')
         password = request.data.get('password')
 
@@ -258,11 +263,13 @@ class Login(APIView):
 
 
 class LoginWithId(APIView):
+    '''Id login view.'''
     @si.inject
     def __init__(self, _deps, *args):
         self.user_service: UserService = _deps['UserService']()
 
     def post(self, request):
+        '''Login using id. Returns token.'''
         user_id = request.data.get('id')
         check_user = User.objects.filter(id=user_id).exists()
         if check_user is False:
@@ -278,6 +285,7 @@ class LoginWithId(APIView):
 
 
 class SeeAllStorageUnits(View):
+    '''See all storage units view.'''
     @si.inject
     def __init__(self, _deps, *args):
         storage_management_service = _deps['StorageManagementService']
@@ -286,6 +294,7 @@ class SeeAllStorageUnits(View):
                                         storage_management_service())
 
     def get(self, request):
+        '''Returns all storages.'''
         if request.method == 'GET':
             allStorages = self.storage_management_service.get_all_storage_units()
             if allStorages is None:
@@ -295,6 +304,7 @@ class SeeAllStorageUnits(View):
 
 
 class AddInputUnit(View):
+    '''Add input unit view.'''
     @si.inject
     def __init__(self, _deps):
         StorageManagementService = _deps['StorageManagementService']
@@ -302,13 +312,14 @@ class AddInputUnit(View):
         self.user_service: UserService = _deps['UserService']()
 
     def post(self, request, storage_space_id, amount, time_of_transaction):
+        '''Post addition to storage.'''
         storage_space = StorageManagementService.get_storage_space_by_id(
             self=self, id=storage_space_id)
         user = request.user
         if request.method == 'POST':
             if storage_space is None:
                 return Http404("Could not find storage space")
-            StorageManagementService.addToStorage(self=self,
+            StorageManagementService.add_to_storage(self=self,
                                                   space_id=storage_space_id,
                                                   amount=amount,
                                                   username=user.username,
@@ -325,11 +336,13 @@ class AddInputUnit(View):
 
 
 class GetUserTransactions(View):
+    '''Get user transactions view.'''
     @si.inject
     def __init__(self, _deps):
         self.user_service: UserService = _deps['UserService']()
 
     def get(self, request, user_id):
+        '''Returns all transactions made by user.'''
         current_user = User.objects.filter(id=user_id)
 
         if current_user.exists() == False:
@@ -346,6 +359,7 @@ class GetUserTransactions(View):
 
 
 class ReturnUnit(View):
+    '''Return unit view.'''
     @si.inject
     def __init__(self, _deps):
         StorageManagementService = _deps['StorageManagementService']
@@ -353,6 +367,7 @@ class ReturnUnit(View):
         self.user_service: UserService = _deps['UserService']()
 
     def post(self, request, storage_space_id, amount, time_of_transaction=now):
+        '''Post return to storage.'''
         storage_space = StorageManagementService.get_storage_space_by_id(
             self=self, id=storage_space_id)
         user = request.user
@@ -371,6 +386,7 @@ class ReturnUnit(View):
 
 
 class Transactions(APIView):
+    '''Transactions API view.'''
     @si.inject
     def __init__(self, _deps):
         StorageManagementService = _deps['StorageManagementService']
@@ -378,6 +394,7 @@ class Transactions(APIView):
         self.user_service: UserService = _deps['UserService']()
 
     def get(self, request):
+        '''Get all transactions.'''
         if request.method == 'GET':
             all_transactions = (
                 self.storage_management_service.get_all_transactions())
@@ -387,6 +404,7 @@ class Transactions(APIView):
             return JsonResponse(list(all_transactions), safe=False, status=200)
 
     def post(self, request):
+        '''Description needed.'''
         compartment = self.storage_management_service.get_compartment_by_qr(
             qr_code=request.data.get("qrCode"))
         if compartment is None:
@@ -437,6 +455,7 @@ class Transactions(APIView):
 
 
 class GetStorageValue(View):
+    '''Get storage value view.'''
     @si.inject
     def __init__(self, _deps):
         storage_management_service = _deps['StorageManagementService']
@@ -444,6 +463,7 @@ class GetStorageValue(View):
                                         storage_management_service())
 
     def get(self, request, storage_id):
+        '''Get storage unit value using id.'''
         if request.method == 'GET':
             storage = self.storage_management_service.get_storage_unit_by_id(
                 storage_id)
@@ -456,6 +476,7 @@ class GetStorageValue(View):
 
 
 class GetStorageCost(APIView):
+    '''Get storage cost API view.'''
     @si.inject
     def __init__(self, _deps, *args):
         storage_management_service = _deps['StorageManagementService']
@@ -463,6 +484,7 @@ class GetStorageCost(APIView):
                                         storage_management_service())
 
     def get(self, request, storage_id):
+        '''Get storage cost.'''
         start_date = request.data.get('start_date')
         end_date = request.data.get('end_date')
         if request.method == 'GET':
@@ -483,6 +505,12 @@ class GetStorageCost(APIView):
 
 
 class GetArticleAlternatives(View):
+    '''Get alternative article view. Gets alternative articles for a 
+       given article. If only article id
+       is entered, the method returns a list of alternative articles and all
+       their attributes. If an article id and a storage id is entered, the
+       method returns the id for alternative articles and the amount of
+       the alternative articles in that storage'''
     @si.inject
     def __init__(self, _deps):
         article_management_service = _deps['ArticleManagementService']
@@ -493,6 +521,7 @@ class GetArticleAlternatives(View):
                                         article_management_service())
 
     def get(self, request, article_id, storage_id=None):
+        '''Get.'''
         if request.method == 'GET':
 
             article = self.article_management_service.get_alternative_articles(
@@ -523,6 +552,7 @@ class GetArticleAlternatives(View):
 
 # FR 8.1 start #
 class SearchForArticleInStorages(View):
+    '''Search for article in storages view.'''
     @si.inject
     def __init__(self, _deps):
         StorageManagementService = _deps['StorageManagementService']
@@ -533,6 +563,8 @@ class SearchForArticleInStorages(View):
         self._order_service = OrderService()
 
     def get(self, request, search_string, input_storage) -> dict:
+        '''Return articles in a given storage which matches
+           Search.'''
         if request.method == 'GET':
 
             # Getting the storage unit which is connected
