@@ -466,6 +466,10 @@ class SearchForArticleInStorages(View):
             else:
                 storage = input_storage
 
+            #NOTE: In order to increase testability and reusability I would like to see already existing functions in 
+            # the service- / data access layer being used here. Another tip is to query the "articles" variable
+            # based on storage_unit_id != storage (then duplicates will not have to be removed) 
+
             # query for the articles which match the input search string and the chosen storage unit.
             articles_in_chosen_storage = StorageSpace.objects.filter(article__name__contains=search_string, storage_unit__id=storage).values_list(
                 'article__name', 'id', 'amount', 'storage_unit__name', 'storage_unit__floor', 'storage_unit__building')
