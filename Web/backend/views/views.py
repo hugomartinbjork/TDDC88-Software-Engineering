@@ -7,15 +7,10 @@ import json
 # from django.shortcuts import render
 # from rest_framework import generics
 from django.http import Http404, JsonResponse, HttpResponseBadRequest
-# from backend.coremodels.transaction import Transaction
-from backend.dataAccess.storageAccess import storageAccess
-# from ..serializers import AlternativeNameSerializer, StorageUnitSerializer,
-# ArticleSerializer, GroupSerializer, QRCodeSerializer,
-# OrderSerializer, StorageSpaceSerializer, TransactionSerializer
-# This import is important for now, since the dependency
-# in articlemanagmentservice will not be stored in the serviceInjector
-# otherwise however, I'm hoping to be able to change this
-# since it looks kind of trashy
+from backend.coremodels.transaction import Transaction
+from ..serializers import AlternativeNameSerializer, StorageUnitSerializer, ArticleSerializer, GroupSerializer, QRCodeSerializer, OrderSerializer, StorageSpaceSerializer, TransactionSerializer
+# This import is important for now, since the dependency in articlemanagmentservice will not be stored in the serviceInjector otherwise however, I'm
+# hoping to be able to change this since it looks kind of trashy
 from backend.services.articleManagementService import articleManagementService
 from backend.services.userService import userService
 from backend.services.groupManagementService import groupManagementService
@@ -285,7 +280,6 @@ class AddInputUnit(View):
     def __init__(self, _deps):
         storageManagementService = _deps['storageManagementService']
         self._storageManagementService = storageManagementService()
-        self._storageAccess = storageAccess()
         self._userService: userService = _deps['userService']()
 
     def post(self, request, storage_space_id, amount):
@@ -335,10 +329,8 @@ class GetUserTransactions(View):
 class ReturnUnit(View):
     @si.inject
     def __init__(self, _deps):
-        # storageAccess = _deps['storageAccess']
         storageManagementService = _deps['storageManagementService']
         self._storageManagementService = storageManagementService()
-        self._storageAccess = storageAccess()
         self._userService: userService = _deps['userService']()
 
     def post(self, request, storage_space_id, amount):
@@ -360,7 +352,6 @@ class Transactions(APIView):
     def __init__(self, _deps):
         storageManagementService = _deps['storageManagementService']
         self._storageManagementService = storageManagementService()
-        self._storageAccess = storageAccess()
         self._userService: userService = _deps['userService']()
 
     def get(self, request):
@@ -529,22 +520,18 @@ class SearchForArticleInStorages(View):
             else:
                 storage = input_storage
 
-            # query for the articles which match the input search string and
-            # the chosen storage unit.
-            articles_in_chosen_storage = StorageSpace.objects.filter(
-                article__name__contains=search_string,
-                storage_unit__id=storage).values_list(
-                    'article__name', 'id', 'amount', 'storage_unit__name',
-                    'storage_unit__floor', 'storage_unit__building')
-            # query for the articles which only matches the input
-            # search string in all storage units.
-            articles = StorageSpace.objects.filter(
-                article__name__contains=search_string).values_list(
-                    'article__name', 'id', 'amount', 'storage_unit__name',
-                    'storage_unit__floor', 'storage_unit__building')
+            #NOTE: In order to increase testability and reusability I would like to see already existing functions in 
+            # the service- / data access layer being used here. Another tip is to query the "articles" variable
+            # based on storage_unit_id != storage (then duplicates will not have to be removed) 
 
-            # sort the articles which does not match with
-            # the chosen storage unit.
+            # query for the articles which match the input search string and the chosen storage unit.
+            articles_in_chosen_storage = StorageSpace.objects.filter(article__name__contains=search_string, storage_unit__id=storage).values_list(
+                'article__name', 'id', 'amount', 'storage_unit__name', 'storage_unit__floor', 'storage_unit__building')
+            # query for the articles which only matches the input search string in all storage units.
+            articles = StorageSpace.objects.filter(article__name__contains=search_string).values_list(
+                'article__name', 'id', 'amount', 'storage_unit__name', 'storage_unit__floor', 'storage_unit__building')
+
+            # sort the articles which does not match with the chosen storage unit.
             sorted_articles = sorted(
                 list(articles), key=itemgetter(5, 4))
 
