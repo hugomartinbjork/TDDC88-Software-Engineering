@@ -8,7 +8,6 @@ from django.shortcuts import render
 from rest_framework import generics
 from django.http import Http404, JsonResponse, HttpResponseBadRequest
 from backend.coremodels.transaction import Transaction
-from backend.dataAccess.storageAccess import storageAccess
 from ..serializers import AlternativeNameSerializer, StorageUnitSerializer, ArticleSerializer, GroupSerializer, QRCodeSerializer, OrderSerializer, StorageSpaceSerializer, TransactionSerializer
 # This import is important for now, since the dependency in articlemanagmentservice will not be stored in the serviceInjector otherwise however, I'm
 # hoping to be able to change this since it looks kind of trashy
@@ -271,7 +270,6 @@ class AddInputUnit(View):
     def __init__(self, _deps):
         storageManagementService = _deps['storageManagementService']
         self._storageManagementService = storageManagementService()
-        self._storageAccess = storageAccess()
         self._userService: userService = _deps['userService']()
 
     def post(self, request, storage_space_id, amount, time_stamp):
@@ -314,10 +312,8 @@ class GetUserTransactions(View):
 class ReturnUnit(View):
     @si.inject
     def __init__(self, _deps):
-        #storageAccess = _deps['storageAccess']
         storageManagementService = _deps['storageManagementService']
         self._storageManagementService = storageManagementService()
-        self._storageAccess = storageAccess()
         self._userService: userService = _deps['userService']()
 
     def post(self, request, storage_space_id, amount, time_stamp=now):
@@ -337,7 +333,6 @@ class Transactions(APIView):
     def __init__(self, _deps):
         storageManagementService = _deps['storageManagementService']
         self._storageManagementService = storageManagementService()
-        self._storageAccess = storageAccess()
         self._userService: userService = _deps['userService']()
 
     def get(self, request):
@@ -348,7 +343,7 @@ class Transactions(APIView):
         else:
             return JsonResponse(list(allTransactions), safe=False, status=200)
 
-    def post(self, request, time_stamp):
+    def post(self, request):
         compartment = self._storageManagementService.get_compartment_by_qr(
             qr_code=request.data.get("qrCode"))
         if compartment == None:
@@ -360,6 +355,10 @@ class Transactions(APIView):
             unit = request.data.get("unit")
             user = request.user
             operation = request.data.get("operation")
+            time_stamp = request.data.get("time_stamp")
+
+            if time_stamp == "":
+                time_stamp = now
 
             if unit == "output":
                 addOutputUnit = False
@@ -374,11 +373,11 @@ class Transactions(APIView):
                 return JsonResponse(TransactionSerializer(transaction).data, status=200)
             elif operation == "return":
                 transaction = self._storageManagementService.addToReturnStorage(
-                    space_id=compartment.id, amount=amount, username=user.username, addOutputUnit=addOutputUnit)
+                    space_id=compartment.id, amount=amount, username=user.username, addOutputUnit=addOutputUnit, time_stamp=time_stamp)
                 return JsonResponse(TransactionSerializer(transaction).data, status=200)
             elif operation == "takeout":
                 transaction = self._storageManagementService.takeFromCompartment(
-                    space_id=compartment.id, amount=amount, username=user.username, addOutputUnit=addOutputUnit)
+                    space_id=compartment.id, amount=amount, username=user.username, addOutputUnit=addOutputUnit, time_stamp=time_stamp)
                 return JsonResponse(TransactionSerializer(transaction).data, status=200)
 
 
@@ -482,6 +481,10 @@ class SearchForArticleInStorages(View):
                 storage = user_storage.id
             else:
                 storage = input_storage
+
+            #NOTE: In order to increase testability and reusability I would like to see already existing functions in 
+            # the service- / data access layer being used here. Another tip is to query the "articles" variable
+            # based on storage_unit_id != storage (then duplicates will not have to be removed) 
 
             # query for the articles which match the input search string and the chosen storage unit.
             articles_in_chosen_storage = StorageSpace.objects.filter(article__name__contains=search_string, storage_unit__id=storage).values_list(
