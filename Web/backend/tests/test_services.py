@@ -24,19 +24,19 @@ class ArticleManagementServiceTest(TestCase):
         test_search = self.article_management_service.getArticleByLioId(lioId="1")
         self.assertEqual(self.article_to_search_for, test_search)    
 
-class storageManagementServiceTest(TestCase):    
-    def setUp(self):                     
-        Article.objects.create(lioId="1")
-        StorageUnit.objects.create(id="1")
-        StorageSpace.objects.create(id="1", storage_unit = StorageUnit.objects.get(id="1"), article = Article.objects.get(lioId="1"))
+# class storageManagementServiceTest(TestCase):    
+#     def setUp(self):                     
+#         Article.objects.create(lioId="1")
+#         StorageUnit.objects.create(id="1")
+#         StorageSpace.objects.create(id="1", storage_unit = StorageUnit.objects.get(id="1"), article = Article.objects.get(lioId="1"))
             
-    def test_getStorageUnitById(self):
-        storageunit = StorageUnit.objects.get(id="1")
-        self.assertEqual(storageManagementService.getStorageUnitById(self,"1"), storageunit)
+#     # def test_getStorageUnitById(self):
+#     #     storageunit = StorageUnit.objects.get(id="1")
+#     #     self.assertEqual(storageManagementService.getStorageUnitById(self,"1"), storageunit)
     
-    def test_getStorageSpaceById(self):
-        storagespace = StorageSpace.objects.get(id="1")
-        self.assertEqual(storageManagementService.getStorageSpaceById(self,"1"), storagespace)
+#     # def test_getStorageSpaceById(self):
+#     #     storagespace = StorageSpace.objects.get(id="1")
+#     #     self.assertEqual(storageManagementService.getStorageSpaceById(self,"1"), storagespace)
     
     
     

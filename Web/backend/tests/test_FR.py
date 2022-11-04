@@ -100,28 +100,24 @@ class FR6_2_test(TestCase):
 
 #Testing FR8.9
 
-class FR8_9_test(TestCase):
-
+class FR8_9_test(TestCase): 
     def setUp(self):
-        Article.objects.create(lioId="1")
-        Article.objects.create(lioId="2")
-        StorageUnit.objects.create(id="1")
-        StorageUnit.objects.create(id="2")
-        StorageSpace.objects.create(id="1", storage_unit = StorageUnit.objects.get(id="1"), article = Article.objects.get(lioId="1"), amount = 2)
-        StorageSpace.objects.create(id="2", storage_unit = StorageUnit.objects.get(id="2"), article = Article.objects.get(lioId="2"), amount = 4)
+        self.article1 = Article.objects.create(lioId="1")
+        self.article2 = Article.objects.create(lioId="2")
+        self.article_management_service : articleManagementService = articleManagementService()
+        self.storage_management_service : storageManagementService = storageManagementService()
+        self.storageUnit1 = StorageUnit.objects.create(id="1")
+        self.storageUnit2 = StorageUnit.objects.create(id="2")
+        self.storageSpace1 = StorageSpace.objects.create(id="1", storage_unit = self.storage_management_service.getStorageUnitById(id="1"), article=self.article_management_service.getArticleByLioId(lioId="1"), amount=2)
+        self.storageSpace1 = StorageSpace.objects.create(id="2", storage_unit = self.storage_management_service.getStorageUnitById(id="2"), article=self.article_management_service.getArticleByLioId(lioId="2"), amount=4)
 
     def test_FR8_9(self):
-       article1 = Article.objects.get(lioId="1")
-       article2 = Article.objects.get(lioId="2")
-       storagespace1 = StorageSpace.objects.get(id="1")
-       storagespace2 = StorageSpace.objects.get(id="2")
-       storageunit1 = StorageUnit.objects.get(id="1")
-       storageunit2 = StorageUnit.objects.get(id="2")
-       self.assertEqual(storageManagementService.searchArticleInStorage("1", "1"), 2)  
-       self.assertNotEqual(storageManagementService.searchArticleInStorage("1", "1"), 3)  
-       self.assertNotEqual(storageManagementService.searchArticleInStorage("2", "1"), 2) 
-       self.assertEqual(storageManagementService.searchArticleInStorage("2", "2"), 4) 
-       self.assertEqual(storageManagementService.searchArticleInStorage("2", "1"), None) 
+        test_article1 = self.storage_management_service.searchArticleInStorage("1", "1")
+        test_article2 = self.storage_management_service.searchArticleInStorage("2", "2")
+        self.assertEqual(test_article1, 2)
+        self.assertEqual(test_article2, 4)
+        self.assertNotEqual(test_article2, 5)
+
 
        
 
