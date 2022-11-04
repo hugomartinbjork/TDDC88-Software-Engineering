@@ -14,4 +14,6 @@ class Order(models.Model):
     hasArrived = models.BooleanField(default=False)
 
     def __str__(self):
-        return str(self.id) + ": " + str(self.ofArticle) + " " + str(self.toStorageUnit)
+        return (str(self.id)
+                + ": " + str(self.ofArticle)
+                + " " + str(self.toStorageUnit))

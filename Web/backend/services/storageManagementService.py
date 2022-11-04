@@ -1,5 +1,5 @@
-#from requests import request
-#from Web.backend.views.views import Compartment
+# from requests import request
+# from Web.backend.views.views import Compartment
 from backend.dataAccess.orderAccess import orderAccess
 from backend.dataAccess.storageAccess import storageAccess
 from backend.dataAccess.userAccess import userAccess
@@ -10,7 +10,7 @@ from backend.coremodels.storage_space import StorageSpace
 from backend.coremodels.transaction import Transaction
 from backend.coremodels.inputOutput import InputOutput
 from django.contrib.auth.models import User
-from datetime import datetime, timezone
+# from datetime import datetime, timezone
 from django.utils.dateparse import parse_date
 from backend.__init__ import serviceInjector as si
 from ..__init__ import dataAccessInjector as di
@@ -34,14 +34,16 @@ class storageManagementService():
         return self._storageAccess.get_compartment_by_id(id)
 
     def setStorage(self, id: str, amount: int) -> int:
-        return self._storageAccess.set_storage_amount(compartmendId=id, amount=amount)
+        return self._storageAccess.set_storage_amount(compartmendId=id,
+                                                      amount=amount)
 
     def getStock(self, id: str, article_id: str) -> int:
-        return self._storageAccess.get_compartment_stock(compartmentId=id, article_id=article_id)
+        return self._storageAccess.get_compartment_stock(compartmentId=id,
+                                                         article_id=article_id)
 
     def getStorageUnitStock(self, id: str) -> dict:
         return self._storageAccess.get_storage_stock(storageId=id)
-    
+
     def getAllStorageUnits(self) -> dict:
         return self._storageAccess.get_all_storage_units()
 
@@ -55,11 +57,12 @@ class storageManagementService():
 
     def getAllTransactions(self) -> dict:
         return self._storageAccess.get_all_transactions()
-    
+
     # Storage is not connected to a costcenter atm
     # For now this is sum och costs (takeout-return)
     # from transactions for one storage_compartment
-    def getStorageCost(self, storage_id: str, start_date: str, end_date: str) -> int:
+    def getStorageCost(self, storage_id: str, start_date: str,
+                       end_date: str) -> int:
         start_date_date = parse_date(start_date)
         end_date_date = parse_date(end_date)
         transactions = self._storageAccess.get_transaction_by_storage(
@@ -74,9 +77,11 @@ class storageManagementService():
             user_cost_center = self._userAccess.get_user_cost_center(
                 transaction.by_user)
             if (user_cost_center == transaction.storage_unit.cost_center):
-                if (start_date_date <= transaction_date_date and end_date_date >= transaction_date_date):
-                    #transaction_user = transaction.by_user
-                    #cost_center = self._userAccess.get_user_cost_center(user=transaction_user)
+                if (start_date_date <= transaction_date_date
+                        and end_date_date >= transaction_date_date):
+                    # transaction_user = transaction.by_user
+                    # cost_center = self._userAccess.get_user_cost_center(
+                    #                                   user=transaction_user)
                     # if cost_center == transaction.storage_id.cost_center
                     if transaction.operation == 1:
                         takeout_value = transaction.get_value()
@@ -90,12 +95,13 @@ class storageManagementService():
 
 # FR 10.1.3 #
 
-
-##alltid takeout/takein
-# TODO: This is a lot of work to refactor since barely any of the methods work. Leaving this 
+# alltid takeout/takein
+# TODO: This is a lot of work to refactor since barely any of the methods work.
+# Leaving this
 # TODO to the original author
 
-    def addToStorage(self, space_id: str, amount: int, username: str, addOutputUnit: bool) -> Transaction:
+    def addToStorage(self, space_id: str, amount: int, username: str,
+                     addOutputUnit: bool) -> Transaction:
         storage_space = self._storageAccess.get_compartment_by_id(
             id=space_id)
         storage_unit_id = storage_space.storage_unit
@@ -108,14 +114,19 @@ class storageManagementService():
                 id=space_id).amount + amount
             new_amount = amount
         else:
-            amount_in_storage = StorageSpace.objects.get(id=id).amount + amount*converter
-            new_amount=amount*converter
-        
-        if (amount_in_storage<0):
+            amount_in_storage = StorageSpace.objects.get(
+                                id=id).amount + amount * converter
+            new_amount = amount*converter
+
+        if (amount_in_storage < 0):
             return None
         else:
             StorageSpace.objects.update(amount=amount_in_storage)
-            new_transaction = Transaction.objects.create(storage_unit=storage_unit_id, article=article, operation=3, by_user=user, amount=new_amount)
+            new_transaction = Transaction.objects.create(
+                                                storage_unit=storage_unit_id,
+                                                article=article, operation=3,
+                                                by_user=user,
+                                                amount=new_amount)
             new_transaction.save()
             print("New add transaction created:")
             print(new_transaction)
@@ -123,10 +134,12 @@ class storageManagementService():
             # except:
             # return None
 
-# TODO: This is a lot of work to refactor since barely any of the methods work. Leaving this
+# TODO: This is a lot of work to refactor since barely any of the methods work.
+# Leaving this
 # TODO to the original author
 
-    def addToReturnStorage(self, space_id: str, amount: int, username: str, addOutputUnit: bool) -> Transaction:
+    def addToReturnStorage(self, space_id: str, amount: int, username: str,
+                           addOutputUnit: bool) -> Transaction:
         storage_space = StorageSpace.objects.get(id=space_id)
         storage_unit_id = storage_space.storage_unit
         amount = amount
@@ -152,13 +165,17 @@ class storageManagementService():
                 id=space_id).amount + amount
             new_amount = amount
         else:
-            amount_in_storage = StorageSpace.objects.get(id=id).amount + amount*converter
-            new_amount=amount*converter
-        if (amount_in_storage<0):
+            amount_in_storage = StorageSpace.objects.get(
+                id=id).amount + amount*converter
+            new_amount = amount * converter
+        if (amount_in_storage < 0):
             return None
         else:
             StorageSpace.objects.update(amount=amount_in_storage)
-            new_transaction = Transaction.objects.create(storage_unit=storage_unit_id, article=article, operation=2, by_user=user, amount=new_amount)
+            new_transaction = Transaction.objects.create(
+                                storage_unit=storage_unit_id, article=article,
+                                operation=2,
+                                by_user=user, amount=new_amount)
             new_transaction.save()
             print("New return transaction created:")
             print(new_transaction)
@@ -170,12 +187,14 @@ class storageManagementService():
         inputOutput = InputOutput.objects.get(article=article)
         converter = inputOutput.outputUnitPerInputUnit
         user = User.objects.get(username=username)
-        if(addOutputUnit):
+        if (addOutputUnit):
             amount_in_storage = StorageSpace.objects.get(
                 id=space_id).amount - amount
             new_amount = amount
         else:
-            # eftersom det inte verkar finnas funktionalitet för input/output-amounts så har jag satt denna till 2 bara för testningens skull.
+            # eftersom det inte verkar finnas funktionalitet för
+            # input/output-amounts så har jag satt denna till 2 bara för
+            # testningens skull.
             if not converter:
                 converter = 2
             amount_in_storage = StorageSpace.objects.get(
@@ -185,23 +204,28 @@ class storageManagementService():
             return None
         else:
             StorageSpace.objects.update(amount=amount_in_storage)
-            new_transaction = Transaction.objects.create(storage_unit=compartment.storage_unit, article=article, operation=1, by_user=user, amount=new_amount)
+            new_transaction = Transaction.objects.create(
+                                storage_unit=compartment.storage_unit,
+                                article=article, operation=1, by_user=user,
+                                amount=new_amount)
             new_transaction.save()
             print("New add transaction created:")
             print(new_transaction)
             return new_transaction
 
-
     def getArticleInStorageSpace(self, storageSpaceId: str) -> Article:
-        return self._storageAccess.getArticleInStorageSpace(storageSpaceId=storageSpaceId)
-    
-    def searchArticleInStorage(self, storageUnitId: str, articleId: str) -> int:
-        return self._storageAccess.searchArticleInStorage(storageUnitId=storageUnitId, articleId=articleId)
+        return self._storageAccess.getArticleInStorageSpace(
+                                    storageSpaceId=storageSpaceId)
+
+    def searchArticleInStorage(self, storageUnitId: str,
+                               articleId: str) -> int:
+        return self._storageAccess.searchArticleInStorage(
+                    storageUnitId=storageUnitId, articleId=articleId)
 # FR 10.1.3 #
 
-
     def getCompartmentContentAndOrders(self, compartmentId):
-        compartment = self._storageAccess.get_compartment_by_id(id=compartmentId)
+        compartment = self._storageAccess.get_compartment_by_id(
+                                                id=compartmentId)
         alteredDict = {}
 
         if compartment is None:
@@ -212,7 +236,9 @@ class storageManagementService():
             return None
         alteredDict.update(compartmentSerializer.data)
 
-        order = self._orderAccess.get_order_by_article_and_storage(compartment.storage_unit.id, compartment.article.lioId)
+        order = self._orderAccess.get_order_by_article_and_storage(
+                                compartment.storage_unit.id,
+                                compartment.article.lioId)
         if order is not None:
             orderSerializer = OrderSerializer(order)
             eta = self._orderAccess.get_eta(order.id)
@@ -222,8 +248,9 @@ class storageManagementService():
             alteredDict['Order'] = orderDictionary
             return alteredDict
 
-    ##  FR 9.4.1 och FR 9.4.2 ##
-    def create_compartment(self, storage_id: str, placement: str, qr_code: str) -> StorageSpace:
+    # FR 9.4.1 och FR 9.4.2 ##
+    def create_compartment(self, storage_id: str, placement: str,
+                           qr_code: str) -> StorageSpace:
 
         print(storage_id)
         compartment = self._storageAccess.create_compartment(
@@ -236,4 +263,4 @@ class storageManagementService():
             qr_code=qr_code)
         return compartment
 
-    ##  FR 9.4.1 och FR 9.4.2 ##
+    # FR 9.4.1 och FR 9.4.2 ##
