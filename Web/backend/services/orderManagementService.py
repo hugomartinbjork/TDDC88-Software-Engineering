@@ -15,6 +15,7 @@ class OrderManagementService():
     def get_order_by_id(self, id: int) -> Order:
         return self.order_access.get_order_by_id(id)
 
-    def text_file(order_name, article_id, storage_unit, eta, time_of_arrival):
+    def text_file(self, order_name, article_id, storage_unit,
+                  eta, time_of_arrival):
         utils.make_text_file(order_name, article_id, storage_unit, eta,
                              time_of_arrival)

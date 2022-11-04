@@ -47,7 +47,7 @@ class OrderAccess():
     #  date the order was ordered.
     def get_eta(self, order_id):
         order = self.get_order_by_id(order_id)
-        if order is None: 
+        if order is None:
             return None
         order_date = order.order_time
         days = order.expected_wait

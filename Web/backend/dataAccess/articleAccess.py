@@ -6,7 +6,9 @@ from ..__init__ import dataAccessInjector as di
 
 @di.register(name="ArticleAccess")
 class ArticleAccess():
-    def get_article_by_lioId(self, lio_id: str) -> Article:
+    '''Article access.'''
+    def get_article_by_lio_id(self, lio_id: str) -> Article:
+        '''Retrieve article by lio-id.'''
         try:
             article = Article.objects.get(lio_id=lio_id)
             return article
@@ -14,6 +16,7 @@ class ArticleAccess():
             return None
 
     def get_alternative_articles(self, lio_id: str) -> Article:
+        '''Retrieve alternative articles.'''
         try:
             article = Article.objects.get(lio_id=lio_id)
             alternative_articles = article.alternative_articles.all()

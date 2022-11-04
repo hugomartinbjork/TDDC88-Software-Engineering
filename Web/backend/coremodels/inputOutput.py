@@ -6,6 +6,7 @@ from backend.coremodels.article import Article
 
 
 class InputOutput(models.Model):
+    '''Describes output/input parameters for articles.'''
     id = models.AutoField(primary_key=True)
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     input_unit_name = models.CharField(max_length=30)

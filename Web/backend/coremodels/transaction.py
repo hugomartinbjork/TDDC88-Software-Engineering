@@ -12,6 +12,7 @@ from backend.operations.enumerator import TransactionOperator
 
 
 class Transaction(models.Model):
+    '''Transaction.'''
     id = models.AutoField(primary_key=True, null=False)
     storage_unit = models.ForeignKey(StorageUnit, on_delete=models.CASCADE)
     by_user = models.ForeignKey(User, on_delete=models.CASCADE)

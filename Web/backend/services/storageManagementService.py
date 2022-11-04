@@ -19,7 +19,7 @@ from ..__init__ import dataAccessInjector as di
 @si.register(name='StorageManagementService')
 class StorageManagementService():
     @di.inject
-    def __init__(self, _deps):
+    def __init__(self, _deps, *args):
         self.storage_access: StorageAccess = _deps["StorageAccess"]()
         self.order_access: OrderAccess = _deps["OrderAccess"]()
         self.user_access: UserAccess = _deps["UserAccess"]()
@@ -94,8 +94,6 @@ class StorageManagementService():
         return self.storage_access.get_storage_by_costcenter(cost_center)
 
 # FR 10.1.3 #
-
-
 # alltid takeout/takein
 # TODO: This is a lot of work to refactor since barely any of the
 # methods work. Leaving this
@@ -124,7 +122,9 @@ class StorageManagementService():
         else:
             StorageSpace.objects.update(amount=amount_in_storage)
             new_transaction = Transaction.objects.create(
-                storage_unit=storage_unit_id, article=article, operation=3, by_user=user, amount=new_amount, time_of_transaction=time_of_transaction)
+                storage_unit=storage_unit_id, article=article, operation=3,
+                by_user=user, amount=new_amount,
+                time_of_transaction=time_of_transaction)
             new_transaction.save()
             print("New add transaction created:")
             print(new_transaction)
@@ -174,7 +174,9 @@ class StorageManagementService():
             StorageSpace.objects.update(amount=amount_in_storage)
             print("skapar ny transaction")
             new_transaction = Transaction.objects.create(
-                storage_unit=storage_unit_id, article=article, operation=2, by_user=user, amount=new_amount, time_of_transaction=time_of_transaction)
+                storage_unit=storage_unit_id, article=article, operation=2,
+                by_user=user, amount=new_amount,
+                time_of_transaction=time_of_transaction)
             new_transaction.save()
             print("New return transaction created:")
             print(new_transaction)
@@ -214,8 +216,8 @@ class StorageManagementService():
             return new_transaction
 
     def get_article_in_storage_space(self, storage_space_id: str) -> Article:
-        return self.storage_access.getArticleInStorageSpace(
-                                    storageSpaceId=storage_space_id)
+        return self.storage_access.get_article_in_storage_space(
+                                    storage_space_id=storage_space_id)
 
     def search_article_in_storage(self, storageUnitId: str,
                                   articleId: str) -> int:

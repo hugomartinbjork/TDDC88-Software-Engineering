@@ -53,7 +53,7 @@ class Article(View):
 
     def get(self, request, article_id):
         if request.method == 'GET':
-            article = self.article_management_service.get_article_by_lioId(
+            article = self.article_management_service.get_article_by_lio_id(
                 article_id)
             supplier = self.article_management_service.get_supplier(article)
             supplier_article_nr = (

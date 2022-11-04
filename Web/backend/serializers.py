@@ -17,7 +17,8 @@ from backend.coremodels.transaction import Transaction
 class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
-        fields = ('name', 'lio_id', 'description', 'article_group', 'image', 'Z41', 'price',
+        fields = ('name', 'lio_id', 'description',
+                  'article_group', 'image', 'Z41', 'price',
                   'alternative_articles')
 
 
@@ -47,7 +48,8 @@ class UserInfoSerializer(serializers.ModelSerializer):
 class StorageSpaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = StorageSpace
-        fields = ('id', 'storage_unit', 'article', 'order_point', 'standard_order_amount',
+        fields = ('id', 'storage_unit', 'article',
+                  'order_point', 'standard_order_amount',
                   'maximal_capacity', 'amount')
 
 

@@ -5,6 +5,7 @@ from backend.coremodels.storage_unit import StorageUnit
 
 
 class Order(models.Model):
+    '''Order.'''
     id = models.AutoField(primary_key=True)
     of_article = models.ForeignKey(Article, on_delete=models.CASCADE)
     to_storage_unit = models.ForeignKey(StorageUnit, on_delete=models.CASCADE)

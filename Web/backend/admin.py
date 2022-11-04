@@ -63,7 +63,8 @@ admin.site.register(GroupInfo, GroupAdmin)
 
 admin.site.register(Supplier)
 
-# Displays which storage components that the articles are in, the supplier that the article has and its alternative names
+# Displays which storage components that the articles are in, 
+# the supplier that the article has and its alternative names
 
 
 class StorageSpaceInline(admin.TabularInline):
