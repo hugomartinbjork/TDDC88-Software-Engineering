@@ -60,23 +60,23 @@ class StorageServiceEconomyTest(TestCase):
     def setUp(self):
         transacted_article = create_article(price=10)
         cost_center = create_costcenter(id="123")
-        storage_unit = create_storageunit(costCenter=cost_center)
+        storage = create_storageunit(costCenter=cost_center)
         transaction_time = datetime.date(2000, 7, 15)
         transaction_list = []
         transaction_list.append(create_transaction(article=transacted_article,
                                                    amount=2, operation=2,
-                                                   storage_unit=storage_unit,
+                                                   storage=storage,
                                                    time_of_transaction=(
                                                        transaction_time)))
         transaction_list.append(create_transaction(article=transacted_article,
                                                    amount=2, operation=1,
-                                                   storage_unit=storage_unit,
+                                                   storage=storage,
                                                    time_of_transaction=(
                                                        transaction_time)))
         transaction_list.append(create_transaction(article=transacted_article,
                                                    amount=4,
                                                    operation=1,
-                                                   storage_unit=storage_unit,
+                                                   storage=storage,
                                                    time_of_transaction=(
                                                        transaction_time)))
         storage_access_mock = StorageAccess

@@ -1,5 +1,5 @@
 from ...coremodels.transaction import Transaction
-from ...coremodels.storage_unit import StorageUnit
+from ...coremodels.storage import Storage
 from ...coremodels.cost_center import CostCenter
 from ...coremodels.article import Article
 from django.contrib.auth.models import User
@@ -10,14 +10,14 @@ import uuid
 
 
 def create_transaction(
-    id=None, storage_unit=None, by_user=None, article=None,
+    id=None, storage=None, by_user=None, article=None,
         amount=1, time_of_transaction=None, operation=1):
     '''Create new transaction.'''
 
     if id is None:
         id = "1337"
-    if storage_unit is None:
-        storage_unit = create_storageunit()
+    if storage is None:
+        storage = create_storageunit()
     if by_user is None:
         by_user = create_user()
     if article is None:
@@ -26,7 +26,7 @@ def create_transaction(
         time_of_transaction = datetime.now()
 
     transaction = Transaction(
-        id=id, storage_unit=storage_unit, by_user=by_user,
+        id=id, storage=storage, by_user=by_user,
         article=article, amount=amount, operation=operation,
         time_of_transaction=time_of_transaction)
 
@@ -42,11 +42,11 @@ def create_storageunit(id="1337",
 
     if costCenter is None:
         costCenter = create_costcenter()
-    storage_unit = StorageUnit(name=name, building=building,
+    storage = Storage(name=name, building=building,
                                floor=floor,
                                cost_center=costCenter)
 
-    return storage_unit
+    return storage
 
 
 def create_user(first_name="Elias", is_superuser=False,

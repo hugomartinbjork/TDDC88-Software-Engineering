@@ -2,7 +2,7 @@ from datetime import timedelta
 import string
 
 from backend.coremodels.article import Article
-from backend.coremodels.storage_unit import StorageUnit
+from backend.coremodels.storage import Storage
 from ..coremodels.order import Order
 from ..__init__ import dataAccessInjector as di
 
@@ -19,10 +19,10 @@ class OrderAccess():
             return None
 
     def get_order_by_article_and_storage(self,
-                                         storage_unit_id, article_id) -> Order:
+                                         storage_id, article_id) -> Order:
         '''Returns order using article and storage.'''
         order = Order.objects.filter(
-            to_storage_unit=storage_unit_id, of_article=article_id).first()
+            to_storage=storage_id, of_article=article_id).first()
         return order
 
     def get_ordered_article(self, order_id: int) -> Article:
@@ -33,11 +33,11 @@ class OrderAccess():
         except Exception:
             return None
 
-    def get_to_storage_unit(self, order_id: int) -> StorageUnit:
+    def get_to_storage(self, order_id: int) -> Storage:
         '''Returns storage unit form order id.'''
         try:
-            storage_unit = self.get_order_by_id(order_id).to_storage_unit
-            return storage_unit
+            storage = self.get_order_by_id(order_id).to_storage
+            return storage
         except Exception:
             return None
 
@@ -65,10 +65,10 @@ class OrderAccess():
                      expected_wait: int):
         '''Create new order.'''
         article = Article.objects.filter(lio_id=article_id).first()
-        storage_unit = StorageUnit.objects.filter(id=storage_id).first()
+        storage = Storage.objects.filter(id=storage_id).first()
         try:
             order = Order(
-                of_article=article, to_storage_unit=storage_unit,
+                of_article=article, to_storage=storage,
                 amount=amount, expected_wait=expected_wait)
             order.save()
         except Exception:

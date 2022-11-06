@@ -25,8 +25,8 @@ from backend.services.orderServices import OrderService
 from django.views import View
 from backend.__init__ import serviceInjector as si
 # from backend.coremodels.article import Article
-# from backend.coremodels.storage_unit import StorageUnit
-from backend.coremodels.storage_space import StorageSpace
+# from backend.coremodels.storage import Storage
+from backend.coremodels.compartment import Compartment
 # from backend.coremodels.qr_code import QRCode
 # from backend.coremodels.order import Order
 # from rest_framework.authtoken.models import Token
@@ -74,7 +74,7 @@ class Article(View):
             unit_list = []
             for i in compartments:
                 compartment_serializer = StorageSpaceSerializer(i)
-                unit_serializer = StorageUnitSerializer(i.storage_unit)
+                unit_serializer = StorageUnitSerializer(i.storage)
 
                 compartment_list.append(compartment_serializer.data)
                 unit_list.append(unit_serializer.data.get('name'))
@@ -130,7 +130,7 @@ class Storage(View):
         '''Return storage unit using id.'''
         if request.method == 'GET':
             storage = (
-                self.storage_management_service.get_storage_unit_by_id(
+                self.storage_management_service.get_storage_by_id(
                                                             storage_id))
             if storage is None:
                 raise Http404("Could not find storage")
@@ -140,18 +140,18 @@ class Storage(View):
             return HttpResponseBadRequest
 
 
-class StorageSpace(View):
+class Compartment(View):
     '''Storage-space view.'''
     def __init__(self, _deps, *args):
         self.order_service: OrderService = _deps['OrderService']()
         self.storage_management_service: StorageManagementService = (
                                 _deps['StorageManagementService']())
 
-    def get(self, request, storage_space_id):
+    def get(self, request, compartment_id):
         '''Returns compartment content as well as orders.'''
         altered_dict = (
             self.storage_management_service.get_compartment_content_and_orders(
-                                                           storage_space_id))
+                                                           compartment_id))
         if altered_dict is None:
             return Http404("Could not find storage space")
         return JsonResponse(altered_dict, status=200)
@@ -219,11 +219,11 @@ class Order(View):
         if request.method == 'POST':
             json_body = json.loads(request.body)
             article = json_body['of_article']
-            storage_unit = json_body['to_storage_unit']
+            storage = json_body['to_storage']
             amount = json_body['amount']
 
             order = self.order_service.place_order_if_no_order(
-                storage_unit_id=storage_unit, article_id=article, amount=amount
+                storage_id=storage, article_id=article, amount=amount
             )
 
             serializer = OrderSerializer(order)
@@ -294,7 +294,7 @@ class SeeAllStorageUnits(View):
     def get(self, request):
         '''Returns all storages.'''
         if request.method == 'GET':
-            allStorages = self.storage_management_service.get_all_storage_units()
+            allStorages = self.storage_management_service.get_all_storages()
             if allStorages is None:
                 raise Http404("Could not find any storage units")
             else:
@@ -309,16 +309,16 @@ class AddInputUnit(View):
         self.storage_management_service = StorageManagementService()
         self.user_service: UserService = _deps['UserService']()
 
-    def post(self, request, storage_space_id, amount, time_of_transaction):
+    def post(self, request, compartment_id, amount, time_of_transaction):
         '''Post addition to storage.'''
-        storage_space = StorageManagementService.get_storage_space_by_id(
-            self=self, id=storage_space_id)
+        compartment = StorageManagementService.get_compartment_by_id(
+            self=self, id=compartment_id)
         user = request.user
         if request.method == 'POST':
-            if storage_space is None:
+            if compartment is None:
                 return Http404("Could not find storage space")
             StorageManagementService.add_to_storage(self=self,
-                                                  space_id=storage_space_id,
+                                                  space_id=compartment_id,
                                                   amount=amount,
                                                   username=user.username,
                                                   add_output_unit=False,
@@ -364,17 +364,17 @@ class ReturnUnit(View):
         self.storage_management_service = StorageManagementService()
         self.user_service: UserService = _deps['UserService']()
 
-    def post(self, request, storage_space_id, amount, time_of_transaction=now):
+    def post(self, request, compartment_id, amount, time_of_transaction=now):
         '''Post return to storage.'''
-        storage_space = StorageManagementService.get_storage_space_by_id(
-            self=self, id=storage_space_id)
+        compartment = StorageManagementService.get_compartment_by_id(
+            self=self, id=compartment_id)
         user = request.user
         if request.method == 'POST':
-            if storage_space is None:
+            if compartment is None:
                 return Http404("Could not find storage space")
             StorageManagementService.add_to_return_storage(
                                                         self=self,
-                                                        space_id=storage_space_id,
+                                                        space_id=compartment_id,
                                                         amount=amount,
                                                         username=user.username,
                                                         add_output_unit=True,
@@ -409,7 +409,7 @@ class Transactions(APIView):
             return Response({'error': 'Could not find compartment'},
                             status=status.HTTP_400_BAD_REQUEST)
         else:
-            storage = self.storage_management_service.get_storage_unit_by_id(
+            storage = self.storage_management_service.get_storage_by_id(
                 id=compartment.id)
             amount = request.data.get("quantity")
             unit = request.data.get("unit")
@@ -463,7 +463,7 @@ class GetStorageValue(View):
     def get(self, request, storage_id):
         '''Get storage unit value using id.'''
         if request.method == 'GET':
-            storage = self.storage_management_service.get_storage_unit_by_id(
+            storage = self.storage_management_service.get_storage_by_id(
                 storage_id)
             if storage is None:
                 raise Http404("Could not find storage")
@@ -486,7 +486,7 @@ class GetStorageCost(APIView):
         start_date = request.data.get('start_date')
         end_date = request.data.get('end_date')
         if request.method == 'GET':
-            storage = self.storage_management_service.get_storage_unit_by_id(
+            storage = self.storage_management_service.get_storage_by_id(
                 storage_id)
             if storage is None:
                 raise Http404("Could not find storage")
@@ -584,19 +584,19 @@ class SearchForArticleInStorages(View):
             # like to see already existing functions in
             # the service- / data access layer being used here. Another tip is
             # to query the "articles" variable
-            # based on storage_unit_id != storage (then duplicates will not
+            # based on storage_id != storage (then duplicates will not
             # have to be removed)
 
             # query for the articles which match the input search string
             # and the chosen storage unit.
-            articles_in_chosen_storage = StorageSpace.objects.filter(
+            articles_in_chosen_storage = Compartment.objects.filter(
                 article__name__contains=search_string,
                 storage_unit__id=storage).values_list(
                 'article__name', 'id', 'amount', 'storage_unit__name',
                 'storage_unit__floor', 'storage_unit__building')
             # query for the articles which only matches the input search
             # string in all storage units.
-            articles = StorageSpace.objects.filter(
+            articles = Compartment.objects.filter(
                 article__name__contains=search_string).values_list(
                 'article__name', 'id', 'amount', 'storage_unit__name',
                 'storage_unit__floor', 'storage_unit__building')

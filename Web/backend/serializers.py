@@ -4,11 +4,11 @@ from rest_framework import serializers
 from backend.coremodels.article import Article
 from backend.coremodels.article import GroupInfo
 from backend.coremodels.qr_code import QRCode
-from backend.coremodels.storage_unit import StorageUnit
-# from backend.coremodels.storageComponent import storage_unit
+from backend.coremodels.storage import Storage
+# from backend.coremodels.storageComponent import storage
 from backend.coremodels.cost_center import CostCenter
 from backend.coremodels.user_info import UserInfo
-from backend.coremodels.storage_space import StorageSpace
+from backend.coremodels.compartment import Compartment
 from backend.coremodels.qr_code import QRCode
 from backend.coremodels.order import Order
 from backend.coremodels.transaction import Transaction
@@ -24,13 +24,13 @@ class ArticleSerializer(serializers.ModelSerializer):
 
 class StorageUnitSerializer(serializers.ModelSerializer):
     class Meta:
-        model = StorageUnit
+        model = Storage
         fields = ('name',)
 
 
 # class StorageUnitSerializer(serializers.ModelSerializer):
 #     class Meta:
-#         model = storage_unit
+#         model = storage
 #         fields = ('currentStock', 'article', 'storage',)
 
 class CostCenterSerializer(serializers.ModelSerializer):
@@ -47,8 +47,8 @@ class UserInfoSerializer(serializers.ModelSerializer):
 
 class StorageSpaceSerializer(serializers.ModelSerializer):
     class Meta:
-        model = StorageSpace
-        fields = ('id', 'storage_unit', 'article',
+        model = Compartment
+        fields = ('id', 'storage', 'article',
                   'order_point', 'standard_order_amount',
                   'maximal_capacity', 'amount')
 
@@ -62,20 +62,20 @@ class GroupSerializer(serializers.ModelSerializer):
 class QRCodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = QRCode
-        fields = ('id', 'storage_space')
+        fields = ('id', 'compartment')
 
 
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ('id', 'of_article', 'to_storage_unit',
+        fields = ('id', 'of_article', 'to_storage',
                   'expected_wait', 'order_time')
 
 
 class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
-        fields = ('id', 'storage_unit', 'by_user', 'article',
+        fields = ('id', 'storage', 'by_user', 'article',
                   'amount', 'time_of_transaction', 'operation')
 
 

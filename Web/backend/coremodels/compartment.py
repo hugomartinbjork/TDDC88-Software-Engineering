@@ -1,13 +1,13 @@
 # from contextlib import nullcontext
 from django.db import models
 from backend.coremodels.article import Article
-from backend.coremodels.storage_unit import StorageUnit
+from backend.coremodels.storage import Storage
 
 
-class StorageSpace(models.Model):
+class Compartment(models.Model):
     '''A single compartment.'''
     id = models.CharField(max_length=15, primary_key=True)  # this is qr_code
-    storage_unit = models.ForeignKey(StorageUnit, on_delete=models.CASCADE)
+    storage = models.ForeignKey(Storage, on_delete=models.CASCADE)
     article = models.ForeignKey(Article, on_delete=models.CASCADE, null=True,
                                 blank=True, db_constraint=False)
     order_point = models.PositiveSmallIntegerField(default=0)
@@ -17,4 +17,4 @@ class StorageSpace(models.Model):
     placement = models.CharField(max_length=30, null=True)
 
     def __str__(self):
-        return str(self.storage_unit) + " " + str(self.article)
+        return str(self.storage) + " " + str(self.article)
