@@ -3,7 +3,7 @@ from datetime import datetime
 from django.utils.timezone import now
 from django.utils.dateparse import parse_date
 # from sqlalchemy import PrimaryKeyConstraint
-from backend.coremodels.storage_unit import StorageUnit
+from backend.coremodels.storage import Storage
 from django.contrib.auth.models import User
 from backend.coremodels.article import Article
 from backend.operations.enumerator import TransactionOperator
@@ -14,7 +14,7 @@ from backend.operations.enumerator import TransactionOperator
 class Transaction(models.Model):
     '''Transaction.'''
     id = models.AutoField(primary_key=True, null=False)
-    storage_unit = models.ForeignKey(StorageUnit, on_delete=models.CASCADE)
+    storage = models.ForeignKey(Storage, on_delete=models.CASCADE)
     by_user = models.ForeignKey(User, on_delete=models.CASCADE)
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     amount = models.PositiveSmallIntegerField(default=0)

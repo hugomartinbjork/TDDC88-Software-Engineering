@@ -7,7 +7,7 @@ from ..dataAccess.storageAccess import StorageAccess
 from ..dataAccess.userAccess import UserAccess
 from .testObjectFactory.dependencyFactory import DependencyFactory
 from .testObjectFactory.coremodelFactory import create_article
-from .testObjectFactory.coremodelFactory import create_storageunit
+from .testObjectFactory.coremodelFactory import create_storage
 from .testObjectFactory.coremodelFactory import create_transaction
 from .testObjectFactory.coremodelFactory import create_costcenter
 from datetime import datetime
@@ -18,14 +18,14 @@ dependency_factory = DependencyFactory()
 
 class OrderServiceCalculateEtaTestCase(TestCase):
     '''Test case to calculate estimated time to arrival.'''
-    def setUp(self) -> None:
+    def set_up(self) -> None:
         central_storage_mock = CentralStorageAccess
-        # When checking the article stock, the stub will return 100 as the 
+        # When checking the article stock, the stub will return 100 as the
         # amount of the article found
         # in the central storage. 
         central_storage_mock.get_stock_by_article_id = MagicMock(
                                                 return_value=100)
-        # dependency factory autocompletes with the rest of the   
+        # dependency factory autocompletes with the rest of the
         # dependencies that are not used for this specific test
         mocked_dependencies = (
             dependency_factory.complete_dependency_dictionary(
@@ -57,26 +57,26 @@ class OrderServiceCalculateEtaTestCase(TestCase):
 
 class StorageServiceEconomyTest(TestCase):
     '''Storage service economy test.'''
-    def setUp(self):
+    def set_up(self):
         transacted_article = create_article(price=10)
         cost_center = create_costcenter(id="123")
-        storage_unit = create_storageunit(costCenter=cost_center)
+        storage = create_storage(costCenter=cost_center)
         transaction_time = datetime.date(2000, 7, 15)
         transaction_list = []
         transaction_list.append(create_transaction(article=transacted_article,
                                                    amount=2, operation=2,
-                                                   storage_unit=storage_unit,
+                                                   storage=storage,
                                                    time_of_transaction=(
                                                        transaction_time)))
         transaction_list.append(create_transaction(article=transacted_article,
                                                    amount=2, operation=1,
-                                                   storage_unit=storage_unit,
+                                                   storage=storage,
                                                    time_of_transaction=(
                                                        transaction_time)))
         transaction_list.append(create_transaction(article=transacted_article,
                                                    amount=4,
                                                    operation=1,
-                                                   storage_unit=storage_unit,
+                                                   storage=storage,
                                                    time_of_transaction=(
                                                        transaction_time)))
         storage_access_mock = StorageAccess

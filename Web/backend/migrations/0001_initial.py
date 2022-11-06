@@ -91,7 +91,7 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name="StorageUnit",
+            name="Storage",
             fields=[
                 (
                     "id",
@@ -205,7 +205,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "storage_unit",
+                    "storage",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         to="backend.storageunit",
@@ -214,7 +214,7 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name="StorageSpace",
+            name="Compartment",
             fields=[
                 (
                     "id",
@@ -236,7 +236,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "storage_unit",
+                    "storage",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         to="backend.storageunit",
@@ -252,11 +252,11 @@ class Migration(migrations.Migration):
                     models.CharField(max_length=15, primary_key=True, serialize=False),
                 ),
                 (
-                    "storage_space",
+                    "compartment",
                     models.ForeignKey(
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="backend.storagespace",
+                        to="backend.compartment",
                     ),
                 ),
             ],
@@ -277,7 +277,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "to_storage_unit",
+                    "to_storage",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         to="backend.storageunit",

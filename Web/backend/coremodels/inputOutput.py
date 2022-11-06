@@ -2,7 +2,7 @@
 # from unittest.util import _MAX_LENGTH
 from django.db import models
 from backend.coremodels.article import Article
-# from backend.coremodels.storage_unit import StorageUnit
+# from backend.coremodels.storage import Storage
 
 
 class InputOutput(models.Model):

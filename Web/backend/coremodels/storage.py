@@ -3,7 +3,7 @@ from django.db import models
 from backend.coremodels.cost_center import CostCenter
 
 
-class StorageUnit(models.Model):
+class Storage(models.Model):
     '''A unit containing several compartments.'''
     id = models.CharField(max_length=15, primary_key=True)
     name = models.CharField(max_length=30)
