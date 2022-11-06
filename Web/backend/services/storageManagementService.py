@@ -3,7 +3,7 @@
 from backend.dataAccess.orderAccess import OrderAccess
 from backend.dataAccess.storageAccess import StorageAccess
 from backend.dataAccess.userAccess import UserAccess
-from backend.serializers import OrderSerializer, StorageSpaceSerializer
+from backend.serializers import OrderSerializer, CompartmentSerializer
 from backend.coremodels.article import Article
 from backend.coremodels.storage import Storage
 from backend.coremodels.compartment import Compartment
@@ -225,11 +225,11 @@ class StorageManagementService():
         return self.storage_access.get_article_in_compartment(
                                     compartment_id=compartment_id)
 
-    def search_article_in_storage(self, storageUnitId: str,
-                                  articleId: str) -> int:
+    def search_article_in_storage(self, storage_id: str,
+                                  article_id: str) -> int:
         '''Search for article in storage.'''
         return self.storage_access.search_article_in_storage(
-            storageUnitId=storageUnitId, articleId=articleId)
+            storage_id=storage_id, article_id=article_id)
 # FR 10.1.3 #
 
     def get_compartment_content_and_orders(self, compartment_id):
@@ -242,7 +242,7 @@ class StorageManagementService():
         if compartment is None:
             return None
 
-        compartment_serializer = StorageSpaceSerializer(compartment)
+        compartment_serializer = CompartmentSerializer(compartment)
         if not compartment_serializer.is_valid:
             return None
         altered_dict.update(compartment_serializer.data)

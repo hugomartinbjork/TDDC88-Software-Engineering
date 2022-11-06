@@ -67,7 +67,7 @@ admin.site.register(Supplier)
 # the supplier that the article has and its alternative names
 
 
-class StorageSpaceInline(admin.TabularInline):
+class CompartmentInline(admin.TabularInline):
     model = Compartment
 
 
@@ -80,7 +80,7 @@ class AlternativeNameInLine(admin.TabularInline):
 
 
 class ArticleAdmin(admin.ModelAdmin):
-    inlines = (StorageSpaceInline, ArticleHasSupplierInline,
+    inlines = (CompartmentInline, ArticleHasSupplierInline,
                AlternativeNameInLine, )
 
 
@@ -89,7 +89,7 @@ admin.site.register(Article, ArticleAdmin)
 
 
 class StorageAdmin(admin.ModelAdmin):
-    inlines = (StorageSpaceInline, )
+    inlines = (CompartmentInline, )
 
 
 # Display QRCode in Backend

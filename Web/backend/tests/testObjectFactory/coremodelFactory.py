@@ -17,7 +17,7 @@ def create_transaction(
     if id is None:
         id = "1337"
     if storage is None:
-        storage = create_storageunit()
+        storage = create_storage()
     if by_user is None:
         by_user = create_user()
     if article is None:
@@ -33,11 +33,11 @@ def create_transaction(
     return transaction
 
 
-def create_storageunit(id="1337",
-                       name="testStorageUnit",
-                       building="testbuilding",
-                       floor="testFloor",
-                       costCenter=None):
+def create_storage(id="1337",
+                   name="testStorage",
+                   building="testbuilding",
+                   floor="testFloor",
+                   costCenter=None):
     '''Create new storage-unit.'''
 
     if costCenter is None:

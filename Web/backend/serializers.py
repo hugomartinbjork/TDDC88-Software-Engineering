@@ -22,13 +22,13 @@ class ArticleSerializer(serializers.ModelSerializer):
                   'alternative_articles')
 
 
-class StorageUnitSerializer(serializers.ModelSerializer):
+class StorageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Storage
         fields = ('name',)
 
 
-# class StorageUnitSerializer(serializers.ModelSerializer):
+# class StorageSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = storage
 #         fields = ('currentStock', 'article', 'storage',)
@@ -45,7 +45,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
         fields = ('user', 'cost_center')
 
 
-class StorageSpaceSerializer(serializers.ModelSerializer):
+class CompartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Compartment
         fields = ('id', 'storage', 'article',

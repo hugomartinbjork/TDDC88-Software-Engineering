@@ -8,9 +8,9 @@ import json
 # from rest_framework import generics
 from django.http import Http404, JsonResponse, HttpResponseBadRequest
 # from backend.coremodels.transaction import Transaction
-from ..serializers import AlternativeNameSerializer, StorageUnitSerializer
+from ..serializers import AlternativeNameSerializer, StorageSerializer
 from ..serializers import ArticleSerializer, OrderSerializer
-from ..serializers import StorageSpaceSerializer, TransactionSerializer
+from ..serializers import CompartmentSerializer, TransactionSerializer
 from ..serializers import GroupSerializer
 # from QRCodeSerializer
 #  This import is important for now, since the dependency
@@ -62,7 +62,7 @@ class Article(View):
             supplier_article_nr = (
                 self.article_management_service.get_supplier_article_nr(
                     article))
-            compartments = list(article.storagespace_set.all())
+            compartments = list(article.compartment_set.all())
             alternative_names = list(article.alternativearticlename_set.all())
 
             if article is None:
@@ -73,8 +73,8 @@ class Article(View):
             compartment_list = []
             unit_list = []
             for i in compartments:
-                compartment_serializer = StorageSpaceSerializer(i)
-                unit_serializer = StorageUnitSerializer(i.storage)
+                compartment_serializer = CompartmentSerializer(i)
+                unit_serializer = StorageSerializer(i.storage)
 
                 compartment_list.append(compartment_serializer.data)
                 unit_list.append(unit_serializer.data.get('name'))
@@ -134,7 +134,7 @@ class Storage(View):
                                                             storage_id))
             if storage is None:
                 raise Http404("Could not find storage")
-            serializer = StorageUnitSerializer(storage)
+            serializer = StorageSerializer(storage)
             if serializer.is_valid:
                 return JsonResponse(serializer.data, status=200)
             return HttpResponseBadRequest
@@ -175,7 +175,7 @@ class Compartment(View):
             if compartment is None:
                 return Http404("Could not find compartment")
             else:
-                serializer = StorageSpaceSerializer(compartment)
+                serializer = CompartmentSerializer(compartment)
                 if serializer.is_valid:
                     return JsonResponse(serializer.data, status=200)
                 return HttpResponseBadRequest
@@ -191,7 +191,7 @@ class Compartment(View):
                 storage_id, placement, qr_code
             )
 
-        serializer = StorageSpaceSerializer(compartment)
+        serializer = CompartmentSerializer(compartment)
         if serializer.is_valid:
             return JsonResponse(serializer.data, status=200)
         return HttpResponseBadRequest
@@ -234,7 +234,8 @@ class Order(View):
 
 class Login(APIView):
     '''Login view.'''
-    # Dependencies are injected, I hope that we will be able to mock (i.e. make stubs of) these for testing
+    # Dependencies are injected, I hope that we will be able to mock (i.e. 
+    # make stubs of) these for testing
     @si.inject
     def __init__(self, _deps, *args):
         self.user_service: UserService = _deps['UserService']()
@@ -282,8 +283,8 @@ class LoginWithId(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
 
-class SeeAllStorageUnits(View):
-    '''See all storage units view.'''
+class SeeAllStorages(View):
+    '''See all storages view.'''
     @si.inject
     def __init__(self, _deps, *args):
         storage_management_service = _deps['StorageManagementService']
@@ -294,11 +295,11 @@ class SeeAllStorageUnits(View):
     def get(self, request):
         '''Returns all storages.'''
         if request.method == 'GET':
-            allStorages = self.storage_management_service.get_all_storages()
-            if allStorages is None:
+            all_storages = self.storage_management_service.get_all_storages()
+            if all_storages is None:
                 raise Http404("Could not find any storage units")
             else:
-                return JsonResponse(list(allStorages), safe=False, status=200)
+                return JsonResponse(list(all_storages), safe=False, status=200)
 
 
 class AddInputUnit(View):
@@ -306,6 +307,8 @@ class AddInputUnit(View):
     @si.inject
     def __init__(self, _deps):
         StorageManagementService = _deps['StorageManagementService']
+        # what is meant by StorageManagementService here?
+        # is it supposed to be storage_management_service?
         self.storage_management_service = StorageManagementService()
         self.user_service: UserService = _deps['UserService']()
 
@@ -503,7 +506,7 @@ class GetStorageCost(APIView):
 
 
 class GetArticleAlternatives(View):
-    '''Get alternative article view. Gets alternative articles for a 
+    '''Get alternative article view. Gets alternative articles for a
        given article. If only article id
        is entered, the method returns a list of alternative articles and all
        their attributes. If an article id and a storage id is entered, the
