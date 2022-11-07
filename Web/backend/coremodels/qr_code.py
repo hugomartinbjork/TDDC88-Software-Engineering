@@ -2,7 +2,7 @@
 from django.db import models
 from backend.coremodels.compartment import Compartment
 
-
+#not used anymore
 class QRCode(models.Model):
     '''QR code for storage spaces (compartments).'''
     id = models.CharField(max_length=15, primary_key=True)
