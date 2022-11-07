@@ -1,4 +1,5 @@
 from django.test import TestCase
+from Web.backend.dataAccess.storageAccess import StorageAccess
 from backend.dataAccess.articleAccess import ArticleAccess
 from backend.coremodels.article import Article
 from backend.coremodels.compartment import Compartment
@@ -155,17 +156,19 @@ class FR8_9_test(TestCase):
 #Testing FR4.2
 #-------Fails test and gives errormessage: "Compartment matching query does not exist."
 #-------No idea what is wrong.
-# class FR4_2_test(TestCase):
-#     def setUP(self):
-#         Article.objects.create(lio_id="1")
-#         Storage.objects.create(id="1")
-#         Compartment.objects.create(id="2", storage = Storage.objects.get(id="1"), article = Article.objects.get(lio_id="1"))
-#         QRCode.objects.create(id="1", storage_space=Compartment.objects.get(id="2"))
+#class FR4_2_test(TestCase):
+#    def setUP(self):
+#        article_access_stub = ArticleAccess
+#        self.article_to_search_for = Article(lio_id="1")
+#        storage_access_stub = StorageAccess
+#        self.storage_access_stub = StorageAccess(id="1")
+#        Compartment.objects.create(id="2", storage = Storage.objects.get(id="1"), article = Article.objects.get(lio_id="1"))
+#        QRCode.objects.create(id="1", compartment=Compartment.objects.get(id="2"))
 
-#     def test_QRcode_containing_Storagespace(self):
-#         compartment = Compartment.objects.get(id="2")
-#         qrcode = QRCode.objects.get(id="1")
-#         self.assertEqual(qrcode.storage_space, compartment)
+#    def test_QRcode_containing_Storagespace(self):
+#        compartment = Compartment.objects.get(id="2")
+#        qrcode = QRCode.objects.get(id="1")
+#        self.assertEqual(qrcode.compartment, compartment)
 
 
 
