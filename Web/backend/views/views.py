@@ -420,8 +420,8 @@ class Transactions(APIView):
             operation = request.data.get("operation")
             time_of_transaction = request.data.get("time_of_transaction")
 
-            #if time_of_transaction == "" or time_of_transaction is None:
-            time_of_transaction = date.today()
+            if time_of_transaction == "" or time_of_transaction is None:
+                time_of_transaction = date.today()
 
             if unit == "output":
                 add_output_unit = False
@@ -473,9 +473,12 @@ class GetTransaction(APIView):
             return JsonResponse(TransactionSerializer(transaction).data, safe=False, status=200)
 
     def put(self, request, transaction_id):
+        print("tjabba")
         '''Put transaction.'''
         if request.method == 'PUT':
+            print("tjena")
             new_time_of_transaction = request.data.get("time_of_transaction")
+            print("hallå")
             transaction = (
                 self.storage_management_service.edit_transaction_by_id(transaction_id, new_time_of_transaction))
 

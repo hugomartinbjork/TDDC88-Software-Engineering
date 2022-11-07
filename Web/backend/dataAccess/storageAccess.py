@@ -114,12 +114,22 @@ class StorageAccess():
         except Exception:
             return None
 
+    def edit_transaction_by_id(self, transaction_id: str, new_time_of_transaction: str) -> Transaction:
+        '''Changes a date of a transaction.'''
+        try:
+            Transaction.objects.filter(id=transaction_id).update(time_of_transaction=new_time_of_transaction)
+            transaction =  Transaction.objects.get(id=transaction_id)
+            return transaction
+        except Exception:
+            return None
+
     def get_transaction_by_storage(self, storage_id: str) -> int:
         '''Return transaction from storage id.'''
         try:
             return Transaction.objects.filter(storage=storage_id)
         except Exception:
             return None
+
 
     def get_storage_by_costcenter(self, cost_center: str) -> Storage:
         '''Return storage using cost-center.'''
