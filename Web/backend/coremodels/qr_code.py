@@ -9,6 +9,5 @@ class QRCode(models.Model):
     compartment = models.ForeignKey(Compartment, on_delete=models.CASCADE,
                                       null=True)
 
-
     def __str__(self):
-        return self.id
+        return str(self.id)
