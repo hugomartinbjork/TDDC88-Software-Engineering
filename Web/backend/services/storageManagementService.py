@@ -275,3 +275,9 @@ class StorageManagementService():
         return compartment
 
     # FR 9.4.1 och FR 9.4.2 ##
+
+    def get_compartment_by_qr(self, qr_code: str) -> Compartment:
+        '''Return compartment using qr code.'''
+        compartment = self.storage_access.get_compartment_by_qr(
+            qr_code=qr_code)
+        return compartment

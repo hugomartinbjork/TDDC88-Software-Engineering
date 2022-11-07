@@ -620,3 +620,28 @@ class SearchForArticleInStorages(View):
                     data2.append(article)
 
             return JsonResponse(data2, safe=False, status=200)
+
+
+class ArticleToCompartmentByQRcode(View):
+    '''Change Article linked to Compartment by using QR code.'''
+    @si.inject
+    def __init__(self, _deps):
+        self.storage_management_service: StorageManagementService = (
+            _deps['StorageManagementService']())
+        self.article_management_service: ArticleManagementService = (
+            _deps['ArticleManagementService']())
+
+    def get(self, request, qr_code):
+        '''Returns all transactions made by user.'''
+        current_compartment = (
+            self.storage_management_service.get_compartment_by_qr(
+                qr_code=qr_code))
+
+        if current_compartment is not None:
+            article_id = request.data.get("lioNr")
+            self.article_management_service.get_article_by_lio_id(article_id)
+            print(article_id)
+            return None
+        else:
+            return Response({'error': 'Could not find compartment'},
+                            status=status.HTTP_400_BAD_REQUEST)
