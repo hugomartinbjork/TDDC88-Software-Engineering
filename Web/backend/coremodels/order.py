@@ -2,6 +2,7 @@ from datetime import datetime
 from django.db import models
 from backend.coremodels.article import Article
 from backend.coremodels.storage import Storage
+from backend.operations.enumerator import OrderOperator
 
 
 class Order(models.Model):
@@ -12,7 +13,9 @@ class Order(models.Model):
     amount = models.PositiveIntegerField(default=None)
     expected_wait = models.PositiveSmallIntegerField(default=0)
     order_time = models.DateTimeField(default=datetime.now)
-    has_arrived = models.BooleanField(default=False)
+    order_state = models.IntegerField(
+        choices=OrderOperator.choices, default=1, null=False)
+
 
     def __str__(self):
         return (str(self.id)
