@@ -18,7 +18,7 @@ dependency_factory = DependencyFactory()
 
 class OrderServiceCalculateEtaTestCase(TestCase):
     '''Test case to calculate estimated time to arrival.'''
-    def set_up(self) -> None:
+    def setUp(self) -> None:
         central_storage_mock = CentralStorageAccess
         # When checking the article stock, the stub will return 100 as the
         # amount of the article found
@@ -57,7 +57,7 @@ class OrderServiceCalculateEtaTestCase(TestCase):
 
 class StorageServiceEconomyTest(TestCase):
     '''Storage service economy test.'''
-    def set_up(self):
+    def setUp(self):
         transacted_article = create_article(price=10)
         cost_center = create_costcenter(id="123")
         storage = create_storage(costCenter=cost_center)
