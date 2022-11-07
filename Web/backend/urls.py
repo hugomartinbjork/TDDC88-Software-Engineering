@@ -34,7 +34,7 @@ urlPatterns = [
      path('compartments/<str:qr_code>', views.Compartment.as_view()),
      path('transactions/', views.Transactions.as_view()),
      # alternative urls for transactions if date is input
-     path('connectArticleToCompartment/<str:qr_code>',
+     path('connectArticleToCompartment/<str:qr_code>/',
           views.ArticleToCompartmentByQRcode.as_view())
 ]
 
