@@ -18,7 +18,15 @@ def get_directory_class_names(directory):
 
 
 class DependencyFactory():
-    '''Dependency factory.'''
+    '''Made for creating a mockup of the "_deps" dictionary
+        injected into every service/view. This is done by
+        finding every class in the views and dataaccess folders
+        and adding them as keys to a dictionary with the RandomCallable
+        class as the value. The "RandomCallable
+        class tricks the service/view into thinking it received
+        a valid dependency (python duck-typing), however, for the actually
+        used dependencies, a mockup should be provided using the
+        complete_dependency_dinctionary function provided in this class'''
     def __init__(self) -> None:
         servicepath = os.path.abspath(os.path.join(os.path.dirname(
                                 __file__), '..', '..', 'services'))
