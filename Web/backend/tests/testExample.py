@@ -22,7 +22,7 @@ class OrderServiceCalculateEtaTestCase(TestCase):
         central_storage_mock = CentralStorageAccess
         # When checking the article stock, the stub will return 100 as the
         # amount of the article found
-        # in the central storage. 
+        # in the central storage.
         central_storage_mock.get_stock_by_article_id = MagicMock(
                                                 return_value=100)
         # dependency factory autocompletes with the rest of the
