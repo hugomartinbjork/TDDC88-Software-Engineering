@@ -111,7 +111,7 @@ class StorageManagementService():
 # TODO to the original author
 
     def add_to_storage(self, space_id: str, amount: int, username: str,
-                       add_output_unit: bool) -> Transaction:
+                       add_output_unit: bool, time_of_transaction) -> Transaction:
         '''Add to storage.'''
         compartment = self.storage_access.get_compartment_by_id(
             id=space_id)
