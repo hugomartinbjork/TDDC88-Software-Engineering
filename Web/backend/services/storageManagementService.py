@@ -42,6 +42,10 @@ class StorageManagementService():
         return self.storage_access.set_storage_amount(compartment_id=id,
                                                       amount=amount)
 
+    def set_article_in_compartment(self, current_compartment: Compartment, new_article: Article):
+        '''Set Article value.'''
+        self.storage_access.set_article(current_compartment, new_article)
+
     def get_stock(self, id: str, article_id: str) -> int:
         '''Return stock.'''
         return self.storage_access.get_compartment_stock(compartment_id=id,
@@ -275,9 +279,3 @@ class StorageManagementService():
         return compartment
 
     # FR 9.4.1 och FR 9.4.2 ##
-
-    def get_compartment_by_qr(self, qr_code: str) -> Compartment:
-        '''Return compartment using qr code.'''
-        compartment = self.storage_access.get_compartment_by_qr(
-            qr_code=qr_code)
-        return compartment

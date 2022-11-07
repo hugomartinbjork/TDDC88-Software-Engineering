@@ -33,15 +33,6 @@ class StorageAccess():
             return None
 
     # TODO: This does not seem to do what it is supposed to do. Please review
-    def set_storage_amount(self, compartment_id: str, amount: int) -> int:
-        '''Sets amount in compartment.'''
-        try:
-            new_amount = amount
-            return Compartment.objects.update(**{amount: new_amount})
-        except Exception:
-            return None
-
-    # TODO: This does not seem to do what it is supposed to do. Please review
     def get_compartment_stock(self,
                               compartment_id: str, article_id: str) -> int:
         '''Returns stock of campartmend using article id.'''
@@ -147,3 +138,17 @@ class StorageAccess():
             return None
 
 # #  FR 9.4.1 och FR 9.4.2
+
+ # TODO: This does not seem to do what it is supposed to do. Please review
+    def set_storage_amount(self, compartment_id: str, amount: int) -> int:
+        '''Sets amount in compartment.'''
+        try:
+            new_amount = amount
+            return Compartment.objects.update(**{amount: new_amount})
+        except Exception:
+            return None
+
+    def set_article(self, current_compartment: Compartment, new_article: Article):
+        '''Sets article in compartment.'''
+        current_compartment.article = new_article
+        current_compartment.save()

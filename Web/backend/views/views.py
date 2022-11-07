@@ -639,8 +639,9 @@ class ArticleToCompartmentByQRcode(APIView):
             article_to_change = self.article_management_service.get_article_by_lio_id(article_id)
             print(article_to_change)
             if article_to_change is not None:
+                self.storage_management_service.set_article_in_compartment(current_compartment, article_to_change) #Updates article in compartment
                 
-                return None
+                return JsonResponse(ArticleSerializer(article_to_change).data,                             status=200)
             else:
                 return Response({'error': 'Could not find article'},
                             status=status.HTTP_400_BAD_REQUEST)
