@@ -1,13 +1,14 @@
+from backend.coremodels.alternative_article_name import AlternativeArticleName
 from backend.coremodels.cost_center import CostCenter
 from rest_framework import serializers
 from backend.coremodels.article import Article
 from backend.coremodels.article import GroupInfo
 from backend.coremodels.qr_code import QRCode
-from backend.coremodels.storage_unit import StorageUnit
-# from backend.coremodels.storageComponent import storageUnit
+from backend.coremodels.storage import Storage
+# from backend.coremodels.storageComponent import storage
 from backend.coremodels.cost_center import CostCenter
 from backend.coremodels.user_info import UserInfo
-from backend.coremodels.storage_space import StorageSpace
+from backend.coremodels.compartment import Compartment
 from backend.coremodels.qr_code import QRCode
 from backend.coremodels.order import Order
 from backend.coremodels.transaction import Transaction
@@ -16,19 +17,20 @@ from backend.coremodels.transaction import Transaction
 class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
-        fields = ('name', 'lioId', 'description', 'article_group', 'image', 'sanitation_level', 'price', 'alternative_names',
+        fields = ('name', 'lio_id', 'description',
+                  'article_group', 'image', 'Z41', 'price',
                   'alternative_articles')
 
 
-class StorageUnitSerializer(serializers.ModelSerializer):
+class StorageSerializer(serializers.ModelSerializer):
     class Meta:
-        model = StorageUnit
+        model = Storage
         fields = ('name',)
 
 
-# class StorageUnitSerializer(serializers.ModelSerializer):
+# class StorageSerializer(serializers.ModelSerializer):
 #     class Meta:
-#         model = storageUnit
+#         model = storage
 #         fields = ('currentStock', 'article', 'storage',)
 
 class CostCenterSerializer(serializers.ModelSerializer):
@@ -43,10 +45,11 @@ class UserInfoSerializer(serializers.ModelSerializer):
         fields = ('user', 'cost_center')
 
 
-class StorageSpaceSerializer(serializers.ModelSerializer):
+class CompartmentSerializer(serializers.ModelSerializer):
     class Meta:
-        model = StorageSpace
-        fields = ('id', 'storage_unit', 'article', 'orderpoint', 'standard_order_amount',
+        model = Compartment
+        fields = ('id', 'storage', 'article',
+                  'order_point', 'standard_order_amount',
                   'maximal_capacity', 'amount')
 
 
@@ -59,11 +62,24 @@ class GroupSerializer(serializers.ModelSerializer):
 class QRCodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = QRCode
-        fields = ('id', 'storage_space')
+        fields = ('id', 'compartment')
 
 
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ('id', 'ofArticle', 'toStorageUnit',
-                  'expectedWait', 'orderTime')
+        fields = ('id', 'of_article', 'to_storage',
+                  'expected_wait', 'order_time')
+
+
+class TransactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Transaction
+        fields = ('id', 'storage', 'by_user', 'article',
+                  'amount', 'time_of_transaction', 'operation')
+
+
+class AlternativeNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AlternativeArticleName
+        fields = ('name',)

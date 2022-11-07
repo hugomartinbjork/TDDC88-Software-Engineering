@@ -1,18 +1,24 @@
 from backend.coremodels.order import Order
-from backend.__init__ import serviceInjector as si 
+from backend.__init__ import serviceInjector as si
 from ..__init__ import dataAccessInjector as di
 from backend.Order_text_files import utils
-from ..dataAccess.orderAccess import orderAccess
+from ..dataAccess.orderAccess import OrderAccess
 
-@si.register(name = 'orderManagementService')
-class orderManagementService():
-    
+
+@si.register(name='OrderManagementService')
+class OrderManagementService():
+    '''Order management service.'''
+
     @di.inject
-    def __init__(self, _deps):
-        self._orderAccess : orderAccess = _deps["orderAccess"]()
+    def __init__(self, _deps, *args):
+        self.order_access: OrderAccess = _deps["OrderAccess"]()
 
-    def getOrderById(self, id: int) -> Order:
-        return self._orderAccess.getOrderById(id)
+    def get_order_by_id(self, id: int) -> Order:
+        '''Returns order using id.'''
+        return self.order_access.get_order_by_id(id)
 
-    def textFile(orderName, article_id, storage_unit, eta, timeOfArrival):
-        utils.makeTextFile(orderName, article_id, storage_unit, eta, timeOfArrival)
+    def text_file(self, order_name, article_id, storage,
+                  eta, time_of_arrival):
+        '''Makes text file.'''
+        utils.make_text_file(order_name, article_id, storage, eta,
+                             time_of_arrival)

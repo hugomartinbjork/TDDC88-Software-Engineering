@@ -10,6 +10,7 @@ db.sqlite3
 media
 
 # Visual Studio Code # 
+.vscode/
 .vscode/* 
 !.vscode/settings.json 
 !.vscode/tasks.json 
@@ -54,3 +55,6 @@ Skärmavbild 2022-09-23 kl. 19.39.03.png
 
 # Orders
 Order:*.txt
+
+# .DS_Store
+.DS_Store

@@ -58,13 +58,11 @@ spec:
           image: gitlab.liu.se:5000/tddc88-2022/c4/rdx-solutions-backend-project/rdx-backend:latest # Specify the image
           env:
             - name: DJANGO_SECRET_KEY
-              value: "8SKLdsklsdSD89DS)UISD0ds903"
+              value: $DJANGO_SECRET_KEY
             - name: DJANGO_SUPERUSER_USERNAME
               value: "admin"
             - name: DJANGO_SUPERUSER_PASSWORD
               value: "rdxsolutions"
-            - name: DJANGO_SUPERUSER_EMAIL
-              value: "admin@rdx.com"
             - name: PORT
               value: "8000"
           ports: # Specify what ports should be opened
@@ -104,9 +102,10 @@ spec:
           #  path: "/api/hello_world"
           # livenessProbe:
           #  httpGet:
+            #  port: web
+             # path: "/api/hello_world"
           #  port: web
           # path: "/api/hello_world"
-
 # That's it, now our container is running on the cluster!
 
 # Remember the `---` to create a new yaml-document!
@@ -161,4 +160,12 @@ spec:
                 name: rdx-backend-app-service
                 port:
                   number: 80
+          - path: /api/
+            pathType: Prefix
+            backend:
+              service:
+                name: rdx-backend-app-service
+                port:
+                  number: 80
+
 ---
