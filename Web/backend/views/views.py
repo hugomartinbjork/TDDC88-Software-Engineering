@@ -420,8 +420,8 @@ class Transactions(APIView):
             operation = request.data.get("operation")
             time_of_transaction = request.data.get("time_of_transaction")
 
-            if time_of_transaction == "":
-                time_of_transaction = date.today()
+            #if time_of_transaction == "" or time_of_transaction is None:
+            time_of_transaction = date.today()
 
             if unit == "output":
                 add_output_unit = False

@@ -120,7 +120,7 @@ class StorageManagementService():
 # TODO to the original author
 
     def add_to_storage(self, space_id: str, amount: int, username: str,
-                       add_output_unit: bool) -> Transaction:
+                       add_output_unit: bool, time_of_transaction: str) -> Transaction:
         '''Add to storage.'''
         compartment = self.storage_access.get_compartment_by_id(
             id=space_id)
@@ -135,7 +135,7 @@ class StorageManagementService():
             new_amount = amount
         else:
             amount_in_storage = Compartment.objects.get(
-                id=id).amount + amount*converter
+                id=space_id).amount + amount*converter
             new_amount = amount*converter
 
         if (amount_in_storage < 0):
