@@ -446,7 +446,7 @@ class Transactions(APIView):
                                     status=200)
             elif operation == "takeout":
                 transaction = (
-                    self.storage_management_service.takeFromCompartment(
+                    self.storage_management_service.take_from_Compartment(
                         space_id=compartment.id, amount=amount,
                         username=user.username,
                         add_output_unit=add_output_unit,
@@ -454,6 +454,36 @@ class Transactions(APIView):
                 return JsonResponse(TransactionSerializer(transaction).data,
                                     status=200)
 
+class GetTransaction(APIView):
+    '''Get transaction by ID view.'''
+    @si.inject
+    def __init__(self, _deps):
+        StorageManagementService = _deps['StorageManagementService']
+        self.storage_management_service = StorageManagementService()
+        self.user_service: UserService = _deps['UserService']()
+
+    def get(self, request, transaction_id):
+        '''Get transaction.'''
+        if request.method == 'GET':
+            transaction = (
+                self.storage_management_service.get_transaction_by_id(transaction_id))
+        if transaction is None:
+            raise Http404("Could not find the transaction")
+        else:
+            return JsonResponse(TransactionSerializer(transaction).data, safe=False, status=200)
+
+    def put(self, request, transaction_id):
+        '''Put transaction.'''
+        if request.method == 'PUT':
+            new_time_of_transaction = request.data.get("time_of_transaction")
+            transaction = (
+                self.storage_management_service.edit_transaction_by_id(transaction_id, new_time_of_transaction))
+
+        if transaction is None:
+            raise Http404("Could not find the transaction")
+        else:
+            return JsonResponse(TransactionSerializer(transaction).data, safe=False, status=200)
+    
 
 class GetStorageValue(View):
     '''Get storage value view.'''

@@ -68,6 +68,15 @@ class StorageManagementService():
         '''Returns every transaction.'''
         return self.storage_access.get_all_transactions()
 
+    def get_transaction_by_id(self, transaction_id: str) -> Transaction:
+        '''Returns a transaction by id'''
+        return self.storage_access.get_transaction_by_id(transaction_id)
+
+    def edit_transaction_by_id(self, transaction_id: str, new_time_of_transaction: str) -> Transaction:
+        '''Edit time of a transaction'''
+        return self.storage_access.edit_transaction_by_id(transaction_id, new_time_of_transaction)
+    
+
     # Storage is not connected to a costcenter atm
     # For now this is sum och costs (takeout-return)
     # from transactions for one storage_compartment

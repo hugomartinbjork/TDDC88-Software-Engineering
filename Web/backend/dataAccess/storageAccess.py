@@ -106,6 +106,14 @@ class StorageAccess():
         except Exception:
             return None
 
+    def get_transaction_by_id(self, transaction_id: str) -> Transaction:
+        '''Return transaction from transaction id.'''
+        try:
+            transaction = Transaction.objects.get(id=transaction_id)
+            return transaction
+        except Exception:
+            return None
+
     def get_transaction_by_storage(self, storage_id: str) -> int:
         '''Return transaction from storage id.'''
         try:
