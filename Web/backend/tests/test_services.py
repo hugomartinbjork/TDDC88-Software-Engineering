@@ -22,7 +22,7 @@ class ArticleManagementServiceTest(TestCase):
         )
     def test_get_article_by_lio_id_unittestversion(self):
         test_search = self.article_management_service.get_article_by_lio_id(lio_id="1")
-        self.assertEqual(self.article_to_search_for, test_search)    
+        self.assertEqual(self.article_to_search_for, test_search)
 
 # class storageManagementServiceTest(TestCase):    
 #     def setUp(self):                     

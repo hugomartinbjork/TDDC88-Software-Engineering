@@ -146,30 +146,23 @@ class FR8_9_test(TestCase):
         self.assertEqual(test_article2, 4)
         self.assertNotEqual(test_article2, 5)
 
-
-       
-
-
-
-
-
 #Testing FR4.2
-#-------Fails test and gives errormessage: "Compartment matching query does not exist."
-#-------No idea what is wrong.
-# class FR4_2_test(TestCase):
-#     def setUP(self):
-#         article_access_stub = ArticleAccess
-#         self.article_to_search_for = Article(lio_id="1")
-#         storage_access_stub = StorageAccess
-#         self.storage_access_stub = StorageAccess(id="1")
+# Desc: The system shall connect a QR code with a Compartment in the Storage.
 
-#         Compartment.objects.create(id="2", storage = Storage.objects.get(id="1"), article = Article.objects.get(lio_id="1"))
-#         QRCode.objects.create(id="1", compartment=Compartment.objects.get(id="2"))
+class FR4_2_test(TestCase): 
+    def setUp(self):
+        # self.storage1 = Storage.objects.create(id="1")
+        # self.storage_management_service : StorageManagementService = StorageManagementService()
+        # self.compartment1 = Compartment.objects.create(id="1", storage = self.storage_management_service.get_storage_by_id(id="1"))
 
-#     def test_QRcode_containing_Storagespace(self):
-#         compartment = Compartment.objects.get(id="2")
-#         qrcode = QRCode.objects.get(id="1")
-#         self.assertEqual(qrcode.compartment, compartment)
+        storage_access_stub = StorageAccess
+        self.storage_management_service : StorageManagementService = StorageManagementService()
+        self.storage = Storage(id="1")
+        storage_access_stub.get_storage = MagicMock(return_value = self.storage)
+        self.compartment = Compartment(id="1", storage = storage_access_stub.get_storage(id="1"))
+        storage_access_stub.get_compartment_by_qr = MagicMock(return_value = self.compartment)
 
-
-
+    def test_FR4_2(self):
+        test_compartment = self.storage_management_service.get_compartment_by_qr(qr_code="1")
+        self.assertEqual(self.compartment, test_compartment)
+        self.assertEqual(self.storage, test_compartment.storage)
