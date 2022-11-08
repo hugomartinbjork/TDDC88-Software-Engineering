@@ -93,10 +93,13 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="Storage",
             fields=[
-                ('id', models.CharField(max_length=15, primary_key=True, serialize=False)),
-                ('name', models.CharField(max_length=30)),
-                ('building', models.CharField(max_length=30)),
-                ('floor', models.CharField(max_length=30)),
+                (
+                    "id",
+                    models.CharField(max_length=15, primary_key=True, serialize=False),
+                ),
+                ("name", models.CharField(max_length=30)),
+                ("building", models.CharField(max_length=30)),
+                ("floor", models.CharField(max_length=30)),
                 (
                     "cost_center",
                     models.ForeignKey(
@@ -280,6 +283,7 @@ class Migration(migrations.Migration):
                         to="backend.storageunit",
                     ),
                 ),
+<<<<<<< HEAD
             ],
         ),
         migrations.CreateModel(
@@ -340,6 +344,59 @@ class Migration(migrations.Migration):
                 ('supplier_article_nr', models.CharField(max_length=15, null=True)),
                 ('article', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='backend.article')),
                 ('article_supplier', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='backend.supplier')),
+=======
+            ],
+        ),
+        migrations.CreateModel(
+            name="InputOutput",
+            fields=[
+                ("id", models.AutoField(primary_key=True, serialize=False)),
+                ("input_unit_name", models.CharField(max_length=30)),
+                ("output_unit_name", models.CharField(max_length=30)),
+                ("output_unit_per_input_unit", models.PositiveIntegerField(default=0)),
+                (
+                    "article",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="backend.article",
+                    ),
+                ),
+            ],
+        ),
+        migrations.CreateModel(
+            name="CentralStorageSpace",
+            fields=[
+                ("id", models.AutoField(primary_key=True, serialize=False)),
+                ("amount", models.PositiveSmallIntegerField(default=0)),
+                (
+                    "article",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="backend.article",
+                    ),
+                ),
+            ],
+        ),
+        migrations.CreateModel(
+            name="ArticleHasSupplier",
+            fields=[
+                ("id", models.AutoField(primary_key=True, serialize=False)),
+                ("supplier_article_nr", models.CharField(max_length=15, null=True)),
+                (
+                    "article",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="backend.article",
+                    ),
+                ),
+                (
+                    "article_supplier",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="backend.supplier",
+                    ),
+                ),
+>>>>>>> e6f44c425a244c4240e86ed1dca3204a65f5f9b2
             ],
         ),
         migrations.AddField(
@@ -360,6 +417,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
+<<<<<<< HEAD
         ),
         migrations.CreateModel(
             name='AlternativeArticleName',
@@ -368,5 +426,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=30)),
                 ('article', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='backend.article')),
             ],
+=======
+>>>>>>> e6f44c425a244c4240e86ed1dca3204a65f5f9b2
         ),
     ]
