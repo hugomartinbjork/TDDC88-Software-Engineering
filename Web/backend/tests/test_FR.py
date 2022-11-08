@@ -3,11 +3,15 @@ from backend.dataAccess.storageAccess import StorageAccess
 from backend.dataAccess.articleAccess import ArticleAccess
 from backend.coremodels.article import Article
 from backend.coremodels.compartment import Compartment
+from backend.coremodels.cost_center import CostCenter
 from backend.coremodels.storage import Storage 
 from backend.coremodels.qr_code import QRCode
+from backend.coremodels.user_info import UserInfo
 from backend.services.articleManagementService import ArticleManagementService
 from backend.services.storageManagementService import StorageManagementService
+from backend.coremodels.transaction import Transaction
 import unittest
+from django.contrib.auth.models import User
 from unittest.mock import MagicMock
 from unittest.mock import MagicMock, Mock
 from ..services.orderServices import OrderService
@@ -151,7 +155,6 @@ class FR8_9_test(TestCase):
         self.Storage2 = Storage.objects.create(id="2")
         self.compartment1 = Compartment.objects.create(id="1", storage = self.storage_management_service.get_storage_by_id(id="1"), article=self.article_management_service.get_article_by_lio_id(lio_id="1"), amount=2)
         self.compartment2 = Compartment.objects.create(id="2", storage = self.storage_management_service.get_storage_by_id(id="2"), article=self.article_management_service.get_article_by_lio_id(lio_id="2"), amount=4)
-
     def test_FR8_9(self):
         test_article1 = self.storage_management_service.search_article_in_storage("1", "1")
         test_article2 = self.storage_management_service.search_article_in_storage("2", "2")
@@ -186,45 +189,151 @@ class FR8_9_test(TestCase):
 
 
 
-class StorageServiceEconomyTest(TestCase):
-    '''Storage service economy test.'''
-    def set_up(self):
-        dependency_factory = DependencyFactory()
-        transacted_article = create_article(price=10)
-        cost_center = create_costcenter(id="123")
-        storage = create_storage(costCenter=cost_center)
-        transaction_time = datetime.date(2000, 7, 15)
-        transaction_list = []
-        transaction_list.append(create_transaction(article=transacted_article,
-                                                   amount=2, operation=2,
-                                                   storage=storage,
-                                                   time_of_transaction=(
-                                                       transaction_time)))
-        transaction_list.append(create_transaction(article=transacted_article,
-                                                   amount=2, operation=1,
-                                                   storage=storage,
-                                                   time_of_transaction=(
-                                                       transaction_time)))
-        transaction_list.append(create_transaction(article=transacted_article,
-                                                   amount=4,
-                                                   operation=1,
-                                                   storage=storage,
-                                                   time_of_transaction=(
-                                                       transaction_time)))
-        storage_access_mock = StorageAccess
-        storage_access_mock.get_transaction_by_storage = MagicMock(
-                                     return_value=transaction_list)
-        user_access_mock = UserAccess
-        user_access_mock.get_user_cost_center = MagicMock(
-                                 return_value=cost_center)
-        mocked_dependencies = (
-            dependency_factory.complete_dependency_dictionary(
-                {"StorageAccess": storage_access_mock,
-                 "UserAccess": user_access_mock}))
-        self.storage_service = StorageManagementService(mocked_dependencies)
+# class StorageServiceEconomyTest(TestCase):
+#     '''Storage service economy test.'''
+#     def set_up(self):
+#         dependency_factory = DependencyFactory()
+#         transacted_article = create_article(price=10)
+#         cost_center = create_costcenter(id="123")
+#         storage = create_storage(costCenter=cost_center)
+#         transaction_time = datetime.date(2000, 7, 15)
+#         transaction_list = []
+#         transaction_list.append(create_transaction(article=transacted_article,
+#                                                    amount=2, operation=2,
+#                                                    storage=storage,
+#                                                    time_of_transaction=(
+#                                                        transaction_time)))
+#         transaction_list.append(create_transaction(article=transacted_article,
+#                                                    amount=2, operation=1,
+#                                                    storage=storage,
+#                                                    time_of_transaction=(
+#                                                        transaction_time)))
+#         transaction_list.append(create_transaction(article=transacted_article,
+#                                                    amount=4,
+#                                                    operation=1,
+#                                                    storage=storage,
+#                                                    time_of_transaction=(
+#                                                        transaction_time)))
+#         storage_access_mock = StorageAccess
+#         storage_access_mock.get_transaction_by_storage = MagicMock(
+#                                      return_value=transaction_list)
+#         user_access_mock = UserAccess
+#         user_access_mock.get_user_cost_center = MagicMock(
+#                                  return_value=cost_center)
+#         mocked_dependencies = (
+#             dependency_factory.complete_dependency_dictionary(
+#                 {"StorageAccess": storage_access_mock,
+#                  "UserAccess": user_access_mock}))
+#         self.storage_service = StorageManagementService(mocked_dependencies)
 
-    def test_sum_transactions_and_withdrawals(self):
-        '''Test sym of transactions and withdrawals.'''
-        economyresult = self.storage_service.get_storage_cost(
-                                "", "2000-06-15", "2000-08-15")
-        self.assertAlmostEquals(economyresult, 40)
+#     def test_sum_transactions_and_withdrawals(self):
+#         '''Test sym of transactions and withdrawals.'''
+#         economyresult = self.storage_service.get_storage_cost(
+#                                 "", "2000-06-15", "2000-08-15")
+#         self.assertAlmostEquals(economyresult, 40)
+
+#Testing FR11.1
+#Desc: The system shall register the cost of the storage to the sum of all the articles in it
+class FR11_1_Test(TestCase): 
+    def setUp(self):
+        #create 2 articles witha certain price and a cost center
+        self.article1 = Article.objects.create(lio_id="1", price = 10)
+        self.article2 = Article.objects.create(lio_id="2", price = 30)
+        self.article_management_service : ArticleManagementService = ArticleManagementService()
+        self.storage_management_service : StorageManagementService = StorageManagementService()
+        cost_center1 = CostCenter.objects.create(id="123")
+        self.Storage1 = Storage.objects.create(id="99", cost_center = cost_center1)
+        
+        #create 2 mock users
+        self.user1 = User.objects.create(username="userOne", password="TDDC88")
+        self.use_info1 = UserInfo.objects.create(user = self.user1, cost_center = cost_center1)
+        self.user2 = User.objects.create(username="userTwo", password="TDDC88")
+        self.use_info2 = UserInfo.objects.create(user = self.user2, cost_center = cost_center1)
+
+        self.compartment1 = Compartment.objects.create(id="1", storage = self.storage_management_service.get_storage_by_id(id="99"), article=self.article_management_service.get_article_by_lio_id(lio_id="1"))
+        self.compartment2 = Compartment.objects.create(id="2", storage = self.storage_management_service.get_storage_by_id(id="99"), article=self.article_management_service.get_article_by_lio_id(lio_id="2"))
+        self.transaction1 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="1"),
+                                                    amount=2, operation=1, by_user = self.user1,
+                                                    storage= self.storage_management_service.get_storage_by_id(id="99"),
+                                                    time_of_transaction=
+                                                    datetime.date(2000, 2, 15))
+        self.transaction2 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="2"),
+                                                    amount=2, operation=1, by_user = self.user1,
+                                                    storage= self.storage_management_service.get_storage_by_id(id="99"),
+                                                    time_of_transaction=
+                                                    datetime.date(2000, 5, 15))   
+        self.transaction1 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="1"),
+                                                    amount=1, operation=1, by_user = self.user2,
+                                                    storage= self.storage_management_service.get_storage_by_id(id="99"),
+                                                    time_of_transaction=
+                                                    datetime.date(2000, 9, 15))                                        
+        
+    def test_FR11_1(self):
+        storage1_cost = self.storage_management_service.get_storage_cost("99", "2000-01-07","2000-12-07")
+        #storage2_cost = self.storage_management_service.get_storage_cost("2", "2022-10-7","2022-12-7")
+        self.assertEqual(storage1_cost, 30)
+        #self.assertEqual(storage2_cost, 120)
+
+# class FR11_1_Test(TestCase): 
+#     def setUp(self):
+#         #create 2 articles witha certain price and a cost center
+#         self.article1 = Article.objects.create(lio_id="1", price = 10)
+#         self.article2 = Article.objects.create(lio_id="2", price = 30)
+#         self.article_management_service : ArticleManagementService = ArticleManagementService()
+#         self.storage_management_service : StorageManagementService = StorageManagementService()
+#         cost_center1 = CostCenter.objects.create(id="123")
+#         self.Storage1 = Storage.objects.create(id="99", cost_center = cost_center1)
+        
+#         #create 2 mock users
+#         self.user1 = User.objects.create(username="userOne", password="TDDC88")
+#         self.use_info1 = UserInfo.objects.create(user = self.user1, cost_center = cost_center1)
+#         self.user2 = User.objects.create(username="userTwo", password="TDDC88")
+#         self.use_info2 = UserInfo.objects.create(user = self.user2, cost_center = cost_center1)
+
+#         self.compartment1 = Compartment.objects.create(id="1", storage = self.storage_management_service.get_storage_by_id(id="99"), article=self.article_management_service.get_article_by_lio_id(lio_id="1"))
+#         self.compartment2 = Compartment.objects.create(id="2", storage = self.storage_management_service.get_storage_by_id(id="99"), article=self.article_management_service.get_article_by_lio_id(lio_id="2"))
+#         self.transaction1 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="1"),
+#                                                     amount=2, operation=1, by_user = self.user1,
+#                                                     storage= self.storage_management_service.get_storage_by_id(id="99"),
+#                                                     time_of_transaction=
+#                                                     datetime.date(2000, 2, 15))
+#         self.transaction2 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="2"),
+#                                                     amount=2, operation=1, by_user = self.user1,
+#                                                     storage= self.storage_management_service.get_storage_by_id(id="99"),
+#                                                     time_of_transaction=
+#                                                     datetime.date(2000, 5, 15))   
+#         self.transaction1 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="1"),
+#                                                     amount=1, operation=1, by_user = self.user2,
+#                                                     storage= self.storage_management_service.get_storage_by_id(id="99"),
+#                                                     time_of_transaction=
+#                                                     datetime.date(2000, 9, 15))                                        
+        
+#     def test_FR11_1(self):
+#         storage1_cost = self.storage_management_service.get_storage_cost("99", "2000-01-07","2000-12-07")
+#         #storage2_cost = self.storage_management_service.get_storage_cost("2", "2022-10-7","2022-12-7")
+#         self.assertEqual(storage1_cost, 30)
+#         #self.assertEqual(storage2_cost, 120)
+
+
+class FR11_1_Test(TestCase): 
+    def setUp(self):
+        #create 2 articles witha certain price and a cost center
+        self.article1 = Article.objects.create(lio_id="1", price = 10)
+        self.article2 = Article.objects.create(lio_id="2", price = 30)
+        self.article_management_service : ArticleManagementService = ArticleManagementService()
+        self.storage_management_service : StorageManagementService = StorageManagementService()
+        cost_center1 = CostCenter.objects.create(id="123")
+        self.Storage1 = Storage.objects.create(id="99", cost_center = cost_center1)
+        self.Storage2 = Storage.objects.create(id="34", cost_center = cost_center1)
+        
+        #add compartments in storage 1 with articles and a certain amount of articles
+        self.compartment1 = Compartment.objects.create(id="1", storage = self.storage_management_service.get_storage_by_id(id="99"), article=self.article_management_service.get_article_by_lio_id(lio_id="1"), amount = 2)
+        self.compartment2 = Compartment.objects.create(id="2", storage = self.storage_management_service.get_storage_by_id(id="99"), article=self.article_management_service.get_article_by_lio_id(lio_id="2"), amount = 3)                                    
+        #add compartments in storage 2 with articles and a certain amount of articles
+        self.compartment2 = Compartment.objects.create(id="3", storage = self.storage_management_service.get_storage_by_id(id="34"), article=self.article_management_service.get_article_by_lio_id(lio_id="2"), amount = 3)        
+    def test_FR11_1(self):
+        storage1_value = self.storage_management_service.get_storage_value("99")
+        storage2_value = self.storage_management_service.get_storage_value("34")
+        self.assertEqual(storage1_value, 110)
+        self.assertEqual(storage2_value, 90)
+       
