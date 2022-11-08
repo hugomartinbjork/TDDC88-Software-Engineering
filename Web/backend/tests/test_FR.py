@@ -9,6 +9,19 @@ from backend.services.articleManagementService import ArticleManagementService
 from backend.services.storageManagementService import StorageManagementService
 import unittest
 from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
+from ..services.orderServices import OrderService
+from ..dataAccess.centralStorageAccess import CentralStorageAccess
+from ..dataAccess.storageAccess import StorageAccess
+from ..dataAccess.userAccess import UserAccess
+from ..dataAccess.orderAccess import OrderAccess
+from .testObjectFactory.dependencyFactory import DependencyFactory
+from .testObjectFactory.coremodelFactory import create_article
+from .testObjectFactory.coremodelFactory import create_storage
+from .testObjectFactory.coremodelFactory import create_transaction
+from .testObjectFactory.coremodelFactory import create_costcenter
+from datetime import datetime
+import datetime
 
 # Testing FR4.1
 # === How To Rewrite tests example 1 === #
@@ -168,3 +181,8 @@ class FR4_2_test(TestCase):
         test_compartment = self.storage_management_service.get_compartment_by_qr(qr_code="1")
         self.assertEqual(self.compartment, test_compartment)
         self.assertEqual(self.storage, test_compartment.storage)
+    def test_sum_transactions_and_withdrawals(self):
+        '''Test sym of transactions and withdrawals.'''
+        economyresult = self.storage_service.get_storage_cost(
+                                "", "2000-06-15", "2000-08-15")
+        self.assertAlmostEquals(economyresult, 40)
