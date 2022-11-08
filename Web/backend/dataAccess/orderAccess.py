@@ -2,64 +2,76 @@ from datetime import timedelta
 import string
 
 from backend.coremodels.article import Article
-from backend.coremodels.storage_unit import StorageUnit
+from backend.coremodels.storage import Storage
 from ..coremodels.order import Order
 from ..__init__ import dataAccessInjector as di
 
-@di.register(name="orderAccess")
-class orderAccess():
+
+@di.register(name="OrderAccess")
+class OrderAccess():
+    '''Order Access.'''
     def get_order_by_id(self, id: int) -> Order:
+        '''Get order by id.'''
         try:
-            order = Order.objects.get(id=id)  
+            order = Order.objects.get(id=id)
             return order
-        except:
+        except Exception:
             return None
 
-    def get_order_by_article_and_storage(self, storage_unit_id, article_id) -> Order:
+    def get_order_by_article_and_storage(self,
+                                         storage_id, article_id) -> Order:
+        '''Returns order using article and storage.'''
         order = Order.objects.filter(
-            toStorageUnit=storage_unit_id, ofArticle=article_id).first()
+            to_storage=storage_id, of_article=article_id).first()
         return order
 
-    def getOrderedArticle(self, orderId: int) -> Article:
+    def get_ordered_article(self, order_id: int) -> Article:
+        '''Retrieve article that has been ordered.'''
         try:
-            article = self.get_order_by_id(orderId).ofArticle
+            article = self.get_order_by_id(order_id).of_article
             return article
-        except:
+        except Exception:
             return None
-    
-    def getToStorageUnit(self, orderId: int) -> StorageUnit:
+
+    def get_to_storage(self, order_id: int) -> Storage:
+        '''Returns storage unit form order id.'''
         try:
-            storageUnit = self.get_order_by_id(orderId).toStorageUnit
-            return storageUnit
-        except:
+            storage = self.get_order_by_id(order_id).to_storage
+            return storage
+        except Exception:
             return None
-   
-    def getAmount(self, orderId: int) -> int:
+
+    def get_amount(self, order_id: int) -> int:
+        '''Returns order amount from order id.'''
         try:
-            amount = self.get_order_by_id(orderId).amount
+            amount = self.get_order_by_id(order_id).amount
             return amount
-        except:
+        except Exception:
             return None
 
-    # Gets the estimated time of arrival by adding the expected wait to the date the order was ordered
-    def get_eta(self, orderId):
-        order = self.get_order_by_id(orderId)
-        if order is None: 
+    # Gets the estimated time of arrival by adding the expected wait to the
+    #  date the order was ordered.
+    def get_eta(self, order_id):
+        '''Returns estimated time to arrival of order.'''
+        order = self.get_order_by_id(order_id)
+        if order is None:
             return None
-        orderDate = order.orderTime
-        days = order.expectedWait
-        orderDate = orderDate + timedelta(days)
-        return orderDate
+        order_date = order.order_time
+        days = order.expected_wait
+        order_date = order_date + timedelta(days)
+        return order_date
 
-    def create_order(self, storageId : string, articleId : string, amount : int, expectedWait: int):
-        article = Article.objects.filter(lioId=articleId).first()
-        storageUnit = StorageUnit.objects.filter(id = storageId).first()
+    def create_order(self, storage_id: string, article_id: string, amount: int,
+                     expected_wait: int):
+        '''Create new order.'''
+        article = Article.objects.filter(lio_id=article_id).first()
+        storage = Storage.objects.filter(id=storage_id).first()
         try:
             order = Order(
-                ofArticle=article, toStorageUnit=storageUnit,
-                amount=amount, expectedWait=expectedWait)
+                of_article=article, to_storage=storage,
+                amount=amount, expected_wait=expected_wait)
             order.save()
-        except:
+        except Exception:
             return None
 
         return order

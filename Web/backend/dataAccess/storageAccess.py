@@ -1,131 +1,149 @@
-from datetime import timedelta
+# from datetime import timedelta
 from backend.coremodels.article import Article
 from backend.coremodels.transaction import Transaction
-#from backend.coremodels.Compartment import Compartment
-#from backend.coremodels.Storage import Storage
-from backend.coremodels.transaction import Transaction
-from backend.coremodels.article import Article
-from backend.coremodels.qr_code import QRCode
-from backend.coremodels.storage_space import StorageSpace
-from backend.coremodels.storage_unit import StorageUnit
-from backend.coremodels.transaction import Transaction
-from ..coremodels.order import Order
+# from backend.coremodels.Compartment import Compartment
+# from backend.coremodels.Storage import Storage
+# from backend.coremodels.transaction import Transaction
+# from backend.coremodels.article import Article
+# from backend.coremodels.qr_code import QRCode
+from backend.coremodels.compartment import Compartment
+from backend.coremodels.storage import Storage
+# from backend.coremodels.transaction import Transaction
+# from ..coremodels.order import Order
 from ..__init__ import dataAccessInjector as di
 
-@di.register(name="storageAccess")
-class storageAccess():
-    def get_storage(self, id: str) -> StorageUnit:
+
+@di.register(name="StorageAccess")
+class StorageAccess():
+    '''Storage acces.'''
+    def get_storage(self, id: str) -> Storage:
+        '''Returns storage from id.'''
         try:
-            storage = StorageUnit.objects.get(id=id)
+            storage = Storage.objects.get(id=id)
             return storage
-        except:
+        except Exception:
             return None
 
-    def get_compartment_by_id(self, id: str) -> StorageSpace:
+    def get_compartment_by_id(self, id: str) -> Compartment:
+        '''Returns compartmend (storage space) from id.'''
         try:
-            storage = StorageSpace.objects.get(id=id)
+            storage = Compartment.objects.get(id=id)
             return storage
-        except:
+        except Exception:
             return None
 
-    #TODO: This does not seem to do what it is supposed to do. Please review
-    def set_storage_amount(self, compartmentId: str, amount: int) -> int:
+    # TODO: This does not seem to do what it is supposed to do. Please review
+    def set_storage_amount(self, compartment_id: str, amount: int) -> int:
+        '''Sets amount in compartment.'''
         try:
-            newAmount = amount
-            return StorageSpace.objects.update(**{amount: newAmount})
-        except:
+            new_amount = amount
+            return Compartment.objects.update(**{amount: new_amount})
+        except Exception:
             return None
 
-    #TODO: This does not seem to do what it is supposed to do. Please review
-    def get_compartment_stock(self, compartmentId: str, article_id: str) -> int:
+    # TODO: This does not seem to do what it is supposed to do. Please review
+    def get_compartment_stock(self,
+                              compartment_id: str, article_id: str) -> int:
+        '''Returns stock of campartmend using article id.'''
         try:
-            stock = int(StorageSpace.objects.get(
-                id=id, article=article_id).amount)
+            stock = int(Compartment.objects.get(
+                id=compartment_id, article=article_id).amount)
             return stock
-        except:
+        except Exception:
             return None
 
-    def get_storage_stock(self, storageId: str) -> dict:
+    def get_storage_stock(self, storage_id: str) -> dict:
+        '''Returns storage stock using storage id.'''
         try:
-            return "article: {} amount: {}".format(StorageSpace.objects.get(id=id).article, StorageSpace.objects.get(id=id).amount)
-        except:
-            return None
-    
-    def get_all_storage_units(self) -> dict:
-        try:
-            allStorageUnits = StorageUnit.objects.all().values()  
-            return allStorageUnits
-        except:
+            return "article: {} amount: {}".format(
+                        Compartment.objects.get(id=storage_id).article,
+                        Compartment.objects.get(id=storage_id).amount)
+        except Exception:
             return None
 
-    def getArticleInStorageSpace(self, storageSpaceId: str) -> Article:
+    def get_all_storages(self) -> dict:
+        '''Returns every storage unit.'''
         try:
-            storage_space = StorageSpace.objects.get(id=storageSpaceId)
-            article= Article.objects.get(id=storage_space.article)
+            all_storages = Storage.objects.all().values()
+            return all_storages
+        except Exception:
+            return None
+
+    def get_article_in_compartment(self, compartment_id: str) -> Article:
+        '''Return article in storage space using storage space id.'''
+        try:
+            compartment = Compartment.objects.get(id=compartment_id)
+            article = Article.objects.get(id=compartment.article)
             return article
-        except:
-            return None
-    
-    def searchArticleInStorage(self, storageUnitId: str, articleId: str) -> int:
-        try:
-            storage_unit = StorageUnit.objects.get(id=storageUnitId)
-            article = Article.objects.get(lioId = articleId)
-            storage_space = StorageSpace.objects.get(storage_unit=storage_unit, article=article)
-            return storage_space.amount
-        except:
+        except Exception:
             return None
 
-    def get_compartments_by_storage(self, storageId: str) -> int:
-        try: 
-            return StorageSpace.objects.filter(storage_unit=storageId)
-        except:
+    def search_article_in_storage(self, storage_id: str,
+                                  article_id: str) -> int:
+        '''Search for article in storage using storage unit id
+        and article id.'''
+        try:
+            storage = Storage.objects.get(id=storage_id)
+            article = Article.objects.get(lio_id=article_id)
+            compartment = Compartment.objects.get(storage=storage,
+                                                     article=article)
+            return compartment.amount
+        except Exception:
             return None
-    
+
+    def get_compartments_by_storage(self, storage_id: str) -> int:
+        '''Return compartments from storage id.'''
+        try:
+            return Compartment.objects.filter(storage=storage_id)
+        except Exception:
+            return None
 
     def get_all_transactions(self) -> dict:
+        '''Return every transaction.'''
         try:
-            allTransactions = Transaction.objects.all().values()
-            return allTransactions
-        except:
-            return None
-    def get_transaction_by_storage(self, storageId: str) -> int:
-        try:
-            return Transaction.objects.filter(storage_unit=storageId)
-        except:
+            all_transactions = Transaction.objects.all().values()
+            return all_transactions
+        except Exception:
             return None
 
-    def get_storage_by_costcenter(self, cost_center: str) -> StorageUnit:
+    def get_transaction_by_storage(self, storage_id: str) -> int:
+        '''Return transaction from storage id.'''
         try:
-            storage = StorageUnit.objects.get(cost_center=cost_center)
+            return Transaction.objects.filter(storage=storage_id)
+        except Exception:
+            return None
+
+    def get_storage_by_costcenter(self, cost_center: str) -> Storage:
+        '''Return storage using cost-center.'''
+        try:
+            storage = Storage.objects.get(cost_center=cost_center)
             return storage
-        except:
-            None
+        except Exception:
+            return None
 
-##  FR 9.4.1 och FR 9.4.2 ##
+#  FR 9.4.1 och FR 9.4.2 ##
 
-    def create_compartment(self, storage_id: str, placement: str, qr_code) -> StorageSpace:
-        print("helelo: " +storage_id)
-        storage = StorageUnit.objects.filter(id = storage_id).first()
-        article = Article.objects.get(lioId = '123')
-        print(storage)
+    def create_compartment(self, storage_id: str, placement: str,
+                           qr_code) -> Compartment:
+        '''Create new compartment.'''
+        storage = Storage.objects.filter(id=storage_id).first()
+        # article = Article.objects.get(lio_id='123')
         try:
-            compartment = StorageSpace(
-            id = qr_code,
-            storage_unit = storage, 
-            placement = placement,
-        )
+            compartment = Compartment(
+                id=qr_code,
+                storage=storage,
+                placement=placement,)
             compartment.save()
             return compartment
-        except:
+        except Exception:
             return None
 
-    
-    def get_compartment_by_qr(self, qr_code: str) -> StorageSpace:
+    def get_compartment_by_qr(self, qr_code: str) -> Compartment:
+        '''Get compartment using qr code.'''
         try:
-            compartment = StorageSpace.objects.get(id=qr_code)
+            compartment = Compartment.objects.get(id=qr_code)
             return compartment
-        except:
+        except Exception:
             return None
-        
 
-##  FR 9.4.1 och FR 9.4.2 ##
+# #  FR 9.4.1 och FR 9.4.2
