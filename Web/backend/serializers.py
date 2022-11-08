@@ -83,3 +83,8 @@ class AlternativeNameSerializer(serializers.ModelSerializer):
     class Meta:
         model = AlternativeArticleName
         fields = ('name',)
+
+
+class UpdateCompartmentSerializer(serializers.Serializer):
+    qr_code = serializers.CharField(max_length=15)
+    lioNr = serializers.CharField(max_length=15)

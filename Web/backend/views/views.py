@@ -8,7 +8,7 @@ import json
 # from rest_framework import generics
 from django.http import Http404, JsonResponse, HttpResponseBadRequest
 # from backend.coremodels.transaction import Transaction
-from ..serializers import AlternativeNameSerializer, StorageSerializer
+from ..serializers import AlternativeNameSerializer, StorageSerializer, UpdateCompartmentSerializer
 from ..serializers import ArticleSerializer, OrderSerializer
 from ..serializers import CompartmentSerializer, TransactionSerializer
 from ..serializers import GroupSerializer
@@ -653,7 +653,7 @@ class ArticleToCompartmentByQRcode(APIView):
                 new_order_point = request.data.get("orderQuantityLevel")
                 self.storage_management_service.set_order_point(current_compartment, new_order_point)
 
-                return JsonResponse(CompartmentSerializer(current_compartment).data, status=200)
+                return JsonResponse(UpdateCompartmentSerializer(qr_code=qr_code, lioNr=article_id).data, status=200)
             else:
                 return Response({'error': 'Could not find article'},
                             status=status.HTTP_400_BAD_REQUEST)
