@@ -453,6 +453,15 @@ class Transactions(APIView):
                         time_of_transaction=time_of_transaction))
                 return JsonResponse(TransactionSerializer(transaction).data,
                                     status=200)
+            elif operation == "adjust":
+                transaction = (
+                    self.storage_management_service.set_compartment_amount(
+                        compartment_id=compartment.id, amount=amount,
+                        username=user.username,
+                        add_output_unit=add_output_unit,
+                        time_of_transaction=time_of_transaction))
+                return JsonResponse(TransactionSerializer(transaction).data,
+                                    status=200)
 
 class GetTransaction(APIView):
     '''Get transaction by ID view.'''
@@ -473,12 +482,9 @@ class GetTransaction(APIView):
             return JsonResponse(TransactionSerializer(transaction).data, safe=False, status=200)
 
     def put(self, request, transaction_id):
-        print("tjabba")
         '''Put transaction.'''
         if request.method == 'PUT':
-            print("tjena")
             new_time_of_transaction = request.data.get("time_of_transaction")
-            print("hallå")
             transaction = (
                 self.storage_management_service.edit_transaction_by_id(transaction_id, new_time_of_transaction))
 

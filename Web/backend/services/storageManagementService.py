@@ -76,6 +76,17 @@ class StorageManagementService():
         '''Edit time of a transaction'''
         return self.storage_access.edit_transaction_by_id(transaction_id, new_time_of_transaction)
     
+    def set_compartment_amount(self, compartment_id: int, amount: int, username: str, add_output_unit: bool, time_of_transaction: str) -> Transaction:
+        '''Set a storage to a specified level. Return a transaction.'''
+        compartment = self.storage_access.set_compartment_amount(compartment_id, amount)
+        storage = self.storage_access.get_storage(id=compartment.storage.id)
+        article = self.storage_access.get_article_in_compartment(compartment_id=compartment_id)
+        user = User.objects.get(username=username)
+        transaction = Transaction.objects.create(
+                storage=storage, article=article, operation=4,
+                by_user=user, amount=amount,
+                time_of_transaction=time_of_transaction)
+        return transaction
 
     # Storage is not connected to a costcenter atm
     # For now this is sum och costs (takeout-return)

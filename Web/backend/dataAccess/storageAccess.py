@@ -33,11 +33,12 @@ class StorageAccess():
             return None
 
     # TODO: This does not seem to do what it is supposed to do. Please review
-    def set_storage_amount(self, compartment_id: str, amount: int) -> int:
+    def set_compartment_amount(self, compartment_id: str, amount: int) -> int:
         '''Sets amount in compartment.'''
         try:
-            new_amount = amount
-            return Compartment.objects.update(**{amount: new_amount})
+            Compartment.objects.filter(id=compartment_id).update(amount=amount)
+            compartment = Compartment.objects.get(id=compartment_id)
+            return compartment
         except Exception:
             return None
 
@@ -73,7 +74,7 @@ class StorageAccess():
         '''Return article in storage space using storage space id.'''
         try:
             compartment = Compartment.objects.get(id=compartment_id)
-            article = Article.objects.get(id=compartment.article)
+            article = Article.objects.get(lio_id=compartment.article.lio_id)
             return article
         except Exception:
             return None
