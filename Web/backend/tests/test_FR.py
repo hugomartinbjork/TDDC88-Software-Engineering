@@ -23,6 +23,16 @@ from .testObjectFactory.coremodelFactory import create_costcenter
 from datetime import datetime
 import datetime
 
+# Testing FR 1.1 The system shall support three different user types: medical employee, inventory employee, and MIV employee.
+class SupportDifferentUsers(TestCase):
+    def setUp(self):
+        self.article_to_search_for = Article.objects.create(lio_id ="1") #Database is populated and the object is stored so that we don't have to retrieve it again
+        self.article_management_service : ArticleManagementService = ArticleManagementService() #An instance of the class to be tested is created and stored as a class variable for the test class. The "articleManagementService :" part specifies that the stored variable must be of type articlemanagementservice, this is not necessary, but makes the code more understandable
+    def test_get_article_by_lio_id(self):
+        test_search = self.article_management_service.get_article_by_lio_id("1")
+        self.assertEqual(test_search, self.article_to_search_for)
+
+
 # Testing FR4.1
 # === How To Rewrite tests example 1 === #
 # Here the same functionality that you intended is preserved
