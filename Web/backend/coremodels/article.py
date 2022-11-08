@@ -24,6 +24,9 @@ class Article(models.Model):
     takeout_unit = models.IntegerField(
         choices=UnitOperator.choices, default=1, null=False)
 
+    class Meta:
+        permissions = (("get_article", "Can get articles from database"),)
+
     # Should these attributes below really be included, they are not
     # included in the database schema??
 

@@ -36,6 +36,8 @@ from rest_framework.response import Response
 # from rest_framework.authtoken.views import ObtainAuthToken
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import permission_required
+from django.contrib.auth.mixins import PermissionRequiredMixin
 # from rest_framework.decorators import renderer_classes, api_view
 from django.http import HttpResponse
 from itertools import chain
@@ -44,15 +46,18 @@ from django.utils.timezone import now
 # Create your views here.
 
 
-class Article(View):
+class Article(PermissionRequiredMixin, View):
     '''Article view.'''
+    
+    permission_required = 'article.get_article'
+    
     # Dependencies are injected, I hope that we will be able to mock
     # (i.e. make stubs of) these for testing
     @si.inject
     def __init__(self, _deps, *args):
         self.article_management_service: ArticleManagementService = (
                                 _deps['ArticleManagementService']())
-
+    
     def get(self, request, article_id):
         '''Get.'''
         if request.method == 'GET':
