@@ -1,47 +1,33 @@
-# from http.client import OK, HTTPResponse
-from itertools import chain
-from operator import itemgetter
-# import pkgutil
-# from urllib import request
-import json
-# from django.shortcuts import render
-# from rest_framework import generics
-from django.http import Http404, JsonResponse, HttpResponseBadRequest
-# from backend.coremodels.transaction import Transaction
 from ..serializers import AlternativeNameSerializer, StorageSerializer
 from ..serializers import ArticleSerializer, OrderSerializer
 from ..serializers import CompartmentSerializer, TransactionSerializer
 from ..serializers import GroupSerializer
-# from QRCodeSerializer
-#  This import is important for now, since the dependency
-# in articlemanagmentservice will not be stored in the serviceInjector
-# otherwise however, I'm hoping to be able to change this since
-# it looks kind of trashy
+
 from backend.services.articleManagementService import ArticleManagementService
 from backend.services.userService import UserService
 from backend.services.groupManagementService import GroupManagementService
 from backend.services.storageManagementService import StorageManagementService
 from backend.services.orderServices import OrderService
-from django.views import View
+
 from backend.__init__ import serviceInjector as si
-# from backend.coremodels.article import Article
-# from backend.coremodels.storage import Storage
-from backend.coremodels.compartment import Compartment
-# from backend.coremodels.qr_code import QRCode
-# from backend.coremodels.order import Order
-# from rest_framework.authtoken.models import Token
+from django.views import View
+from django.http import Http404, JsonResponse, HttpResponseBadRequest
+
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-# from rest_framework.authtoken.views import ObtainAuthToken
+
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
-# from rest_framework.decorators import renderer_classes, api_view
-from django.http import HttpResponse
+
 from itertools import chain
+from operator import itemgetter
+from backend.coremodels.compartment import Compartment
+from django.http import HttpResponse
 from datetime import date
+from datetime import datetime
+import datetime
 from django.utils.timezone import now
-# Create your views here.
 
 
 class Article(View):
@@ -214,17 +200,34 @@ class Order(View):
                 return JsonResponse(serializer.data, status=200)
             return HttpResponseBadRequest
 
-    def post(self, request, id):
-        '''Place order if no order. Returns order.'''
+    def post(self, request):
+        '''Places an order'''
         if request.method == 'POST':
-            json_body = json.loads(request.body)
-            article = json_body['of_article']
-            storage = json_body['to_storage']
-            amount = json_body['amount']
+            json_body = request.POST
+            storage_id = json_body['storageId']
+            ordered_articles = json_body['articles']
 
-            order = self.order_service.place_order_if_no_order(
-                storage_id=storage, article_id=article, amount=amount
-            )
+            max_wait = 0
+            for ordered_article in ordered_articles:
+                temp = OrderService.calculate_expected_wait(
+                    article_id=ordered_article['lioNr'], amount=ordered_article['quantity'])
+                if (temp > max_wait):
+                    max_wait = temp
+
+            estimated_delivery_date = datetime.now + \
+                datetime.timedelta(days=max_wait)
+
+            order = OrderService.place_order(
+                storage_id=storage_id, estimated_delivery_date=estimated_delivery_date, ordered_articles=ordered_articles)
+
+            if order is None:
+                return HttpResponseBadRequest
+
+            for ordered_article in ordered_articles:
+                article_in_order = OrderService.create_ordered_article(
+                    ordered_article['lioNr'], ordered_article['quantity'], ordered_article['unit'], order)
+                if article_in_order is None:
+                    return HttpResponseBadRequest
 
             serializer = OrderSerializer(order)
             if serializer.is_valid:
