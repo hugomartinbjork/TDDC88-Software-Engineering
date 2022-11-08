@@ -102,3 +102,5 @@ class TransactioInline(admin.TabularInline):
 
 
 admin.site.register(Transaction)
+
+admin.site.register(InputOutput)
