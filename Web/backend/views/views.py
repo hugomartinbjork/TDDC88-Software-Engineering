@@ -639,15 +639,19 @@ class ArticleToCompartmentByQRcode(APIView):
 
             if article_to_change is not None:
                 #Updates article in compartment
-                self.storage_management_service.set_article_in_compartment(current_compartment, article_to_change) 
+                self.storage_management_service.set_article(current_compartment, article_to_change) 
                 
                 #Updates amount in compartment
-                amount_to_change = request.data.get("quantity")
-                self.storage_management_service.set_amount_in_compartment(current_compartment, amount_to_change)
+                new_amount = request.data.get("quantity")
+                self.storage_management_service.set_amount(current_compartment, new_amount)
 
                 #Updates standard_order_amount in compartment
-                std_order_amount_to_change = request.data.get("normalOrderQuantity")
-                self.storage_management_service.set_standard_order_amount(current_compartment, std_order_amount_to_change)
+                new_standard_order_amount = request.data.get("normalOrderQuantity")
+                self.storage_management_service.set_standard_order_amount(current_compartment, new_standard_order_amount)
+
+                #Updates order_point in compartment
+                new_order_point = request.data.get("orderQuantityLevel")
+                self.storage_management_service.set_order_point(current_compartment, new_order_point)
 
                 return JsonResponse(CompartmentSerializer(current_compartment).data, status=200)
             else:

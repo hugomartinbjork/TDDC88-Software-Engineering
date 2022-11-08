@@ -104,18 +104,21 @@ class StorageManagementService():
         return self.storage_access.set_storage_amount(compartment_id=id,
                                                       amount=amount)
 
-    def set_article_in_compartment(self, current_compartment: Compartment, new_article: Article):
+    def set_article(self, current_compartment: Compartment, new_article: Article):
         '''Sets article in compartment.'''
         self.storage_access.set_article(current_compartment, new_article)
     
-    def set_amount_in_compartment(self, current_compartment: Compartment, new_amount: int):
+    def set_amount(self, current_compartment: Compartment, new_amount: int):
         '''Sets amount in compartment.'''
         self.storage_access.set_amount(current_compartment, new_amount)
-
         
     def set_standard_order_amount(self, current_compartment: Compartment, new_std_order_amount: int):
         '''Sets amount in compartment.'''
         self.storage_access.set_standard_order_amount(current_compartment, new_std_order_amount)
+
+    def set_order_point(self, current_compartment: Compartment, new_order_point: int):
+        '''Sets amount in compartment.'''
+        self.storage_access.set_order_point(current_compartment, new_order_point)
 
 
 # FR 10.1.3 #

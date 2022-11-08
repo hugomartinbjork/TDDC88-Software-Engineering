@@ -162,3 +162,8 @@ class StorageAccess():
         '''Sets amount in compartment.'''
         current_compartment.standard_order_amount = new_std_order_amount
         current_compartment.save()
+    
+    def set_order_point(self, current_compartment: Compartment, new_order_point: int):
+        '''Sets amount in compartment.'''
+        current_compartment.order_point = new_order_point
+        current_compartment.save()
