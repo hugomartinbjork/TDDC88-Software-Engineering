@@ -42,10 +42,9 @@ def create_storage(id="1337",
 
     if costCenter is None:
         costCenter = create_costcenter()
-    storage = Storage(name=name, building=building,
-                               floor=floor,
-                               cost_center=costCenter)
-
+    storage = Storage(name=name,
+                      building=building, floor=floor,
+                      cost_center=costCenter)
     return storage
 
 
