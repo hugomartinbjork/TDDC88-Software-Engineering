@@ -127,24 +127,26 @@ class FR6_2_test(TestCase):
 
 
 #Testing FR8.9
+# Desc: The system shall allow users to choose which storage unit to search within.
+# Sytemtest later instead??
 
-class FR8_9_test(TestCase): 
-    def setUp(self):
-        self.article1 = Article.objects.create(lio_id="1")
-        self.article2 = Article.objects.create(lio_id="2")
-        self.article_management_service : ArticleManagementService = ArticleManagementService()
-        self.storage_management_service : StorageManagementService = StorageManagementService()
-        self.Storage1 = Storage.objects.create(id="1")
-        self.Storage2 = Storage.objects.create(id="2")
-        self.compartment1 = Compartment.objects.create(id="1", storage = self.storage_management_service.get_storage_by_id(id="1"), article=self.article_management_service.get_article_by_lio_id(lio_id="1"), amount=2)
-        self.compartment2 = Compartment.objects.create(id="2", storage = self.storage_management_service.get_storage_by_id(id="2"), article=self.article_management_service.get_article_by_lio_id(lio_id="2"), amount=4)
+# class FR8_9_test(TestCase): 
+#     def setUp(self):
+#         self.article1 = Article.objects.create(lio_id="1")
+#         self.article2 = Article.objects.create(lio_id="2")
+#         self.article_management_service : ArticleManagementService = ArticleManagementService()
+#         self.storage_management_service : StorageManagementService = StorageManagementService()
+#         self.Storage1 = Storage.objects.create(id="1")
+#         self.Storage2 = Storage.objects.create(id="2")
+#         self.compartment1 = Compartment.objects.create(id="1", storage = self.storage_management_service.get_storage_by_id(id="1"), article=self.article_management_service.get_article_by_lio_id(lio_id="1"), amount=2)
+#         self.compartment2 = Compartment.objects.create(id="2", storage = self.storage_management_service.get_storage_by_id(id="2"), article=self.article_management_service.get_article_by_lio_id(lio_id="2"), amount=4)
 
-    def test_FR8_9(self):
-        test_article1 = self.storage_management_service.search_article_in_storage("1", "1")
-        test_article2 = self.storage_management_service.search_article_in_storage("2", "2")
-        self.assertEqual(test_article1, 2)
-        self.assertEqual(test_article2, 4)
-        self.assertNotEqual(test_article2, 5)
+#     def test_FR8_9(self):
+#         test_article1 = self.storage_management_service.search_article_in_storage("1", "1")
+#         test_article2 = self.storage_management_service.search_article_in_storage("2", "2")
+#         self.assertEqual(test_article1, 2)
+#         self.assertEqual(test_article2, 4)
+#         self.assertNotEqual(test_article2, 5)
 
 #Testing FR4.2
 # Desc: The system shall connect a QR code with a Compartment in the Storage.
