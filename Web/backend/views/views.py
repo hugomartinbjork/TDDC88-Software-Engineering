@@ -306,10 +306,7 @@ class AddInputUnit(View):
     '''Add input unit view.'''
     @si.inject
     def __init__(self, _deps):
-        StorageManagementService = _deps['StorageManagementService']
-        # what is meant by StorageManagementService here?
-        # is it supposed to be storage_management_service?
-        self.storage_management_service = StorageManagementService()
+        self.storage_management_service = _deps['StorageManagementService']
         self.user_service: UserService = _deps['UserService']()
 
     def post(self, request, compartment_id, amount, time_of_transaction):
@@ -363,8 +360,7 @@ class ReturnUnit(View):
     '''Return unit view.'''
     @si.inject
     def __init__(self, _deps):
-        StorageManagementService = _deps['StorageManagementService']
-        self.storage_management_service = StorageManagementService()
+        self.storage_management_service = _deps['StorageManagementService']
         self.user_service: UserService = _deps['UserService']()
 
     def post(self, request, compartment_id, amount, time_of_transaction=now):
@@ -390,8 +386,7 @@ class Transactions(APIView):
     '''Transactions API view.'''
     @si.inject
     def __init__(self, _deps):
-        StorageManagementService = _deps['StorageManagementService']
-        self.storage_management_service = StorageManagementService()
+        self.storage_management_service = _deps['StorageManagementService']
         self.user_service: UserService = _deps['UserService']()
 
     def get(self, request):
@@ -595,10 +590,9 @@ class SearchForArticleInStorages(View):
     '''Search for article in storages view.'''
     @si.inject
     def __init__(self, _deps):
-        StorageManagementService = _deps['StorageManagementService']
         OrderService = _deps['OrderService']
         UserService = _deps['UserService']
-        self._storage_management_service = StorageManagementService()
+        self._storage_management_service = _deps['StorageManagementService']
         self._user_service = UserService()
         self._order_service = OrderService()
 
