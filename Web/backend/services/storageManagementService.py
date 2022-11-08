@@ -112,6 +112,12 @@ class StorageManagementService():
         '''Sets amount in compartment.'''
         self.storage_access.set_amount(current_compartment, new_amount)
 
+        
+    def set_standard_order_amount(self, current_compartment: Compartment, new_std_order_amount: int):
+        '''Sets amount in compartment.'''
+        self.storage_access.set_standard_order_amount(current_compartment, new_std_order_amount)
+
+
 # FR 10.1.3 #
 # alltid takeout/takein
 # TODO: This is a lot of work to refactor since barely any of the

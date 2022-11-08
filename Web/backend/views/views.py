@@ -627,7 +627,6 @@ class ArticleToCompartmentByQRcode(APIView):
 
     def post(self, request, qr_code):
         '''Sets new article in payload to compartment matching qr_code.'''
-        print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
         
         current_compartment = (
             self.storage_management_service.get_compartment_by_qr(
@@ -645,6 +644,10 @@ class ArticleToCompartmentByQRcode(APIView):
                 #Updates amount in compartment
                 amount_to_change = request.data.get("quantity")
                 self.storage_management_service.set_amount_in_compartment(current_compartment, amount_to_change)
+
+                #Updates standard_order_amount in compartment
+                std_order_amount_to_change = request.data.get("normalOrderQuantity")
+                self.storage_management_service.set_standard_order_amount(current_compartment, std_order_amount_to_change)
 
                 return JsonResponse(CompartmentSerializer(current_compartment).data, status=200)
             else:
