@@ -9,6 +9,19 @@ from backend.services.articleManagementService import ArticleManagementService
 from backend.services.storageManagementService import StorageManagementService
 import unittest
 from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
+from ..services.orderServices import OrderService
+from ..dataAccess.centralStorageAccess import CentralStorageAccess
+from ..dataAccess.storageAccess import StorageAccess
+from ..dataAccess.userAccess import UserAccess
+from ..dataAccess.orderAccess import OrderAccess
+from .testObjectFactory.dependencyFactory import DependencyFactory
+from .testObjectFactory.coremodelFactory import create_article
+from .testObjectFactory.coremodelFactory import create_storage
+from .testObjectFactory.coremodelFactory import create_transaction
+from .testObjectFactory.coremodelFactory import create_costcenter
+from datetime import datetime
+import datetime
 
 # Testing FR4.1
 # === How To Rewrite tests example 1 === #
@@ -173,3 +186,45 @@ class FR8_9_test(TestCase):
 
 
 
+class StorageServiceEconomyTest(TestCase):
+    '''Storage service economy test.'''
+    def set_up(self):
+        dependency_factory = DependencyFactory()
+        transacted_article = create_article(price=10)
+        cost_center = create_costcenter(id="123")
+        storage = create_storage(costCenter=cost_center)
+        transaction_time = datetime.date(2000, 7, 15)
+        transaction_list = []
+        transaction_list.append(create_transaction(article=transacted_article,
+                                                   amount=2, operation=2,
+                                                   storage=storage,
+                                                   time_of_transaction=(
+                                                       transaction_time)))
+        transaction_list.append(create_transaction(article=transacted_article,
+                                                   amount=2, operation=1,
+                                                   storage=storage,
+                                                   time_of_transaction=(
+                                                       transaction_time)))
+        transaction_list.append(create_transaction(article=transacted_article,
+                                                   amount=4,
+                                                   operation=1,
+                                                   storage=storage,
+                                                   time_of_transaction=(
+                                                       transaction_time)))
+        storage_access_mock = StorageAccess
+        storage_access_mock.get_transaction_by_storage = MagicMock(
+                                     return_value=transaction_list)
+        user_access_mock = UserAccess
+        user_access_mock.get_user_cost_center = MagicMock(
+                                 return_value=cost_center)
+        mocked_dependencies = (
+            dependency_factory.complete_dependency_dictionary(
+                {"StorageAccess": storage_access_mock,
+                 "UserAccess": user_access_mock}))
+        self.storage_service = StorageManagementService(mocked_dependencies)
+
+    def test_sum_transactions_and_withdrawals(self):
+        '''Test sym of transactions and withdrawals.'''
+        economyresult = self.storage_service.get_storage_cost(
+                                "", "2000-06-15", "2000-08-15")
+        self.assertAlmostEquals(economyresult, 40)
