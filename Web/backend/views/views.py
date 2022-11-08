@@ -626,7 +626,7 @@ class ArticleToCompartmentByQRcode(APIView):
             _deps['ArticleManagementService']())
 
     def post(self, request, qr_code):
-        '''Returns all transactions made by user.'''
+        '''Sets new article in payload to compartment matching qr_code.'''
         print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
         
         current_compartment = (
@@ -637,11 +637,16 @@ class ArticleToCompartmentByQRcode(APIView):
         if current_compartment is not None:
             article_id = request.data.get("lioNr")
             article_to_change = self.article_management_service.get_article_by_lio_id(article_id)
-            print(article_to_change)
+
             if article_to_change is not None:
-                self.storage_management_service.set_article_in_compartment(current_compartment, article_to_change) #Updates article in compartment
+                #Updates article in compartment
+                self.storage_management_service.set_article_in_compartment(current_compartment, article_to_change) 
                 
-                return JsonResponse(ArticleSerializer(article_to_change).data,                             status=200)
+                #Updates amount in compartment
+                amount_to_change = request.data.get("quantity")
+                self.storage_management_service.set_amount_in_compartment(current_compartment, amount_to_change)
+
+                return JsonResponse(CompartmentSerializer(current_compartment).data, status=200)
             else:
                 return Response({'error': 'Could not find article'},
                             status=status.HTTP_400_BAD_REQUEST)

@@ -152,3 +152,8 @@ class StorageAccess():
         '''Sets article in compartment.'''
         current_compartment.article = new_article
         current_compartment.save()
+
+    def set_amount(self, current_compartment: Compartment, new_amount: int):
+        '''Sets amount in compartment.'''
+        current_compartment.amount = new_amount
+        current_compartment.save()

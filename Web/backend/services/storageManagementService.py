@@ -37,15 +37,6 @@ class StorageManagementService():
         '''Returns storage space using article.'''
         return self.storage_access.get_compartment_by_id(id)
 
-    def set_storage(self, id: str, amount: int) -> int:
-        '''Set storage value. Returns amount.'''
-        return self.storage_access.set_storage_amount(compartment_id=id,
-                                                      amount=amount)
-
-    def set_article_in_compartment(self, current_compartment: Compartment, new_article: Article):
-        '''Set Article value.'''
-        self.storage_access.set_article(current_compartment, new_article)
-
     def get_stock(self, id: str, article_id: str) -> int:
         '''Return stock.'''
         return self.storage_access.get_compartment_stock(compartment_id=id,
@@ -107,6 +98,19 @@ class StorageManagementService():
     def get_storage_by_costcenter(self, cost_center: str) -> Storage:
         '''Get storage using cost-center.'''
         return self.storage_access.get_storage_by_costcenter(cost_center)
+
+    def set_storage(self, id: str, amount: int) -> int:
+        '''Set storage value. Returns amount.'''
+        return self.storage_access.set_storage_amount(compartment_id=id,
+                                                      amount=amount)
+
+    def set_article_in_compartment(self, current_compartment: Compartment, new_article: Article):
+        '''Sets article in compartment.'''
+        self.storage_access.set_article(current_compartment, new_article)
+    
+    def set_amount_in_compartment(self, current_compartment: Compartment, new_amount: int):
+        '''Sets amount in compartment.'''
+        self.storage_access.set_amount(current_compartment, new_amount)
 
 # FR 10.1.3 #
 # alltid takeout/takein
