@@ -24,7 +24,7 @@ class StorageAccess():
         except Exception:
             return None
 
-    def get_compartment_by_id(self, id: str) -> Compartment:
+    def get_compartment_by_qr(self, id: str) -> Compartment:
         '''Returns compartmend (storage space) from id.'''
         try:
             storage = Compartment.objects.get(id=id)

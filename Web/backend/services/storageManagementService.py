@@ -29,9 +29,9 @@ class StorageManagementService():
         '''Returns storage unit using id.'''
         return self.storage_access.get_storage(id)
 
-    def get_compartment_by_id(self, id: str) -> Compartment:
+    def get_compartment_by_qr(self, id: str) -> Compartment:
         '''Returns storage space using id.'''
-        return self.storage_access.get_compartment_by_id(id)
+        return self.storage_access.get_compartment_by_qr(id)
 
     def get_compartment_by_article(self, article: Article) -> Compartment:
         '''Returns storage space using article.'''
@@ -208,8 +208,8 @@ class StorageManagementService():
             new_transaction.save()
             return new_transaction
 
-    def take_from_Compartment(self, space_id, amount, username,
-                              add_output_unit, time_of_transaction):
+    def take_from_Compartment(space_id: str, amount: int, username: str,
+                              add_output_unit: bool, time_of_transaction: str):
         '''Take from compartment. Return transaction.'''
         compartment = self.storage_access.get_compartment_by_id(id=space_id)
         article = Article.objects.get(lio_id=compartment.article.lio_id)

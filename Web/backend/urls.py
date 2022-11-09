@@ -33,7 +33,7 @@ urlPatterns = [
     path('compartments/', views.Compartment.as_view()),
     path('compartments/<str:qr_code>', views.Compartment.as_view()),
     path('transactions/', views.Transactions.as_view()),
-    path('transactions/<transaction_id>', views.GetTransaction.as_view()),
+    path('transactions/<transaction_id>', views.TransactionsById.as_view()),
     # alternative urls for transactions if date is input
 ]
 

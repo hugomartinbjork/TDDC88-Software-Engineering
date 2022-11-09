@@ -386,8 +386,8 @@ class Transactions(APIView):
     '''Transactions API view.'''
     @si.inject
     def __init__(self, _deps):
-        self.storage_management_service = _deps['StorageManagementService']
         self.user_service: UserService = _deps['UserService']()
+        self.storage_management_service: StorageManagementService = (_deps['StorageManagementService']())
 
     def get(self, request):
         '''Get all transactions.'''
@@ -401,8 +401,7 @@ class Transactions(APIView):
 
     def post(self, request):
         '''Description needed.'''
-        compartment = self.storage_management_service.get_compartment_by_qr(
-            qr_code=request.data.get("qrCode"))
+        compartment = self.storage_management_service.get_compartment_by_qr(qr_code=request.data.get("qrCode"))
         if compartment is None:
             return Response({'error': 'Could not find compartment'},
                             status=status.HTTP_400_BAD_REQUEST)
@@ -458,7 +457,7 @@ class Transactions(APIView):
                 return JsonResponse(TransactionSerializer(transaction).data,
                                     status=200)
 
-class GetTransaction(APIView):
+class TransactionsById(APIView):
     '''Get transaction by ID view.'''
     @si.inject
     def __init__(self, _deps):
