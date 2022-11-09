@@ -26,7 +26,7 @@ urlPatterns = [
     #     path('articles/qr/<str:qr_code>') part of API, not yet implemented
     #     path('articles/name/<str:name>') part of API, not yet implemented
     #     path('articles/name/<str:name>') part of API, not yet implemented
-    path('articles/lio/<str:lioNr>/', views.Article.as_view()),
+    path('articles/lio/<str:article_id>/', views.Article.as_view()),
 
     # article URLs below not part of API
     path('alternativearticles/<str:article_id>/',
