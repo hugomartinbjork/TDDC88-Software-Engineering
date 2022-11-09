@@ -9,12 +9,12 @@ class TransactionOperator(models.IntegerChoices):
     ADJUST = 4
 
 class OrderOperator(models.IntegerChoices):
-    """Order operator that keeps track of our curretn state"""
-ORDER_PLACED = 1
-HANDLED_AT_THE_CENTRAL_DEPOT = 2
-IN_TRANSIT = 3
-DELIVERED = 4
-IN_STORAGE = 5
+    '''Order operator that keeps track of our current state'''
+    ORDER_PLACED = 1
+    HANDLED_AT_THE_CENTRAL_DEPOT = 2
+    IN_TRANSIT = 3
+    DELIVERED = 4
+    IN_STORAGE = 5
 
 
 

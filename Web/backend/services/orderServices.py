@@ -1,27 +1,26 @@
-# from datetime import timedelta
-# from datetime import datetime
-import string
+from backend.__init__ import serviceInjector as si
+from ..__init__ import dataAccessInjector as di
+
 from backend.dataAccess.centralStorageAccess import CentralStorageAccess
+from ..dataAccess.orderAccess import OrderAccess
+
 from backend.coremodels.order import Order
 from backend.coremodels.storage import Storage
 from backend.coremodels.compartment import Compartment
 from backend.coremodels.centralStorageSpace import CentralStorageSpace
 from backend.coremodels.article import Article
-from backend.__init__ import serviceInjector as si
-from ..__init__ import dataAccessInjector as di
+
 from backend.Order_text_files.utils import make_text_file
-from backend.Order_text_files import utils
-from ..dataAccess.orderAccess import OrderAccess
 
 
 @si.register(name='OrderService')
 class OrderService():
-    '''Order service.'''
+    '''Order service class includes helper functions for all Order related endpoints.'''
     @di.inject
     def __init__(self, _deps, *args):
         self.order_access: OrderAccess = _deps["OrderAccess"]()
         self.central_storage_access: CentralStorageAccess = _deps[
-                                                    "CentralStorageAccess"]()
+            "CentralStorageAccess"]()
 
 # Returns None if the order does not exist. Otherwise returns the order.
     def has_order(self, storage_id, article_id) -> Order:
@@ -59,8 +58,8 @@ class OrderService():
     def calculate_expected_wait(self, article_id, amount) -> int:
         '''Calculate expected wait.'''
         central_storage_stock = (
-                        self.central_storage_access.get_stock_by_article_id(
-                            article_id=article_id))
+            CentralStorageAccess.get_stock_by_article_id(self,
+                article_id=article_id))
         if central_storage_stock is None:
             central_storage_stock = 0
         if central_storage_stock > amount:
@@ -72,24 +71,22 @@ class OrderService():
         '''Return estimated time to arrival of order.'''
         return self.order_access.get_eta(order_id)
 
-    # Creates an order, saves in in the database and then returns said order.
-    # If the order can't be created None is returned.
-    def place_order(self, storage_id, article_id, amount):
-        '''Place order.'''
-        expected_wait = OrderService.calculate_expected_wait(
-            self, article_id=article_id, amount=amount)
-        order = self.order_access.create_order(
-            storage_id=storage_id, article_id=article_id,
-            amount=amount, expected_wait=expected_wait)
+    def place_order(self, storage_id, estimated_delivery_date, ordered_articles):
+        '''Creates an order, saves in in the database and then returns said order.
+        If order can't be created, None is returned'''
+        print("pooperscooper")
+        print(ordered_articles)
+        order = OrderAccess.create_order(
+            storage_id=storage_id, estimated_delivery_date=estimated_delivery_date)
         if order is not None:
-            make_text_file(order.id, article_id, storage_id,
-                           order.expected_wait, order.order_time)
+            make_text_file(order.id, storage_id, ordered_articles,
+                           order.estimated_delivery_date, order.order_date)
         return order
 
     # Places an order if there is no order of that article to that storage.
     # If there is, that order is returned
-    def place_order_if_no_order(self, storage_id: string,
-                                article_id: string, amount: int) -> Order:
+    def place_order_if_no_order(self, storage_id: str,
+                                article_id: str, amount: int) -> Order:
         '''Place order if no order.'''
         current_order = self.order_access.get_order_by_article_and_storage(
             storage_id=storage_id, article_id=article_id)
@@ -118,13 +115,17 @@ class OrderService():
     def text_file(order_name, article_id, storage,
                   eta, time_of_arrival):
         '''Makes text file and returns amount.'''
-        utils.make_text_file(order_name, article_id, storage,
-                             eta, time_of_arrival)
+        make_text_file(order_name, article_id, storage,
+                       eta, time_of_arrival)
         article = Article.objects.filter(lio_id=article_id).first()
         if CentralStorageSpace.objects.filter(
-                        article=article).first() is not None:
+                article=article).first() is not None:
             amount = CentralStorageSpace.objects.filter(
-                                article=article).first().amount
+                article=article).first().amount
             return amount
         else:
             return None
+
+    def create_ordered_article(lio_id, quantity, unit, order):
+        '''Creates an ordered_article model'''
+        return OrderAccess.create_ordered_article(lio_id, quantity, unit, order)
