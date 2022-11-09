@@ -109,14 +109,10 @@ class StorageManagementService():
             if (user_cost_center == transaction.storage.cost_center):
                 if (start_date_date <= transaction_date_date
                         and end_date_date >= transaction_date_date):
-                    # transaction_user = transaction.by_user
-                    # cost_center = self.user_access.get_user_cost_center(
-                    #                                   user=transaction_user)
-                    # if cost_center == transaction.storage_id.cost_center
                     if transaction.operation == 1:
-                        takeout_value = transaction.get_value()
+                        takeout_value = transaction.get_value() + takeout_value
                     if transaction.operation == 2:
-                        return_value = transaction.get_value()
+                        return_value = transaction.get_value() + return_value
         sum_value = takeout_value - return_value
         return sum_value
 
@@ -177,7 +173,7 @@ class StorageManagementService():
         medical_employee = User.objects.get(username=username).groups.filter(
             name='medical employee').exists()
         input_output_check = InputOutput.objects.filter(
-                                article=article).exists()
+            article=article).exists()
         if (input_output_check):
             input_output = InputOutput.objects.get(article=article)
             converter = input_output.output_unit_per_input_unit
@@ -246,7 +242,7 @@ class StorageManagementService():
     def get_article_in_compartment(self, compartment_id: str) -> Article:
         '''Get article in storage space.'''
         return self.storage_access.get_article_in_compartment(
-                                    compartment_id=compartment_id)
+            compartment_id=compartment_id)
 
     def search_article_in_storage(self, storage_id: str,
                                   article_id: str) -> int:
