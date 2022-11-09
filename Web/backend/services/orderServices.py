@@ -58,7 +58,7 @@ class OrderService():
     def calculate_expected_wait(self, article_id, amount) -> int:
         '''Calculate expected wait.'''
         central_storage_stock = (
-            self.central_storage_access.get_stock_by_article_id(
+            CentralStorageAccess.get_stock_by_article_id(self,
                 article_id=article_id))
         if central_storage_stock is None:
             central_storage_stock = 0
@@ -74,11 +74,11 @@ class OrderService():
     def place_order(self, storage_id, estimated_delivery_date, ordered_articles):
         '''Creates an order, saves in in the database and then returns said order.
         If order can't be created, None is returned'''
-        order = self.order_access.create_order(
+        order = OrderAccess.create_order(self,
             storage_id=storage_id, estimated_delivery_date=estimated_delivery_date)
-        if order is not None:
-            make_text_file(order.id, storage_id, ordered_articles,
-                           order.estimated_delivery_date, order.order_time)
+        # if order is not None:
+        #     make_text_file(order.id, storage_id, ordered_articles,
+        #                    order.estimated_delivery_date, order.order_date)
         return order
 
     # Places an order if there is no order of that article to that storage.
@@ -126,4 +126,4 @@ class OrderService():
 
     def create_ordered_article(self, lio_id, quantity, unit, order):
         '''Creates an ordered_article model'''
-        return OrderAccess.create_ordered_article(lio_id, quantity, unit, order)
+        return OrderAccess.create_ordered_article(self, lio_id, quantity, unit, order)

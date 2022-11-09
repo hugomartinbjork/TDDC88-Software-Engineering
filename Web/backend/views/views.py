@@ -183,7 +183,7 @@ class Compartment(View):
         return HttpResponseBadRequest
 
 
-class Order(View):
+class Order(APIView):
     '''Order view.'''
     @si.inject
     def __init__(self, _deps, *args):
@@ -200,38 +200,41 @@ class Order(View):
                 return JsonResponse(serializer.data, status=200)
             return HttpResponseBadRequest
 
-    def post(self, request):
+    def post(self, request, format=None):
         '''Places an order'''
         if request.method == 'POST':
-            json_body = request.POST
+            json_body = request.data
             storage_id = json_body['storageId']
             ordered_articles = json_body['articles']
 
             max_wait = 0
             for ordered_article in ordered_articles:
-                temp = OrderService.calculate_expected_wait(
+                temp = OrderService.calculate_expected_wait(self,
                     article_id=ordered_article['lioNr'], amount=ordered_article['quantity'])
                 if (temp > max_wait):
                     max_wait = temp
 
-            estimated_delivery_date = datetime.now + \
+            estimated_delivery_date = datetime.datetime.now() + \
                 datetime.timedelta(days=max_wait)
 
-            order = OrderService.place_order(
+            order = OrderService.place_order(self,
                 storage_id=storage_id, estimated_delivery_date=estimated_delivery_date, ordered_articles=ordered_articles)
 
             if order is None:
+                print('pooop')
                 return HttpResponseBadRequest
 
             for ordered_article in ordered_articles:
-                article_in_order = OrderService.create_ordered_article(
+                article_in_order = OrderService.create_ordered_article(self,
                     ordered_article['lioNr'], ordered_article['quantity'], ordered_article['unit'], order)
                 if article_in_order is None:
+                    print('hammurn')
                     return HttpResponseBadRequest
 
             serializer = OrderSerializer(order)
             if serializer.is_valid:
                 return JsonResponse(serializer.data, status=200)
+            print('pooper')
             return HttpResponseBadRequest
 
 

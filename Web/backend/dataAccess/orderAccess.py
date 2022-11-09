@@ -62,15 +62,15 @@ class OrderAccess():
         order_date = order_date + timedelta(days)
         return order_date
 
-    def create_order(self, storage_id: string, expected_wait: int):
+    def create_order(self, storage_id: string, estimated_delivery_date: int):
         '''Create new order.'''
         storage = Storage.objects.filter(id=storage_id).first()
         try:
-            order = Order(to_storage=storage, expected_wait=expected_wait)
+            order = Order(to_storage=storage,
+                          estimated_delivery_date=estimated_delivery_date)
             order.save()
         except Exception:
             return None
-
         return order
 
     def create_ordered_article(self, lio_id, quantity, unit, order):

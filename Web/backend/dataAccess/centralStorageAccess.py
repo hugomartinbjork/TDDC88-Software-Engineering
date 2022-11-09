@@ -8,6 +8,5 @@ class CentralStorageAccess():
 
     def get_stock_by_article_id(self, article_id):
         '''Retrieve stock of and article with a specific id.'''
-        central_storage_space = CentralStorageSpace.objects.filter(
-                                                    id=article_id).first()
+        central_storage_space = CentralStorageSpace.objects.get(id=article_id)
         return central_storage_space.amount

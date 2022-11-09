@@ -2,9 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.utils.html import format_html
 from backend.coremodels.alternative_article_name import AlternativeArticleName
-from backend.coremodels.inputOutput import InputOutput
 from backend.coremodels.article import Article
 from backend.coremodels.centralStorageSpace import CentralStorageSpace
 from backend.coremodels.storage import Storage
@@ -91,7 +89,6 @@ class StorageAdmin(admin.ModelAdmin):
 
 
 # Display QRCode in Backend
-admin.site.register(QRCode)
 admin.site.register(Storage, StorageAdmin)
 
 admin.site.register(Order)
