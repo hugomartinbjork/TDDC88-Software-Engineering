@@ -211,10 +211,10 @@ class StorageManagementService():
             new_transaction.save()
             return new_transaction
 
-    def take_from_Compartment(id: str, amount: int, username: str,
+    def take_from_Compartment(self, id: str, amount: int, username: str,
                               add_output_unit: bool, time_of_transaction: str):
         '''Take from compartment. Return transaction.'''
-        compartment = self.storage_access.get_compartment_by_id(id=id)
+        compartment = self.storage_access.get_compartment_by_qr(id)
         article = Article.objects.get(lio_id=compartment.article.lio_id)
 # inputOutput = InputOutput.objects.get(article=article)
         converter = 2
