@@ -207,6 +207,8 @@ class Order(APIView):
             storage_id = json_body['storageId']
             ordered_articles = json_body['articles']
 
+            print(ordered_articles)
+
             max_wait = 0
             for ordered_article in ordered_articles:
                 temp = OrderService.calculate_expected_wait(self,
@@ -225,8 +227,9 @@ class Order(APIView):
                 return HttpResponseBadRequest
 
             for ordered_article in ordered_articles:
-                article_in_order = OrderService.create_ordered_article(self,
+                article_in_order = OrderService.create_ordered_article(
                     ordered_article['lioNr'], ordered_article['quantity'], ordered_article['unit'], order)
+                print(article_in_order)
                 if article_in_order is None:
                     print('hammurn')
                     return HttpResponseBadRequest

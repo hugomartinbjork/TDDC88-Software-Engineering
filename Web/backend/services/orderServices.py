@@ -124,6 +124,6 @@ class OrderService():
         else:
             return None
 
-    def create_ordered_article(self, lio_id, quantity, unit, order):
+    def create_ordered_article(lio_id, quantity, unit, order):
         '''Creates an ordered_article model'''
-        return OrderAccess.create_ordered_article(self, lio_id, quantity, unit, order)
+        return OrderAccess.create_ordered_article(lio_id, quantity, unit, order)

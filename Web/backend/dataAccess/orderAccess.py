@@ -73,12 +73,13 @@ class OrderAccess():
             return None
         return order
 
-    def create_ordered_article(self, lio_id, quantity, unit, order):
+    def create_ordered_article(lio_id, quantity, unit, order):
         '''Creates an ordered_article model'''
         article = Article.objects.get(lio_id=lio_id)
         try:
             ordered_article = OrderedArticle(
                 quantity=quantity, article=article, order=order, output_per_input=unit)
             ordered_article.save()
+            return ordered_article
         except Exception:
             return None
