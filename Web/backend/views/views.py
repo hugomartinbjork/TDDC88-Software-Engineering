@@ -46,10 +46,10 @@ from django.utils.timezone import now
 # Create your views here.
 
 
-class Article(PermissionRequiredMixin, View):
+class Article(View):
     '''Article view.'''
     
-    permission_required = 'article.get_article'
+    #permission_required = 'article.get_article'
     
     # Dependencies are injected, I hope that we will be able to mock
     # (i.e. make stubs of) these for testing
@@ -58,9 +58,11 @@ class Article(PermissionRequiredMixin, View):
         self.article_management_service: ArticleManagementService = (
                                 _deps['ArticleManagementService']())
     
+    #@permission_required('article.get_article')
     def get(self, request, article_id):
         '''Get.'''
         if request.method == 'GET':
+            print(request.user)
             article = self.article_management_service.get_article_by_lio_id(
                 article_id)
             supplier = self.article_management_service.get_supplier(article)
