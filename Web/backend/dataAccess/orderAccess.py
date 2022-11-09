@@ -62,7 +62,7 @@ class OrderAccess():
         order_date = order_date + timedelta(days)
         return order_date
 
-    def create_order(self, storage_id: string, estimated_delivery_date: int):
+    def create_order(storage_id: string, estimated_delivery_date: int):
         '''Create new order.'''
         storage = Storage.objects.filter(id=storage_id).first()
         try:

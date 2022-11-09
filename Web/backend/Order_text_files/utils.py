@@ -2,7 +2,7 @@
 # from django.db import models
 # import os.path
 
-def make_text_file(name, articles, storage, eta, time_of_order):
+def make_text_file(name, storage, articles, eta, time_of_order):
     with open('Order: {}.txt'.format(name), 'w+') as file:
         for article in articles:
             file.write("Article: " + str(article['lioNr']) + "\n")
