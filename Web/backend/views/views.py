@@ -318,7 +318,7 @@ class AddInputUnit(View):
             if compartment is None:
                 return Http404("Could not find storage space")
             StorageManagementService.add_to_storage(self=self,
-                                                  space_id=compartment_id,
+                                                  id=compartment_id,
                                                   amount=amount,
                                                   username=user.username,
                                                   add_output_unit=False,
@@ -373,7 +373,7 @@ class ReturnUnit(View):
                 return Http404("Could not find storage space")
             StorageManagementService.add_to_return_storage(
                                                         self=self,
-                                                        space_id=compartment_id,
+                                                        id=compartment_id,
                                                         amount=amount,
                                                         username=user.username,
                                                         add_output_unit=True,
@@ -424,7 +424,7 @@ class Transactions(APIView):
 
             if operation == "replenish":
                 transaction = self.storage_management_service.add_to_storage(
-                    space_id=compartment.id, amount=amount,
+                    id=compartment.id, amount=amount,
                     username=user.username, add_output_unit=add_output_unit,
                     time_of_transaction=time_of_transaction)
                 return JsonResponse(TransactionSerializer(transaction).data,
@@ -432,7 +432,7 @@ class Transactions(APIView):
             elif operation == "return":
                 transaction = (
                     self.storage_management_service.add_to_return_storage(
-                        space_id=compartment.id, amount=amount,
+                        id=compartment.id, amount=amount,
                         username=user.username,
                         add_output_unit=add_output_unit,
                         time_of_transaction=time_of_transaction))
@@ -441,7 +441,7 @@ class Transactions(APIView):
             elif operation == "takeout":
                 transaction = (
                     self.storage_management_service.take_from_Compartment(
-                        space_id=compartment.id, amount=amount,
+                        id=compartment.id, amount=amount,
                         username=user.username,
                         add_output_unit=add_output_unit,
                         time_of_transaction=time_of_transaction))

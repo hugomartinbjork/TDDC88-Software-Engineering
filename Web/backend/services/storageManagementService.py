@@ -130,23 +130,22 @@ class StorageManagementService():
 # methods work. Leaving this
 # TODO to the original author
 
-    def add_to_storage(self, space_id: str, amount: int, username: str,
+    def add_to_storage(self, id: str, amount: int, username: str,
                        add_output_unit: bool, time_of_transaction: str) -> Transaction:
         '''Add to storage.'''
-        compartment = self.storage_access.get_compartment_by_id(
-            id=space_id)
+        compartment = self.storage_access.get_compartment_by_qr(id)
         storage_id = compartment.storage
         article = Article.objects.get(lio_id=compartment.article.lio_id)
         # inputOutput = InputOutput.objects.get(article=article)
-        converter = 2
+        converter = 1
         user = User.objects.get(username=username)
         if (add_output_unit):
             amount_in_storage = Compartment.objects.get(
-                id=space_id).amount + amount
+                id=id).amount + amount
             new_amount = amount
         else:
             amount_in_storage = Compartment.objects.get(
-                id=space_id).amount + amount*converter
+                id=id).amount + amount*converter
             new_amount = amount*converter
 
         if (amount_in_storage < 0):
@@ -166,11 +165,11 @@ class StorageManagementService():
 # Leaving this
 # TODO to the original author
 
-    def add_to_return_storage(self, space_id: str, amount: int,
+    def add_to_return_storage(self, id: str, amount: int,
                               username: str, add_output_unit: bool,
                               time_of_transaction) -> Transaction:
         '''Add return to storage.'''
-        compartment = Compartment.objects.get(id=space_id)
+        compartment = Compartment.objects.get(id=id)
         storage_id = compartment.storage
         amount = amount
         article = Article.objects.get(lio_id=compartment.article.lio_id)
@@ -182,6 +181,8 @@ class StorageManagementService():
         if (input_output_check):
             input_output = InputOutput.objects.get(article=article)
             converter = input_output.output_unit_per_input_unit
+            if not converter:
+                converter = 1
         else:
             input_output = InputOutput.objects.create(article=article)
             converter = input_output.output_unit_per_input_unit
@@ -191,7 +192,7 @@ class StorageManagementService():
 
         if (add_output_unit):
             amount_in_storage = Compartment.objects.get(
-                id=space_id).amount + amount
+                id=id).amount + amount
             new_amount = amount
         else:
             amount_in_storage = Compartment.objects.get(
@@ -200,6 +201,8 @@ class StorageManagementService():
         if (amount_in_storage < 0):
             return None
         else:
+            print(amount)
+            print(new_amount)
             Compartment.objects.update(amount=amount_in_storage)
             new_transaction = Transaction.objects.create(
                 storage=storage_id, article=article, operation=2,
@@ -208,17 +211,17 @@ class StorageManagementService():
             new_transaction.save()
             return new_transaction
 
-    def take_from_Compartment(space_id: str, amount: int, username: str,
+    def take_from_Compartment(id: str, amount: int, username: str,
                               add_output_unit: bool, time_of_transaction: str):
         '''Take from compartment. Return transaction.'''
-        compartment = self.storage_access.get_compartment_by_id(id=space_id)
+        compartment = self.storage_access.get_compartment_by_id(id=id)
         article = Article.objects.get(lio_id=compartment.article.lio_id)
 # inputOutput = InputOutput.objects.get(article=article)
         converter = 2
         user = User.objects.get(username=username)
         if (add_output_unit):
             amount_in_storage = Compartment.objects.get(
-                id=space_id).amount - amount
+                id=id).amount - amount
             new_amount = amount
         else:
             # eftersom det inte verkar finnas funktionalitet för
@@ -227,7 +230,7 @@ class StorageManagementService():
             if not converter:
                 converter = 2
             amount_in_storage = Compartment.objects.get(
-                id=space_id).amount - amount*converter
+                id=id).amount - amount*converter
             new_amount = amount*converter
         if (amount_in_storage < 0):
             return None
