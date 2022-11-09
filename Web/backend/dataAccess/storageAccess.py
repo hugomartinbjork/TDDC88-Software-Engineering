@@ -24,7 +24,7 @@ class StorageAccess():
         except Exception:
             return None
 
-    def get_compartment_by_id(self, id: str) -> Compartment:
+    def get_compartment_by_qr(self, id: str) -> Compartment:
         '''Returns compartmend (storage space) from id.'''
         try:
             storage = Compartment.objects.get(id=id)
@@ -33,11 +33,12 @@ class StorageAccess():
             return None
 
     # TODO: This does not seem to do what it is supposed to do. Please review
-    def set_storage_amount(self, compartment_id: str, amount: int) -> int:
+    def set_compartment_amount(self, compartment_id: str, amount: int) -> int:
         '''Sets amount in compartment.'''
         try:
-            new_amount = amount
-            return Compartment.objects.update(**{amount: new_amount})
+            Compartment.objects.filter(id=compartment_id).update(amount=amount)
+            compartment = Compartment.objects.get(id=compartment_id)
+            return compartment
         except Exception:
             return None
 
@@ -73,7 +74,7 @@ class StorageAccess():
         '''Return article in storage space using storage space id.'''
         try:
             compartment = Compartment.objects.get(id=compartment_id)
-            article = Article.objects.get(id=compartment.article)
+            article = Article.objects.get(lio_id=compartment.article.lio_id)
             return article
         except Exception:
             return None
@@ -106,12 +107,30 @@ class StorageAccess():
         except Exception:
             return None
 
+    def get_transaction_by_id(self, transaction_id: str) -> Transaction:
+        '''Return transaction from transaction id.'''
+        try:
+            transaction = Transaction.objects.get(id=transaction_id)
+            return transaction
+        except Exception:
+            return None
+
+    def edit_transaction_by_id(self, transaction_id: str, new_time_of_transaction: str) -> Transaction:
+        '''Changes a date of a transaction.'''
+        try:
+            Transaction.objects.filter(id=transaction_id).update(time_of_transaction=new_time_of_transaction)
+            transaction =  Transaction.objects.get(id=transaction_id)
+            return transaction
+        except Exception:
+            return None
+
     def get_transaction_by_storage(self, storage_id: str) -> int:
         '''Return transaction from storage id.'''
         try:
             return Transaction.objects.filter(storage=storage_id)
         except Exception:
             return None
+
 
     def get_storage_by_costcenter(self, cost_center: str) -> Storage:
         '''Return storage using cost-center.'''

@@ -324,12 +324,12 @@ class AddInputUnit(View):
             if compartment is None:
                 return Http404("Could not find storage space")
             StorageManagementService.add_to_storage(self=self,
-                                                    space_id=compartment_id,
-                                                    amount=amount,
-                                                    username=user.username,
-                                                    add_output_unit=False,
-                                                    time_of_transaction=(
-                                                        time_of_transaction))
+                                                  id=compartment_id,
+                                                  amount=amount,
+                                                  username=user.username,
+                                                  add_output_unit=False,
+                                                  time_of_transaction=(
+                                                      time_of_transaction))
             return HttpResponse(status=200)
 
 # AddOutputUnit is used to add articles to the storage space in
@@ -378,13 +378,13 @@ class ReturnUnit(View):
             if compartment is None:
                 return Http404("Could not find storage space")
             StorageManagementService.add_to_return_storage(
-                self=self,
-                space_id=compartment_id,
-                amount=amount,
-                username=user.username,
-                add_output_unit=True,
-                time_of_transaction=(
-                    time_of_transaction))
+                                                        self=self,
+                                                        id=compartment_id,
+                                                        amount=amount,
+                                                        username=user.username,
+                                                        add_output_unit=True,
+                                                        time_of_transaction=(
+                                                            time_of_transaction))
             return HttpResponse(status=200)
 
 
@@ -392,8 +392,8 @@ class Transactions(APIView):
     '''Transactions API view.'''
     @si.inject
     def __init__(self, _deps):
-        self.storage_management_service = _deps['StorageManagementService']
         self.user_service: UserService = _deps['UserService']()
+        self.storage_management_service: StorageManagementService = (_deps['StorageManagementService']())
 
     def get(self, request):
         '''Get all transactions.'''
@@ -407,8 +407,7 @@ class Transactions(APIView):
 
     def post(self, request):
         '''Description needed.'''
-        compartment = self.storage_management_service.get_compartment_by_qr(
-            qr_code=request.data.get("qrCode"))
+        compartment = self.storage_management_service.get_compartment_by_qr(qr_code=request.data.get("qrCode"))
         if compartment is None:
             return Response({'error': 'Could not find compartment'},
                             status=status.HTTP_400_BAD_REQUEST)
@@ -421,7 +420,7 @@ class Transactions(APIView):
             operation = request.data.get("operation")
             time_of_transaction = request.data.get("time_of_transaction")
 
-            if time_of_transaction == "":
+            if time_of_transaction == "" or time_of_transaction is None:
                 time_of_transaction = date.today()
 
             if unit == "output":
@@ -431,7 +430,7 @@ class Transactions(APIView):
 
             if operation == "replenish":
                 transaction = self.storage_management_service.add_to_storage(
-                    space_id=compartment.id, amount=amount,
+                    id=compartment.id, amount=amount,
                     username=user.username, add_output_unit=add_output_unit,
                     time_of_transaction=time_of_transaction)
                 return JsonResponse(TransactionSerializer(transaction).data,
@@ -439,7 +438,7 @@ class Transactions(APIView):
             elif operation == "return":
                 transaction = (
                     self.storage_management_service.add_to_return_storage(
-                        space_id=compartment.id, amount=amount,
+                        id=compartment.id, amount=amount,
                         username=user.username,
                         add_output_unit=add_output_unit,
                         time_of_transaction=time_of_transaction))
@@ -447,14 +446,53 @@ class Transactions(APIView):
                                     status=200)
             elif operation == "takeout":
                 transaction = (
-                    self.storage_management_service.takeFromCompartment(
-                        space_id=compartment.id, amount=amount,
+                    self.storage_management_service.take_from_Compartment(
+                        id=compartment.id, amount=amount,
+                        username=user.username,
+                        add_output_unit=add_output_unit,
+                        time_of_transaction=time_of_transaction))
+                return JsonResponse(TransactionSerializer(transaction).data,
+                                    status=200)
+            elif operation == "adjust":
+                transaction = (
+                    self.storage_management_service.set_compartment_amount(
+                        compartment_id=compartment.id, amount=amount,
                         username=user.username,
                         add_output_unit=add_output_unit,
                         time_of_transaction=time_of_transaction))
                 return JsonResponse(TransactionSerializer(transaction).data,
                                     status=200)
 
+class TransactionsById(APIView):
+    '''Get transaction by ID view.'''
+    @si.inject
+    def __init__(self, _deps):
+        StorageManagementService = _deps['StorageManagementService']
+        self.storage_management_service = StorageManagementService()
+        self.user_service: UserService = _deps['UserService']()
+
+    def get(self, request, transaction_id):
+        '''Get transaction.'''
+        if request.method == 'GET':
+            transaction = (
+                self.storage_management_service.get_transaction_by_id(transaction_id))
+        if transaction is None:
+            raise Http404("Could not find the transaction")
+        else:
+            return JsonResponse(TransactionSerializer(transaction).data, safe=False, status=200)
+
+    def put(self, request, transaction_id):
+        '''Put transaction.'''
+        if request.method == 'PUT':
+            new_time_of_transaction = request.data.get("time_of_transaction")
+            transaction = (
+                self.storage_management_service.edit_transaction_by_id(transaction_id, new_time_of_transaction))
+
+        if transaction is None:
+            raise Http404("Could not find the transaction")
+        else:
+            return JsonResponse(TransactionSerializer(transaction).data, safe=False, status=200)
+    
 
 class GetStorageValue(View):
     '''Get storage value view.'''
