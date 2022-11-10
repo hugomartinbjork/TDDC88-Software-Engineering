@@ -46,7 +46,7 @@ urlPatterns = [
     # Compartments
     # path('compartments/', views.Compartment.as_view()),
     path('compartments/<str:qr_code>', views.Compartment.as_view()),
-    # path('connectArticleToCompartment/<str:qr_code>', views.Compartment.as_view()), part of API, not yet implemented
+    path('connectArticleToCompartment/<str:qr_code>/', views.ArticleToCompartmentByQRcode.as_view()),
     # path('moveArticle/', views.Compartment.as_view()), part of API, not yet implemented
 
     #Transactions

@@ -11,7 +11,7 @@ from backend.coremodels.compartment import Compartment
 from backend.coremodels.order import Order
 from backend.coremodels.transaction import Transaction
 from backend.coremodels.ordered_article import OrderedArticle
-
+from backend.coremodels.inputOutput import InputOutput
 
 class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -81,9 +81,36 @@ class AlternativeNameSerializer(serializers.ModelSerializer):
         fields = ('name',)
 
 
+class UpdateInputOutoutSerializer(serializers.ModelSerializer):
+
+    input = serializers.CharField(source="input_unit_name")
+    output = serializers.CharField(source="output_unit_name")
+    outputPerInput = serializers.IntegerField(source="output_unit_per_input_unit")
+
+    class Meta:
+        model = InputOutput
+        fields = ('input', 'output', 'outputPerInput',)
+
+
+class UpdateArticleSerializer(serializers.ModelSerializer):
+    input_output = UpdateInputOutoutSerializer()
+    #units = serializers.CharField(source="input_output")
+
+    class Meta:
+        model = Article
+        fields = ('input_output', 'price', 'name', 'lio_id', 'alternative_articles', 'Z41',)
+
+
+#Class for serializing data in ArticleToCompartmentByQRcode view
 class UpdateCompartmentSerializer(serializers.ModelSerializer):
-    article = ArticleSerializer()
+    article = UpdateArticleSerializer()
+
+    storageId = serializers.CharField(source="storage")
+    qrCode = serializers.CharField(source="id")
+    quantity = serializers.IntegerField(source="amount")
+    normalOrderQuantity = serializers.IntegerField(source="standard_order_amount")
+    orderQuantityLevel = serializers.IntegerField(source="order_point")
 
     class Meta:
         model = Compartment
-        fields = ('placement', 'storage', 'id', 'amount', 'standard_order_amount', 'order_point','article')
+        fields = ('placement', 'storageId', 'qrCode', 'quantity', 'normalOrderQuantity', 'orderQuantityLevel', 'article')
