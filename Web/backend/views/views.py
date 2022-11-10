@@ -653,7 +653,7 @@ class ArticleToCompartmentByQRcode(APIView):
                 new_order_point = request.data.get("orderQuantityLevel")
                 self.storage_management_service.set_order_point(current_compartment, new_order_point)
 
-                return JsonResponse(UpdateCompartmentSerializer(qr_code=qr_code, lioNr=article_id).data, status=200)
+                return JsonResponse(UpdateCompartmentSerializer(current_compartment).data, status=200)
             else:
                 return Response({'error': 'Could not find article'},
                             status=status.HTTP_400_BAD_REQUEST)

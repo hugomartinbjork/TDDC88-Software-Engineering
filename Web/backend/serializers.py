@@ -85,6 +85,9 @@ class AlternativeNameSerializer(serializers.ModelSerializer):
         fields = ('name',)
 
 
-class UpdateCompartmentSerializer(serializers.Serializer):
-    qr_code = serializers.CharField(max_length=15)
-    lioNr = serializers.CharField(max_length=15)
+class UpdateCompartmentSerializer(serializers.ModelSerializer):
+    article = ArticleSerializer()
+
+    class Meta:
+        model = Compartment
+        fields = ('storage', 'id', 'amount', 'standard_order_amount', 'order_point','article')
