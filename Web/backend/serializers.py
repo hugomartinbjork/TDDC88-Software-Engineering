@@ -103,7 +103,7 @@ class UpdateArticleSerializer(serializers.ModelSerializer):
 
 #Class for serializing data in ArticleToCompartmentByQRcode view
 class UpdateCompartmentSerializer(serializers.ModelSerializer):
-    article = UpdateArticleSerializer()
+    #article = UpdateArticleSerializer()
 
     storageId = serializers.CharField(source="storage")
     qrCode = serializers.CharField(source="id")
