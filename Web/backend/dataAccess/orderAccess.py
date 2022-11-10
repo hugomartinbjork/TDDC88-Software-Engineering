@@ -3,6 +3,7 @@ import string
 
 from backend.coremodels.article import Article
 from backend.coremodels.storage import Storage
+from backend.coremodels.ordered_article import OrderedArticle
 from ..coremodels.order import Order
 from ..__init__ import dataAccessInjector as di
 
@@ -61,17 +62,24 @@ class OrderAccess():
         order_date = order_date + timedelta(days)
         return order_date
 
-    def create_order(self, storage_id: string, article_id: string, amount: int,
-                     expected_wait: int):
+    def create_order(storage_id: string, estimated_delivery_date: int):
         '''Create new order.'''
-        article = Article.objects.filter(lio_id=article_id).first()
         storage = Storage.objects.filter(id=storage_id).first()
         try:
-            order = Order(
-                of_article=article, to_storage=storage,
-                amount=amount, expected_wait=expected_wait)
+            order = Order(to_storage=storage,
+                          estimated_delivery_date=estimated_delivery_date)
             order.save()
         except Exception:
             return None
-
         return order
+
+    def create_ordered_article(lio_id, quantity, unit, order):
+        '''Creates an ordered_article model'''
+        article = Article.objects.get(lio_id=lio_id)
+        try:
+            ordered_article = OrderedArticle(
+                quantity=quantity, article=article, order=order, output_per_input=unit)
+            ordered_article.save()
+            return ordered_article
+        except Exception:
+            return None
