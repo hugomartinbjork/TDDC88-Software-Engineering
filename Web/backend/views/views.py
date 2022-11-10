@@ -350,16 +350,18 @@ class GetUserTransactions(View):
         current_user = User.objects.filter(id=user_id)
 
         if current_user.exists() == False:
-            return Response({'error': 'User ID does not exist'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'User ID does not exist'},
+                            status=status.HTTP_404_NOT_FOUND)
 
         all_transactions_by_user = (
             self.user_service.get_all_transactions_by_user(
                 current_user=current_user))
 
-        if all_transactions_by_user is None:
+        if all_transactions_by_user is None: #Exception
             raise Http404("Could not find any transactions")
         else:
-            return JsonResponse(list(all_transactions_by_user), safe=False, status=200)
+            return JsonResponse(list(all_transactions_by_user),
+                                safe=False, status=200)
 
 
 class ReturnUnit(View):
