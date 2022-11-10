@@ -62,7 +62,7 @@ class CompartmentCreationTest(TestCase):
          self.compartment = Compartment.objects.create(id="1", storage = Storage.objects.get(id="1"), article = Article.objects.get(lio_id="1"))
             
      def test_storageManagementService(self):
-        test_search_compartment = self.storage_management_service.get_compartment_by_id(id="1")
+        test_search_compartment = self.storage_management_service.get_compartment_by_qr("1")
         test_search_article = self.article_management_service.get_article_by_lio_id(lio_id="1")
         test_search_storage = self.storage_management_service.get_storage_by_id(id="1")
         self.assertEqual(test_search_compartment, self.compartment)
@@ -90,8 +90,8 @@ class FR4_3_Test(TestCase):
 
         #Test that we can find/have the same article in different storage spaces in the same unit
         storage = self.storage_management_service.get_storage_by_id(id="1")
-        compartment1 = self.storage_management_service.get_compartment_by_id(id="1")
-        compartment2 = self.storage_management_service.get_compartment_by_id(id="2")
+        compartment1 = self.storage_management_service.get_compartment_by_qr("1")
+        compartment2 = self.storage_management_service.get_compartment_by_qr("2")
         article1 = self.article_management_service.get_article_by_lio_id("1")
         self.assertEqual(compartment1.article, article1)
         self.assertEqual(compartment2.article, article1)
@@ -114,7 +114,7 @@ class FR6_2_test(TestCase):
 
     def test_FR6_2(self):
         test_article1 = self.article_management_service.get_article_by_lio_id("1")
-        test_search_compartment = self.storage_management_service.get_compartment_by_id("1")
+        test_search_compartment = self.storage_management_service.get_compartment_by_qr("1")
         self.assertEqual(test_search_compartment.amount, 2) 
         self.assertNotEqual(test_search_compartment.amount, 3) 
 
@@ -195,27 +195,62 @@ class test_transaction_takeout_and_withdrawal(TestCase):
 
         self.compartment1 = Compartment.objects.create(id="1", storage = self.storage_management_service.get_storage_by_id(id="99"), article=self.article_management_service.get_article_by_lio_id(lio_id="1"))
         self.compartment2 = Compartment.objects.create(id="2", storage = self.storage_management_service.get_storage_by_id(id="99"), article=self.article_management_service.get_article_by_lio_id(lio_id="2"))
+
+        #transactions in 2000
+        #takeout article 1; amount =2 i.e cost +20
         self.transaction1 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="1"),
                                                     amount=2, operation=1, by_user = self.user1,
                                                     storage= self.storage_management_service.get_storage_by_id(id="99"),
                                                     time_of_transaction=
                                                     datetime.date(2000, 2, 15))
+        #takeout article 2; amount =2 i.e. cost +60
         self.transaction2 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="2"),
                                                     amount=2, operation=1, by_user = self.user1,
                                                     storage= self.storage_management_service.get_storage_by_id(id="99"),
                                                     time_of_transaction=
                                                     datetime.date(2000, 5, 15))   
+        #takeout article 1; amount =1 i.e. +10
         self.transaction1 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="1"),
                                                     amount=1, operation=1, by_user = self.user2,
                                                     storage= self.storage_management_service.get_storage_by_id(id="99"),
                                                     time_of_transaction=
-                                                    datetime.date(2000, 9, 15))                                        
-        
+                                                    datetime.date(2000, 9, 15))   
+
+        #transactions 2021    
+        #replenish 12 of article 1 i.e. cost = -120                                 
+        self.transaction1 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="1"),
+                                                    amount=12, operation=3, by_user = self.user1,
+                                                    storage= self.storage_management_service.get_storage_by_id(id="99"),
+                                                    time_of_transaction=
+                                                    datetime.date(2001, 8, 15))
+
+        #takeout article 2, amount 5 i.e. cost =+150
+        self.transaction1 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="2"),
+                                                    amount=5, operation=1, by_user = self.user1,
+                                                    storage= self.storage_management_service.get_storage_by_id(id="99"),
+                                                    time_of_transaction=
+                                                    datetime.date(2001, 8, 23))
+
+        #return article 2, amount 4 i.e. cost =-120
+        self.transaction1 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="2"),
+                                                    amount=4, operation=3, by_user = self.user1,
+                                                    storage= self.storage_management_service.get_storage_by_id(id="99"),
+                                                    time_of_transaction=
+                                                    datetime.date(2001, 8, 25))
+
+       
+
+
     def test_FR11_1(self):
+        #testtransaction cost for the time period where we had 3 takeouts (totalt of 3 takesouts of article 1 and 2 of aticle 2 = total cost of 90)
         storage1_cost = self.storage_management_service.get_storage_cost("99", "2000-01-07","2000-12-07")
-        #storage2_cost = self.storage_management_service.get_storage_cost("2", "2022-10-7","2022-12-7")
-        self.assertEqual(storage1_cost, 10)
-        #self.assertEqual(storage2_cost, 120)
+        self.assertEqual(storage1_cost, 90)
+
+        #test time period of year 2001
+        storage2_cost = self.storage_management_service.get_storage_cost("99", "2001-01-07","2001-12-07")
+        self.assertEqual(storage2_cost, 30)
+
+       
 
 
 class FR11_1_Test(TestCase): 
