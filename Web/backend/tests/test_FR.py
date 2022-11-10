@@ -114,20 +114,6 @@ class FR6_2_test(TestCase):
         self.assertEqual(test_search_compartment.amount, 2) 
         self.assertNotEqual(test_search_compartment.amount, 3) 
 
-# class FR6_2_test(TestCase):
-
-#     def setUp(self):
-#         Article.objects.create(lio_id="1")
-#         Storage.objects.create(id="1")
-#         Compartment.objects.create(id="1", storage = Storage.objects.get(id="1"), article = Article.objects.get(lio_id="1"), amount = 2)
-#         Compartment.objects.create(id="2", storage = Storage.objects.get(id="1"), article = Article.objects.get(lio_id="1"), amount = 4)
-
-#     def test_FR6_2(self):
-#         article1 = Article.objects.get(lio_id="1")
-#         compartment1 = Compartment.objects.get(id="1")
-#         compartment2 = Compartment.objects.get(id="2")
-#         self.assertEqual(compartment1.amount, 2) 
-
 
 #Testing FR1.2
 
@@ -181,8 +167,3 @@ class FR4_2_test(TestCase):
         test_compartment = self.storage_management_service.get_compartment_by_qr(qr_code="1")
         self.assertEqual(self.compartment, test_compartment)
         self.assertEqual(self.storage, test_compartment.storage)
-    def test_sum_transactions_and_withdrawals(self):
-        '''Test sym of transactions and withdrawals.'''
-        economyresult = self.storage_service.get_storage_cost(
-                                "", "2000-06-15", "2000-08-15")
-        self.assertAlmostEquals(economyresult, 40)
