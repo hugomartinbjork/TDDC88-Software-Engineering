@@ -86,4 +86,4 @@ class UpdateCompartmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Compartment
-        fields = ('storage', 'id', 'amount', 'standard_order_amount', 'order_point','article')
+        fields = ('placement', 'storage', 'id', 'amount', 'standard_order_amount', 'order_point','article')
