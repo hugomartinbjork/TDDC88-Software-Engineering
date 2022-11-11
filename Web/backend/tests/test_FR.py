@@ -151,6 +151,7 @@ class FR6_2_test(TestCase):
 #         self.assertEqual(test_article2, 4)
 #         self.assertNotEqual(test_article2, 5)
 
+# Testing 4.2
 # Desc: The system shall connect a QR code with a Compartment in the Storage.
 
 class FR4_2_test(TestCase): 
@@ -284,5 +285,42 @@ class FR11_1_Test(TestCase):
         self.assertEqual(storage2_value, 90)
        
 
+
+# Testing FR 5.7 
+# Desc: The system shall display the estimated time of arrival of articles not in stock
+# OBS: Tests the functionality of returning the estimated time of arrival, not that it actually displays it. 
+class FR_5_7(TestCase):
+    '''Test case to calculate estimated time to arrival.'''
+    def setUp(self):
+        self.get_stock_by_article_id = CentralStorageAccess.get_stock_by_article_id
+        central_storage_mock = CentralStorageAccess
+
+        central_storage_mock.get_stock_by_article_id = MagicMock(
+                                                return_value=100)
+
+        mocked_dependencies = (
+            dependency_factory.complete_dependency_dictionary(
+                {"CentralStorageAccess": central_storage_mock}))
+
+        self.order_service = OrderService(mocked_dependencies)
+
+    def tearDown(self):
+        CentralStorageAccess.get_stock_by_article_id = self.get_stock_by_article_id
+
+    def test_order_less_than_in_stock(self):
+        '''Test.'''
+        calculated_wait_time = (
+            self.order_service.calculate_expected_wait("123", 10))
+        # When we have enough in the central storage,
+        # the wait time is supposed to be 2 days
+        self.assertEqual(calculated_wait_time, 2)
+
+    def test_order_more_than_in_stock(self):
+        '''Test.'''
+        calculated_wait_time = (
+            self.order_service.calculate_expected_wait("123", 101))
+        # When we don't have enough in the central
+        # storage, the wait time is 14 days
+        self.assertEqual(calculated_wait_time, 14)
 
 
