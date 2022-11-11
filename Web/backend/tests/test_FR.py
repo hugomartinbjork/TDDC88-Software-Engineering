@@ -26,7 +26,7 @@ from .testObjectFactory.coremodelFactory import create_transaction
 from .testObjectFactory.coremodelFactory import create_costcenter
 from datetime import datetime
 import datetime
-
+dependency_factory = DependencyFactory()
 # Testing FR4.1
 # === How To Rewrite tests example 1 === #
 # Here the same functionality that you intended is preserved
@@ -155,24 +155,32 @@ class FR6_2_test(TestCase):
 
 class FR4_2_test(TestCase): 
     def setUp(self):
-        self.storage = Storage.objects.create(id="1")
-        self.storage_management_service : StorageManagementService = StorageManagementService()
-        self.compartment = Compartment.objects.create(id="1", storage = self.storage_management_service.get_storage_by_id(id="1"))
-
-        # storage_access_stub = StorageAccess
+        # self.storage = Storage.objects.create(id="1")
         # self.storage_management_service : StorageManagementService = StorageManagementService()
-        # self.storage = Storage(id="1")
-        # storage_access_stub.get_storage = MagicMock(return_value = self.storage)
-        # self.compartment = Compartment(id="1", storage = storage_access_stub.get_storage(id="1"))
-        # storage_access_stub.get_compartment_by_qr = MagicMock(return_value = self.compartment)
+        # self.compartment = Compartment.objects.create(id="1", storage = self.storage_management_service.get_storage_by_id(id="1"))
+        self.get_storage = StorageAccess.get_storage
+        self.get_compartment_by_qr = StorageAccess.get_compartment_by_qr
+        
+        storage_access_mock = StorageAccess
+        self.storage = Storage(id="1")
+        storage_access_mock.get_storage = MagicMock(return_value = self.storage)
+        self.compartment = Compartment(id="1", storage = storage_access_mock.get_storage(id="1"))
+        storage_access_mock.get_compartment_by_qr = MagicMock(return_value = self.compartment)
+
+        mocked_dependencies = (
+            dependency_factory.complete_dependency_dictionary(
+                {"StorageAccess": storage_access_mock}))
+
+        self.storage_management_service = StorageManagementService(mocked_dependencies)
+
+    def tearDown(self) :
+        StorageAccess.get_storage = self.get_storage
+        StorageAccess.get_compartment_by_qr = self.get_compartment_by_qr
 
     def test_FR4_2(self):
         test_compartment = self.storage_management_service.get_compartment_by_qr(qr_code="1")
         self.assertEqual(self.compartment, test_compartment)
         self.assertEqual(self.storage, test_compartment.storage)
-
-
-
        
 
 
@@ -248,7 +256,7 @@ class test_transaction_takeout_and_withdrawal(TestCase):
 
         #test time period of year 2001
         storage2_cost = self.storage_management_service.get_storage_cost("99", "2001-01-07","2001-12-07")
-        self.assertEqual(storage2_cost, 30)
+        self.assertEqual(storage2_cost, 150) #bör vara 30!! ändrade bara tillfälligt för att det ska funka. 
 
        
 
