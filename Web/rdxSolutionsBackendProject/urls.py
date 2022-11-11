@@ -27,3 +27,6 @@ urlpatterns = [
     path('api/', include('backend.urls')),
 
 ]
+
+
+  
