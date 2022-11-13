@@ -1,5 +1,6 @@
 # from requests import request
 # from Web.backend.views.views import Compartment
+from math import floor
 from backend.dataAccess.orderAccess import OrderAccess
 from backend.dataAccess.storageAccess import StorageAccess
 from backend.dataAccess.userAccess import UserAccess
@@ -298,8 +299,34 @@ class StorageManagementService():
     # 25.2.1
     def get_nearby_storages(self, qr_code: str) -> Compartment:
         subject_compartment = self.get_compartment_by_qr(qr_code)
-        subject_article = subject_compartment.article
         subject_storage = subject_compartment.storage
-        
+        subject_article_id = subject_compartment.article.lio_id
 
-        return nearby_storages
+        subject_floor = subject_storage.floor
+        subject_building = subject_storage.building
+
+        compartments = self.storage_access.get_compartments_containing_article(subject_article_id)
+        if (compartments is None):
+            return None
+        else:
+            floor = False
+            building = False
+            storages_on_floor = []
+            storages_in_building = []
+            storages_elsewhere = []
+            for compartment in compartments:
+                if (compartment.storage.floor == subject_floor):
+                    storages_on_floor.append(compartment.storage)
+                    floor = True
+                elif (compartment.storage.building == subject_building):
+                    storages_in_building.append(compartment.storage)
+                    building = True
+                else:
+                    storages_elsewhere.append(compartment.storage)
+
+        if floor:
+            return storages_on_floor
+        elif building:
+            return storages_in_building
+        else:
+            return storages_elsewhere

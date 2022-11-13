@@ -23,6 +23,11 @@ class StorageAccess():
             return storage
         except Exception:
             return None
+    
+    def get_compartments_containing_article(self, lio_id):
+        '''Get compartmens containing an article id.'''
+        compartments = Compartment.objects.filter(article=lio_id)
+        return compartments
 
     # TODO: This does not seem to do what it is supposed to do. Please review
     def set_compartment_amount(self, compartment_id: str, amount: int) -> int:
