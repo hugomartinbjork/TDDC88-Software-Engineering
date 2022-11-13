@@ -126,7 +126,7 @@ class Storage(View):
             return HttpResponseBadRequest
 
 
-class GetNearbyStorages(View):
+class NearbyStorages(View):
     '''Get nearby storages.'''
     @si.inject
     def __init__(self, _deps, *args):
@@ -139,7 +139,13 @@ class GetNearbyStorages(View):
         if request.method == 'GET':
             nearby_storages = (
                 self.storage_management_service.get_nearby_storages(qr_code))
-            return nearby_storages
+            
+            if nearby_storages is None:
+                raise Http404("Could not find storage")
+            serializer = StorageSerializer(nearby_storages)
+            if serializer.is_valid:
+                return JsonResponse(serializer.data, status=200)
+            return HttpResponseBadRequest
 
 
 

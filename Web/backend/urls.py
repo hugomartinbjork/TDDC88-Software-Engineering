@@ -37,7 +37,7 @@ urlPatterns = [
     # Storages
     path('storages/', views.SeeAllStorages.as_view()),
     path('storages/<int:storage_id>/', views.Storage.as_view()),
-    path('nearbyStorages/<str:qr_code>', views.GetNearbyStorages.as_view()),
+    path('nearbyStorages/<str:qr_code>', views.NearbyStorages.as_view()),
 
     # Below storage URLs not part of API
     path('storage/<str:storage_id>/value', views.GetStorageValue.as_view()),

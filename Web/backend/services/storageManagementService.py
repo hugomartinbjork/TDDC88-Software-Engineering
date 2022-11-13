@@ -298,6 +298,13 @@ class StorageManagementService():
 
     # 25.2.1
     def get_nearby_storages(self, qr_code: str) -> Compartment:
+        '''Returns nearby storages containing the
+        article which is contained in the compartment which 
+        the qr_code points to. If there are no nearby storages on
+        the same floor, nearby storages in the building is
+        returned. If there are none in the building, other 
+        storages are returned. If there are no other storages
+        containing the article, None is returned.'''
         subject_compartment = self.get_compartment_by_qr(qr_code)
         subject_storage = subject_compartment.storage
         subject_article_id = subject_compartment.article.lio_id
@@ -305,28 +312,30 @@ class StorageManagementService():
         subject_floor = subject_storage.floor
         subject_building = subject_storage.building
 
-        compartments = self.storage_access.get_compartments_containing_article(subject_article_id)
-        if (compartments is None):
+        compartments = (
+            self.storage_access.get_compartments_containing_article(
+                                                subject_article_id))
+        if compartments is None:
             return None
         else:
-            floor = False
-            building = False
+            floor_neigh = False
+            building_neigh = False
             storages_on_floor = []
             storages_in_building = []
             storages_elsewhere = []
             for compartment in compartments:
                 if (compartment.storage.floor == subject_floor):
                     storages_on_floor.append(compartment.storage)
-                    floor = True
+                    floor_neigh = True
                 elif (compartment.storage.building == subject_building):
                     storages_in_building.append(compartment.storage)
-                    building = True
+                    building_neigh = True
                 else:
                     storages_elsewhere.append(compartment.storage)
-
-        if floor:
-            return storages_on_floor
-        elif building:
-            return storages_in_building
-        else:
-            return storages_elsewhere
+            if floor_neigh:
+                storages_on_floor = list(dict.fromkeys(storages_on_floor))
+                return storages_on_floor
+            elif building_neigh:
+                return storages_in_building
+            else:
+                return storages_elsewhere
