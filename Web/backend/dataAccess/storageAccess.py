@@ -111,7 +111,7 @@ class StorageAccess():
         '''Changes a date of a transaction.'''
         try:
             Transaction.objects.filter(id=transaction_id).update(time_of_transaction=new_time_of_transaction)
-            transaction =  Transaction.objects.get(id=transaction_id)
+            transaction = Transaction.objects.get(id=transaction_id)
             return transaction
         except Exception:
             return None
@@ -129,10 +129,8 @@ class StorageAccess():
             storage = Storage.objects.get(cost_center=cost_center)
             return storage
         except Exception:
-            return None
 
-#  FR 9.4.1 och FR 9.4.2 ##
-
+# FR 9.4.1 och FR 9.4.2 ##
     def create_compartment(self, storage_id: str, placement: str,
                            qr_code) -> Compartment:
         '''Create new compartment.'''

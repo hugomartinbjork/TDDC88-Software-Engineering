@@ -125,6 +125,24 @@ class Storage(View):
                 return JsonResponse(serializer.data, status=200)
             return HttpResponseBadRequest
 
+
+class GetNearbyStorages(View):
+    '''Get nearby storages.'''
+    @si.inject
+    def __init__(self, _deps, *args):
+        self.storage_management_service: StorageManagementService = (
+            _deps['StorageManagementService']())
+
+    def get(self, request, qr_code):
+        '''Return nearby storages of the storage which contains the qr_code with a
+        specific qr_code'''
+        if request.method == 'GET':
+            nearby_storages = (
+                self.storage_management_service.get_nearby_storages(qr_code))
+            return nearby_storages
+
+
+
 class Compartments(View):
     '''Compartment view.'''
     # Dependencies are injected, I hope that we will be able to mock
