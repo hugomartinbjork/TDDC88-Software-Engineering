@@ -125,26 +125,7 @@ class Storage(View):
                 return JsonResponse(serializer.data, status=200)
             return HttpResponseBadRequest
 
-
-class Compartment(View):
-    '''Storage-space view.'''
-
-    def __init__(self, _deps, *args):
-        self.order_service: OrderService = _deps['OrderService']()
-        self.storage_management_service: StorageManagementService = (
-            _deps['StorageManagementService']())
-
-    def get(self, request, compartment_id):
-        '''Returns compartment content as well as orders.'''
-        altered_dict = (
-            self.storage_management_service.get_compartment_content_and_orders(
-                compartment_id))
-        if altered_dict is None:
-            return Http404("Could not find storage space")
-        return JsonResponse(altered_dict, status=200)
-
-
-class Compartment(View):
+class Compartments(View):
     '''Compartment view.'''
     # Dependencies are injected, I hope that we will be able to mock
     # (i.e. make stubs of) these for testing
