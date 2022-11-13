@@ -129,6 +129,7 @@ class StorageAccess():
             storage = Storage.objects.get(cost_center=cost_center)
             return storage
         except Exception:
+            return None
 
 # FR 9.4.1 och FR 9.4.2 ##
     def create_compartment(self, storage_id: str, placement: str,

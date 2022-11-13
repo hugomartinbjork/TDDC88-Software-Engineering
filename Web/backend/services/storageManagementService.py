@@ -294,3 +294,12 @@ class StorageManagementService():
         return compartment
 
     # FR 9.4.1 och FR 9.4.2 ##
+
+    # 25.2.1
+    def get_nearby_storages(self, qr_code: str) -> Compartment:
+        subject_compartment = self.get_compartment_by_qr(qr_code)
+        subject_article = subject_compartment.article
+        subject_storage = subject_compartment.storage
+        
+
+        return nearby_storages
