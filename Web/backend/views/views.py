@@ -29,6 +29,8 @@ from datetime import datetime
 import datetime
 from django.utils.timezone import now
 
+# from Web.backend import serializers
+
 
 class Article(View):
     '''Article view.'''
@@ -153,9 +155,8 @@ class NearbyStorages(View):
                 possible_storage['compartment'] = (
                     CompartmentSerializer(nearby_storages[key_storage]).data)
                 serializer.append(possible_storage)
-            
-            return JsonResponse(list(serializer), status=200)
-            return HttpResponseBadRequest
+
+            return JsonResponse(list(serializer), status=200, safe=False)
 
 
 
