@@ -2,6 +2,10 @@ from django.test import TestCase
 from backend.dataAccess.storageAccess import StorageAccess
 from backend.dataAccess.articleAccess import ArticleAccess
 from backend.coremodels.article import Article
+
+from backend.coremodels.user_info import UserInfo
+from backend.coremodels.group import GroupInfo
+
 from backend.coremodels.compartment import Compartment
 from backend.coremodels.storage import Storage 
 from backend.coremodels.qr_code import QRCode
@@ -26,7 +30,7 @@ import datetime
 # Testing FR 1.1 The system shall support three different user types: medical employee, inventory employee, and MIV employee.
 class SupportDifferentUsers(TestCase):
     def setUp(self):
-        self.article_to_search_for = Article.objects.create(lio_id ="1") #Database is populated and the object is stored so that we don't have to retrieve it again
+        self.article_to_search_for = UserInfo.objects.create(group ="1") #Database is populated and the object is stored so that we don't have to retrieve it again
         self.article_management_service : ArticleManagementService = ArticleManagementService() #An instance of the class to be tested is created and stored as a class variable for the test class. The "articleManagementService :" part specifies that the stored variable must be of type articlemanagementservice, this is not necessary, but makes the code more understandable
     def test_get_article_by_lio_id(self):
         test_search = self.article_management_service.get_article_by_lio_id("1")
