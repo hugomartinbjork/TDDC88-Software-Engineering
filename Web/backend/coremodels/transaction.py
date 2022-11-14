@@ -18,7 +18,7 @@ class Transaction(models.Model):
     time_of_transaction = models.DateField(
         default=now, null=True, blank=True)
     operation = models.IntegerField(
-        choices=TransactionOperator.choices, default=1, null=False)
+        choices=TransactionOperator.choices, default=0, null=False)
 
     def __str__(self):
         return str(self.id)
