@@ -8,6 +8,7 @@ __pycache__/
 *.py[cod]
 db.sqlite3
 media
+Web/mydatabase
 
 # Visual Studio Code # 
 .vscode/

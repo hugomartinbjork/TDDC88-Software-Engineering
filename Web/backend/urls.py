@@ -29,6 +29,7 @@ urlPatterns = [
     path('articles/lio/<str:article_id>/', views.Article.as_view()),
 
     # article URLs below not part of API
+
     path('alternativearticles/<str:article_id>/',
          views.GetArticleAlternatives.as_view()),
     path('alternativearticles/<str:article_id>/<str:storage_id>/',
@@ -49,7 +50,7 @@ urlPatterns = [
     # path('connectArticleToCompartment/<str:qr_code>', views.Compartment.as_view()), part of API, not yet implemented
     # path('moveArticle/', views.Compartment.as_view()), part of API, not yet implemented
 
-    #Transactions
+    # Transactions
     path('transactions/', views.Transactions.as_view()),
     # path('transactions/<id>', views.Transactions.as_view()), part of API, not yet implemented
 
@@ -63,7 +64,7 @@ urlPatterns = [
 
     # Orders
     path('orders/', views.Order.as_view()),
-    path('orders/<int:id>/', csrf_exempt(views.Order.as_view())),
+    path('orders/<int:id>/', views.OrderId.as_view()),
 
     # Economy (no URLS implemented yet)
     # path('economy/<storage_id>') part of API, not yet implemented
