@@ -5,7 +5,6 @@ from backend.coremodels.article import Article
 from backend.coremodels.compartment import Compartment
 from backend.coremodels.cost_center import CostCenter
 from backend.coremodels.storage import Storage 
-from backend.coremodels.qr_code import QRCode
 from backend.coremodels.user_info import UserInfo
 from backend.services.articleManagementService import ArticleManagementService
 from backend.services.storageManagementService import StorageManagementService
@@ -322,5 +321,3 @@ class FR_5_7(TestCase):
         # When we don't have enough in the central
         # storage, the wait time is 14 days
         self.assertEqual(calculated_wait_time, 14)
-
-
