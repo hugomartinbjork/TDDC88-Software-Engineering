@@ -24,14 +24,6 @@ class StorageAccess():
         except Exception:
             return None
 
-    def get_compartment_by_qr(self, id: str) -> Compartment:
-        '''Returns compartmend (storage space) from id.'''
-        try:
-            storage = Compartment.objects.get(id=id)
-            return storage
-        except Exception:
-            return None
-
     # TODO: This does not seem to do what it is supposed to do. Please review
     def set_compartment_amount(self, compartment_id: str, amount: int) -> int:
         '''Sets amount in compartment.'''
@@ -130,7 +122,6 @@ class StorageAccess():
             return Transaction.objects.filter(storage=storage_id)
         except Exception:
             return None
-
 
     def get_storage_by_costcenter(self, cost_center: str) -> Storage:
         '''Return storage using cost-center.'''

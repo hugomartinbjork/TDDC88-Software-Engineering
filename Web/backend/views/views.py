@@ -135,26 +135,7 @@ class Storage(View):
                 return JsonResponse(serializer.data, status=200)
             return HttpResponseBadRequest
 
-
-class Compartment(View):
-    '''Storage-space view.'''
-
-    def __init__(self, _deps, *args):
-        self.order_service: OrderService = _deps['OrderService']()
-        self.storage_management_service: StorageManagementService = (
-            _deps['StorageManagementService']())
-
-    def get(self, request, compartment_id):
-        '''Returns compartment content as well as orders.'''
-        altered_dict = (
-            self.storage_management_service.get_compartment_content_and_orders(
-                compartment_id))
-        if altered_dict is None:
-            return Http404("Could not find storage space")
-        return JsonResponse(altered_dict, status=200)
-
-
-class Compartment(View):
+class Compartments(View):
     '''Compartment view.'''
     # Dependencies are injected, I hope that we will be able to mock
     # (i.e. make stubs of) these for testing
@@ -359,19 +340,20 @@ class GetUserTransactions(View):
         '''Returns all transactions made by user.'''
         current_user = User.objects.filter(id=user_id)
 
-        if current_user.exists() == False:
-            return Response({'error': 'User ID does not exist'},
-                            status=status.HTTP_404_NOT_FOUND)
-
-        all_transactions_by_user = (
+        if current_user is not None:
+            all_transactions_by_user = (
             self.user_service.get_all_transactions_by_user(
                 current_user=current_user))
 
-        if all_transactions_by_user is None:
-            raise Http404("Could not find any transactions")
-        else:
-            return JsonResponse(list(all_transactions_by_user),
-                                safe=False, status=200)
+            if all_transactions_by_user is not None:
+                return JsonResponse(list(all_transactions_by_user),
+                                    safe=False, status=200) 
+            else:  #Exception
+                return Response({'error': 'Could not find any transactions'},
+                                status=status.HTTP_404_NOT_FOUND)
+        else:  #Exception
+            return Response({'error': 'Could not find user'},
+                            status=status.HTTP_404_NOT_FOUND)
 
 
 class ReturnUnit(View):
