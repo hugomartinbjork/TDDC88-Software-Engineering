@@ -134,17 +134,27 @@ class NearbyStorages(View):
             _deps['StorageManagementService']())
 
     def get(self, request, qr_code):
-        '''Return nearby storages of the storage which contains the qr_code with a
+        '''Return nearby storages of the storage which
+        contains the qr_code with a
         specific qr_code'''
         if request.method == 'GET':
             nearby_storages = (
                 self.storage_management_service.get_nearby_storages(qr_code))
-            
             if nearby_storages is None:
-                raise Http404("Could not find storage")
-            serializer = StorageSerializer(nearby_storages)
-            if serializer.is_valid:
-                return JsonResponse(serializer.data, status=200)
+                raise Http404("Could not find any nearby storages")
+
+            serializer = []
+            for key_storage in nearby_storages:
+                possible_storage = {}
+                possible_storage['id'] = key_storage.id
+                possible_storage['location'] = {
+                    'building': key_storage.building,
+                    'floor': key_storage.floor}
+                possible_storage['compartment'] = (
+                    CompartmentSerializer(nearby_storages[key_storage]).data)
+                serializer.append(possible_storage)
+            
+            return JsonResponse(list(serializer), status=200)
             return HttpResponseBadRequest
 
 

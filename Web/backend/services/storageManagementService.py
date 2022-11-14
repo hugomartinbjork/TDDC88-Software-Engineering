@@ -320,20 +320,19 @@ class StorageManagementService():
         else:
             floor_neigh = False
             building_neigh = False
-            storages_on_floor = []
-            storages_in_building = []
-            storages_elsewhere = []
+            storages_on_floor = {}
+            storages_in_building = {}
+            storages_elsewhere = {}
             for compartment in compartments:
                 if (compartment.storage.floor == subject_floor):
-                    storages_on_floor.append(compartment.storage)
+                    storages_on_floor[compartment.storage] = compartment
                     floor_neigh = True
                 elif (compartment.storage.building == subject_building):
-                    storages_in_building.append(compartment.storage)
+                    storages_in_building[compartment.storage] = compartment
                     building_neigh = True
                 else:
-                    storages_elsewhere.append(compartment.storage)
+                    storages_elsewhere[compartment.storage] = compartment
             if floor_neigh:
-                storages_on_floor = list(dict.fromkeys(storages_on_floor))
                 return storages_on_floor
             elif building_neigh:
                 return storages_in_building
