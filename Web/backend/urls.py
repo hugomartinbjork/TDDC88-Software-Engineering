@@ -37,7 +37,7 @@ urlPatterns = [
 
     # Storages
     path('storages/', views.SeeAllStorages.as_view()),
-    path('storages/<int:storage_id>/', views.Storage.as_view()),
+    path('storages/<str:storage_id>/', views.Storage.as_view()),
     #     path('nearbyStorages/<str:qr_code>', views.Storage.as_view()), part of API, not yet implemented
 
     # Below storage URLs not part of API
@@ -45,8 +45,8 @@ urlPatterns = [
     path('storage/<str:storage_id>/cost', views.GetStorageCost.as_view()),
 
     # Compartments
-    path('compartments/', views.Compartment.as_view()),
-    path('compartments/<str:qr_code>', views.Compartment.as_view()),
+    #path('compartments/', views.Compartment.as_view()),
+    path('compartments/<str:qr_code>/', views.Compartments.as_view()),
     # path('connectArticleToCompartment/<str:qr_code>', views.Compartment.as_view()), part of API, not yet implemented
     # path('moveArticle/', views.Compartment.as_view()), part of API, not yet implemented
 

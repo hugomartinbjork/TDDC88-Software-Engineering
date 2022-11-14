@@ -19,12 +19,6 @@ class ArticleSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class StorageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Storage
-        fields = ('name',)
-
-
 class CostCenterSerializer(serializers.ModelSerializer):
     class Meta:
         model = CostCenter
@@ -38,11 +32,19 @@ class UserInfoSerializer(serializers.ModelSerializer):
 
 
 class CompartmentSerializer(serializers.ModelSerializer):
+    article = ArticleSerializer(many=False, read_only=True)
+
     class Meta:
         model = Compartment
         fields = ('id', 'storage', 'article',
                   'order_point', 'standard_order_amount',
                   'maximal_capacity', 'amount')
+
+class StorageSerializer(serializers.ModelSerializer):
+    ''' compartments = storageManagemetnServisce(storage.id)'''
+    class Meta:
+        model = Storage
+        fields = ('id','building', 'floor')
 
 
 class GroupSerializer(serializers.ModelSerializer):
