@@ -1,5 +1,5 @@
 from ..serializers import AlternativeNameSerializer, StorageSerializer
-from ..serializers import ArticleSerializer, OrderSerializer
+from ..serializers import ArticleSerializer, OrderSerializer, OrderedArticleSerializer
 from ..serializers import CompartmentSerializer, TransactionSerializer
 from ..serializers import GroupSerializer
 
@@ -177,21 +177,20 @@ class Compartments(View):
 
 
 class Order(APIView):
-    '''Order view.'''
+    '''Order endpoint handling all request from /orders'''
     @si.inject
     def __init__(self, _deps, *args):
         self.order_service: OrderService = _deps['OrderService']()
+        self.article_management_service: ArticleManagementService = _deps['ArticleManagementService'](
+        )
 
-    def get(self, request, id):
-        '''Return order using id.'''
-        if request.method == 'GET':
-            order = self.order_service.get_order_by_id(id)
-            if order is None:
-                raise Http404("Could not find order")
-            serializer = OrderSerializer(order)
-            if serializer.is_valid:
-                return JsonResponse(serializer.data, status=200)
-            return HttpResponseBadRequest
+    def get(self, request):
+        '''Returns all orders)'''
+        orders = self.order_service.get_orders()
+        serializer = OrderSerializer(orders, many=True)
+        if serializer.is_valid:
+            return Response(serializer.data)
+        return HttpResponseBadRequest
 
     def post(self, request, format=None):
         '''Places an order'''
@@ -210,24 +209,97 @@ class Order(APIView):
             estimated_delivery_date = datetime.datetime.now() + \
                 datetime.timedelta(days=max_wait)
 
-            print(ordered_articles)
             order = self.order_service.place_order(
                 storage_id=storage_id, estimated_delivery_date=estimated_delivery_date, ordered_articles=ordered_articles)
 
             if order is None:
                 return HttpResponseBadRequest
 
+            serialized_articles = []
             for ordered_article in ordered_articles:
                 article_in_order = OrderService.create_ordered_article(
                     ordered_article['lioNr'], ordered_article['quantity'], ordered_article['unit'], order)
-                print(article_in_order)
+                real_article = self.article_management_service.get_article_by_lio_id(
+                    ordered_article['lioNr'])
+                serialized_article = ArticleSerializer(real_article)
+                serialized_order_article = OrderedArticleSerializer(
+                    article_in_order)
+                serialized_articles.append(serialized_article.data)
+                serialized_articles.append(serialized_order_article.data)
                 if article_in_order is None:
                     return HttpResponseBadRequest
 
-            serializer = OrderSerializer(order)
-            if serializer.is_valid:
-                return JsonResponse(serializer.data, status=200)
+            serialized_order = OrderSerializer(order)
+            if serialized_order.is_valid:
+                data = {}
+                data.update(serialized_order.data)
+                data['articles'] = serialized_articles
+                return Response(data, status=200)
             return HttpResponseBadRequest
+
+
+class OrderId(APIView):
+    '''Order Endpoint which handles all request coming from /orders/id'''
+    @si.inject
+    def __init__(self, _deps, *args):
+        self.order_service: OrderService = _deps['OrderService']()
+        self.article_management_service: ArticleManagementService = _deps['ArticleManagementService'](
+        )
+
+    def get(self, request, id):
+        order = self.order_service.get_order_by_id(id)
+        ordered_articles = self.order_service.get_ordered_articles(order.id)
+
+        if ordered_articles is None:
+            return HttpResponseBadRequest
+
+        serialized_articles = []
+        for ordered_article in ordered_articles:
+            real_article = self.article_management_service.get_article_by_lio_id(
+                ordered_article.article.lio_id)
+            serialized_article = ArticleSerializer(real_article)
+            serialized_order_article = OrderedArticleSerializer(
+                ordered_article)
+            serialized_articles.append(serialized_article.data)
+            serialized_articles.append(serialized_order_article.data)
+        serialized_order = OrderSerializer(order)
+        if serialized_order.is_valid:
+            data = {}
+            data.update(serialized_order.data)
+            data['articles'] = serialized_articles
+            return Response(data, status=200)
+        return HttpResponseBadRequest
+
+    def put(self, request, id):
+        '''OBS! Not yet finished! Only used for testing. Written by Hugo and Jakob. 
+        Alters the state of an order to delivered and updates the amount in the correct compartments.'''
+        json_body = request.data
+        order_state = json_body['state']
+        ordered_articles = self.order_service.get_ordered_articles(id)
+
+        if order_state == "delivered":
+            updated_order = self.order_service.order_arrived(id)
+
+        if updated_order == None:
+            return HttpResponseBadRequest
+
+        # ugly
+        serialized_articles = []
+        for ordered_article in ordered_articles:
+            real_article = self.article_management_service.get_article_by_lio_id(
+                ordered_article.article.lio_id)
+            serialized_article = ArticleSerializer(real_article)
+            serialized_order_article = OrderedArticleSerializer(
+                ordered_article)
+            serialized_articles.append(serialized_article.data)
+            serialized_articles.append(serialized_order_article.data)
+        serialized_order = OrderSerializer(updated_order)
+        if serialized_order.is_valid:
+            data = {}
+            data.update(serialized_order.data)
+            data['articles'] = serialized_articles
+            return Response(data, status=200)
+        return HttpResponseBadRequest
 
 
 class Login(APIView):
