@@ -242,7 +242,7 @@ class test_transaction_takeout_and_withdrawal(TestCase):
 
         #return article 2, amount 4 i.e. cost =-120
         self.transaction1 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="2"),
-                                                    amount=4, operation=3, by_user = self.user1,
+                                                    amount=4, operation=2, by_user = self.user1,
                                                     storage= self.storage_management_service.get_storage_by_id(id="99"),
                                                     time_of_transaction=
                                                     datetime.date(2001, 8, 25))
@@ -257,7 +257,7 @@ class test_transaction_takeout_and_withdrawal(TestCase):
 
         #test time period of year 2001
         storage2_cost = self.storage_management_service.get_storage_cost("99", "2001-01-07","2001-12-07")
-        self.assertEqual(storage2_cost, 150) #bör vara 30!! ändrade bara tillfälligt för att det ska funka. 
+        self.assertEqual(storage2_cost, 30) #bör vara 30!! ändrade bara tillfälligt för att det ska funka. 
 
        
 
