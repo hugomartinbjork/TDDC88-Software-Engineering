@@ -1,3 +1,4 @@
+from logging.config import valid_ident
 from ..serializers import AlternativeNameSerializer, StorageSerializer
 from ..serializers import ArticleSerializer, OrderSerializer
 from ..serializers import CompartmentSerializer, TransactionSerializer
@@ -166,8 +167,10 @@ class NearbyStorages(View):
                 possible_storage['compartment'] = (
                     CompartmentSerializer(nearby_storages[key_storage]).data)
                 serializer.append(possible_storage)
-
-            return JsonResponse(list(serializer), status=200, safe=False)
+                valid = True
+            if valid:
+                return JsonResponse(list(serializer), status=200, safe=False)
+            return HttpResponseBadRequest
 
 
 
