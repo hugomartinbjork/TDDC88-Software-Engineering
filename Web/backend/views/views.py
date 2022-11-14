@@ -166,7 +166,6 @@ class Compartments(View):
 
     def put(self, request):
         '''Post compartment.'''
-        json_body = request.POST
         storage_id = json_body['storage_id']
         placement = json_body['placement']
         qr_code = json_body['qr_code']
