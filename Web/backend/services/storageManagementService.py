@@ -31,6 +31,7 @@ class StorageManagementService():
 
     def get_compartment_by_qr(self, id: str) -> Compartment:
         '''Returns storage space using id.'''
+        print(id)
         return self.storage_access.get_compartment_by_qr(id)
 
     def get_compartment_by_article(self, article: Article) -> Compartment:
@@ -294,3 +295,15 @@ class StorageManagementService():
         return compartment
 
     # FR 9.4.1 och FR 9.4.2 ##
+
+    def update_compartment_by_qr(self, current_compartment: Compartment, new_placement: str, new_storage_id: str, new_amount: int, new_standard_order_amount: int, new_order_point: int) -> Compartment:
+        '''Edit compartment using qr code.'''
+
+        new_storage = self.storage_access.get_storage(new_storage_id)
+
+        #Update compartments attributes
+        current_compartment.placement = new_placement
+        current_compartment.storage = new_storage
+        current_compartment.amount = new_amount
+        current_compartment.standard_order_amount = new_standard_order_amount
+        current_compartment.order_point = new_order_point

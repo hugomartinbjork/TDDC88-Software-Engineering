@@ -125,7 +125,7 @@ class Storage(View):
                 return JsonResponse(serializer.data, status=200)
             return HttpResponseBadRequest
 
-class Compartments(View):
+class Compartments(APIView):
     '''Compartment view.'''
     # Dependencies are injected, I hope that we will be able to mock
     # (i.e. make stubs of) these for testing
@@ -164,18 +164,32 @@ class Compartments(View):
             return JsonResponse(serializer.data, status=200)
         return HttpResponseBadRequest
 
-    def put(self, request):
-        '''Post compartment.'''
-        storage_id = json_body['storage_id']
-        placement = json_body['placement']
-        qr_code = json_body['qr_code']
-        compartment = self.storage_management_service.create_compartment(
-            storage_id, placement, qr_code)
+    def put(self, request, qr_code):
+        '''Edit compartment by QR code.'''
 
-        serializer = CompartmentSerializer(compartment)
-        if serializer.is_valid:
-            return JsonResponse(serializer.data, status=200)
-        return HttpResponseBadRequest
+        current_compartment = (
+            self.storage_management_service.get_compartment_by_qr(qr_code))
+
+        if current_compartment is not None:
+
+            #Get values from payload
+            new_placement = request.data.get("placement")
+            new_storage_id = request.data.get("storageId") 
+            #new_qr_code = request.data.get("qr_code")
+            new_amount = request.data.get('quantity')
+            new_standard_order_amount = request.data.get('normalOrderQuantity')
+            new_order_point = request.data.get('orderQuantityLevel')
+
+            self.storage_management_service.update_compartment_by_qr(current_compartment, new_placement, new_storage_id, new_amount, new_standard_order_amount, new_order_point)
+
+            serializer = CompartmentSerializer(current_compartment)
+            if serializer.is_valid:
+                return JsonResponse(UpdateCompartmentSerializer(current_compartment).data, status=200)
+            return HttpResponseBadRequest
+
+        else:
+            return Response({'error': 'Could not find compartment'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
 
 class Order(APIView):
