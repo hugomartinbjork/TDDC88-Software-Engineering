@@ -164,6 +164,20 @@ class Compartments(View):
             return JsonResponse(serializer.data, status=200)
         return HttpResponseBadRequest
 
+    def put(self, request):
+        '''Post compartment.'''
+        json_body = request.POST
+        storage_id = json_body['storage_id']
+        placement = json_body['placement']
+        qr_code = json_body['qr_code']
+        compartment = self.storage_management_service.create_compartment(
+            storage_id, placement, qr_code)
+
+        serializer = CompartmentSerializer(compartment)
+        if serializer.is_valid:
+            return JsonResponse(serializer.data, status=200)
+        return HttpResponseBadRequest
+
 
 class Order(APIView):
     '''Order view.'''
