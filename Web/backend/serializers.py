@@ -1,3 +1,5 @@
+from dataclasses import field
+from unittest import mock
 from rest_framework import serializers
 
 from backend.coremodels.alternative_article_name import AlternativeArticleName
@@ -85,3 +87,8 @@ class AlternativeNameSerializer(serializers.ModelSerializer):
     class Meta:
         model = AlternativeArticleName
         fields = ('name',)
+
+# class MultiStorageSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Storage,Compartment
+#         field

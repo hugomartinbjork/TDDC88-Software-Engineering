@@ -1,3 +1,4 @@
+from logging.config import valid_ident
 from ..serializers import AlternativeNameSerializer, StorageSerializer
 from ..serializers import ArticleSerializer, OrderSerializer, OrderedArticleSerializer
 from ..serializers import CompartmentSerializer, TransactionSerializer
@@ -28,6 +29,8 @@ from datetime import date
 from datetime import datetime
 import datetime
 from django.utils.timezone import now
+
+# from Web.backend import serializers
 
 
 class Article(View):
@@ -135,6 +138,41 @@ class Storage(View):
             #if serializer.is_valid:
             return JsonResponse(data, status=200, safe=False)
             return HttpResponseBadRequest
+
+
+class NearbyStorages(View):
+    '''Get nearby storages.'''
+    @si.inject
+    def __init__(self, _deps, *args):
+        self.storage_management_service: StorageManagementService = (
+            _deps['StorageManagementService']())
+
+    def get(self, request, qr_code):
+        '''Return nearby storages of the storage which
+        contains the qr_code with a
+        specific qr_code'''
+        if request.method == 'GET':
+            nearby_storages = (
+                self.storage_management_service.get_nearby_storages(qr_code))
+            if nearby_storages is None:
+                raise Http404("Could not find any nearby storages")
+
+            serializer = []
+            for key_storage in nearby_storages:
+                possible_storage = {}
+                possible_storage['id'] = key_storage.id
+                possible_storage['location'] = {
+                    'building': key_storage.building,
+                    'floor': key_storage.floor}
+                possible_storage['compartment'] = (
+                    CompartmentSerializer(nearby_storages[key_storage]).data)
+                serializer.append(possible_storage)
+                valid = True
+            if valid:
+                return JsonResponse(list(serializer), status=200, safe=False)
+            return HttpResponseBadRequest
+
+
 
 class Compartments(View):
     '''Compartment view.'''

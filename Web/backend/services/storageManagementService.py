@@ -1,5 +1,6 @@
 # from requests import request
 # from Web.backend.views.views import Compartment
+from math import floor
 from backend.dataAccess.orderAccess import OrderAccess
 from backend.dataAccess.storageAccess import StorageAccess
 from backend.dataAccess.userAccess import UserAccess
@@ -299,3 +300,48 @@ class StorageManagementService():
         return compartment
 
     # FR 9.4.1 och FR 9.4.2 ##
+
+    # 25.2.1
+    def get_nearby_storages(self, qr_code: str) -> Compartment:
+        '''Returns nearby storages containing the
+        article which is contained in the compartment which 
+        the qr_code points to. If there are no nearby storages on
+        the same floor, nearby storages in the building is
+        returned. If there are none in the building, other 
+        storages are returned. If there are no other storages
+        containing the article, None is returned.'''
+        subject_compartment = self.get_compartment_by_qr(qr_code)
+        if subject_compartment is None:
+            return None
+        subject_storage = subject_compartment.storage
+        subject_article_id = subject_compartment.article.lio_id
+
+        subject_floor = subject_storage.floor
+        subject_building = subject_storage.building
+
+        compartments = (
+            self.storage_access.get_compartments_containing_article(
+                                                subject_article_id))
+        if compartments is None:
+            return None
+        else:
+            floor_neigh = False
+            building_neigh = False
+            storages_on_floor = {}
+            storages_in_building = {}
+            storages_elsewhere = {}
+            for compartment in compartments:
+                if (compartment.storage.floor == subject_floor):
+                    storages_on_floor[compartment.storage] = compartment
+                    floor_neigh = True
+                elif (compartment.storage.building == subject_building):
+                    storages_in_building[compartment.storage] = compartment
+                    building_neigh = True
+                else:
+                    storages_elsewhere[compartment.storage] = compartment
+            if floor_neigh:
+                return storages_on_floor
+            elif building_neigh:
+                return storages_in_building
+            else:
+                return storages_elsewhere

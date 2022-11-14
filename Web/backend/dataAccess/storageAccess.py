@@ -23,6 +23,11 @@ class StorageAccess():
             return storage
         except Exception:
             return None
+    
+    def get_compartments_containing_article(self, lio_id):
+        '''Get compartmens containing an article id.'''
+        compartments = Compartment.objects.filter(article=lio_id)
+        return compartments
 
     # TODO: This does not seem to do what it is supposed to do. Please review
     def set_compartment_amount(self, compartment_id: str, amount: int) -> int:
@@ -111,7 +116,7 @@ class StorageAccess():
         '''Changes a date of a transaction.'''
         try:
             Transaction.objects.filter(id=transaction_id).update(time_of_transaction=new_time_of_transaction)
-            transaction =  Transaction.objects.get(id=transaction_id)
+            transaction = Transaction.objects.get(id=transaction_id)
             return transaction
         except Exception:
             return None
@@ -131,8 +136,7 @@ class StorageAccess():
         except Exception:
             return None
 
-#  FR 9.4.1 och FR 9.4.2 ##
-
+# FR 9.4.1 och FR 9.4.2 ##
     def create_compartment(self, storage_id: str, placement: str,
                            qr_code) -> Compartment:
         '''Create new compartment.'''
