@@ -311,6 +311,8 @@ class StorageManagementService():
         storages are returned. If there are no other storages
         containing the article, None is returned.'''
         subject_compartment = self.get_compartment_by_qr(qr_code)
+        if subject_compartment is None:
+            return None
         subject_storage = subject_compartment.storage
         subject_article_id = subject_compartment.article.lio_id
 
