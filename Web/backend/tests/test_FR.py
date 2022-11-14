@@ -6,7 +6,6 @@ from backend.coremodels.group import GroupInfo
 from backend.coremodels.compartment import Compartment
 from backend.coremodels.cost_center import CostCenter
 from backend.coremodels.storage import Storage 
-from backend.coremodels.qr_code import QRCode
 from backend.coremodels.user_info import UserInfo
 from backend.services.articleManagementService import ArticleManagementService
 from backend.services.storageManagementService import StorageManagementService
@@ -211,6 +210,7 @@ class FR4_2_test(TestCase):
 
 
 #Testing transactions, user connected to cost centers, initiated cost centers, storage links to cost center and vice versa
+#and test of fr9.7 that all transaction of a user should be stored and accesasable
 class test_transaction_takeout_and_withdrawal(TestCase): 
     def setUp(self):
         #create 2 articles witha certain price and a cost center
@@ -218,6 +218,7 @@ class test_transaction_takeout_and_withdrawal(TestCase):
         self.article2 = Article.objects.create(lio_id="2", price = 30)
         self.article_management_service : ArticleManagementService = ArticleManagementService()
         self.storage_management_service : StorageManagementService = StorageManagementService()
+        self.order_service : UserService = UserService()
         cost_center1 = CostCenter.objects.create(id="123")
         self.Storage1 = Storage.objects.create(id="99", cost_center = cost_center1)
         
@@ -244,7 +245,7 @@ class test_transaction_takeout_and_withdrawal(TestCase):
                                                     time_of_transaction=
                                                     datetime.date(2000, 5, 15))   
         #takeout article 1; amount =1 i.e. +10
-        self.transaction1 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="1"),
+        self.transaction3 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="1"),
                                                     amount=1, operation=1, by_user = self.user2,
                                                     storage= self.storage_management_service.get_storage_by_id(id="99"),
                                                     time_of_transaction=
@@ -252,21 +253,21 @@ class test_transaction_takeout_and_withdrawal(TestCase):
 
         #transactions 2021    
         #replenish 12 of article 1 i.e. cost = -120                                 
-        self.transaction1 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="1"),
+        self.transaction4 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="1"),
                                                     amount=12, operation=3, by_user = self.user1,
                                                     storage= self.storage_management_service.get_storage_by_id(id="99"),
                                                     time_of_transaction=
                                                     datetime.date(2001, 8, 15))
 
         #takeout article 2, amount 5 i.e. cost =+150
-        self.transaction1 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="2"),
+        self.transaction5 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="2"),
                                                     amount=5, operation=1, by_user = self.user1,
                                                     storage= self.storage_management_service.get_storage_by_id(id="99"),
                                                     time_of_transaction=
                                                     datetime.date(2001, 8, 23))
 
         #return article 2, amount 4 i.e. cost =-120
-        self.transaction1 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="2"),
+        self.transaction6 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="2"),
                                                     amount=4, operation=2, by_user = self.user1,
                                                     storage= self.storage_management_service.get_storage_by_id(id="99"),
                                                     time_of_transaction=
@@ -283,8 +284,9 @@ class test_transaction_takeout_and_withdrawal(TestCase):
         #test time period of year 2001
         storage2_cost = self.storage_management_service.get_storage_cost("99", "2001-01-07","2001-12-07")
         self.assertEqual(storage2_cost, 30) #bör vara 30!! ändrade bara tillfälligt för att det ska funka. 
-
-       
+        print(self.user1)
+        transaction_user1 = self.order_service.get_all_transactions_by_user(self.user1)  
+        self.assertEqual(transaction_user1, [self.transaction1, self.transaction2, self.transaction4, self.transaction5, self.transaction6])    
 
 
 class FR11_1_Test(TestCase): 
@@ -347,5 +349,3 @@ class FR_5_7(TestCase):
         # When we don't have enough in the central
         # storage, the wait time is 14 days
         self.assertEqual(calculated_wait_time, 14)
-
-
