@@ -16,9 +16,7 @@ from backend.coremodels.ordered_article import OrderedArticle
 class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
-        fields = ('name', 'lio_id', 'description',
-                  'article_group', 'image', 'Z41', 'price',
-                  'alternative_articles')
+        fields = '__all__'
 
 
 class StorageSerializer(serializers.ModelSerializer):
@@ -56,16 +54,22 @@ class GroupSerializer(serializers.ModelSerializer):
 class OrderedArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderedArticle
-        fields = ('article')
+        fields = ('quantity', 'unit')
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    article = OrderedArticleSerializer(many=True, read_only=True)
 
     class Meta:
         model = Order
         fields = ['id', 'to_storage', 'order_date',
-                  'estimated_delivery_date', 'order_state', 'article']
+                  'estimated_delivery_date', 'order_state']
+
+    def create(self, validated_data):
+        ordered_articles_data = validated_data.pop('article')
+        order = Order.objects.create(**validated_data)
+        for ordered_article in ordered_articles_data:
+            OrderedArticle.objects.create(order=order, **ordered_article)
+        return order
 
 
 class TransactionSerializer(serializers.ModelSerializer):
