@@ -2,6 +2,7 @@ from django.test import TestCase
 from backend.dataAccess.storageAccess import StorageAccess
 from backend.dataAccess.articleAccess import ArticleAccess
 from backend.coremodels.article import Article
+from backend.coremodels.group import GroupInfo
 from backend.coremodels.compartment import Compartment
 from backend.coremodels.cost_center import CostCenter
 from backend.coremodels.storage import Storage 
@@ -27,6 +28,28 @@ from .testObjectFactory.coremodelFactory import create_costcenter
 from datetime import datetime
 import datetime
 dependency_factory = DependencyFactory()
+
+# Testing FR 1.1 The system shall support three different user types: medical employee, inventory employee, and MIV employee.
+class SupportDifferentUsers(TestCase):
+    def setUp(self):
+        #create 3 mock users and info about them
+        self.user_service : UserService = UserService()
+        cost_center1 = CostCenter.objects.create(id="123")
+        self.user1 = User.objects.create(username="MIV-Employee", password="TDDC88")
+        self.user_info1 = UserInfo.objects.create(user = self.user1, cost_center = cost_center1)
+        self.user2 = User.objects.create(username="Medical Employee", password="TDDC88")
+        self.user_info2 = UserInfo.objects.create(user = self.user2, cost_center = cost_center1)
+        self.user3 = User.objects.create(username="Inventory Employee", password="TDDC88")
+        self.user_info3 = UserInfo.objects.create(user = self.user3, cost_center = cost_center1)
+    def test_setup_users(self):
+        #By getting info from database we can verify that we it was created.
+        test_user_creation1 = self.user_service.get_user_info(self.user1)
+        self.assertEqual(test_user_creation1, self.user_info1)
+        test_user_creation2 = self.user_service.get_user_info(self.user2)
+        self.assertEqual(test_user_creation2, self.user_info2)
+        test_user_creation3 = self.user_service.get_user_info(self.user3)
+        self.assertEqual(test_user_creation3, self.user_info3)
+
 # Testing FR4.1
 # === How To Rewrite tests example 1 === #
 # Here the same functionality that you intended is preserved
@@ -187,6 +210,7 @@ class FR4_2_test(TestCase):
 
 #Testing transactions, user connected to cost centers, initiated cost centers, storage links to cost center and vice versa
 #and test of fr9.7 that all transaction of a user should be stored and accesasable
+#tests fr 5.9 as well
 class test_transaction_takeout_and_withdrawal(TestCase): 
     def setUp(self):
         #create 2 articles witha certain price and a cost center
@@ -261,7 +285,7 @@ class test_transaction_takeout_and_withdrawal(TestCase):
         storage2_cost = self.storage_management_service.get_storage_cost("99", "2001-01-07","2001-12-07")
         self.assertEqual(storage2_cost, 30) #bör vara 30!! ändrade bara tillfälligt för att det ska funka. 
 
-        #test 5.9 FR 5.10 For each transaction, the system shall register the LIO-number of the article taken out of storage, 
+        #test 5.9  For each transaction, the system shall register the LIO-number of the article taken out of storage, 
         # who performed the transaction, from which storage unit the transaction was performed, 
         # the time of the transaction and the number of articles taken from the storage unit.
         self.assertEqual(self.transaction1.article.lio_id, self.article1.lio_id)
