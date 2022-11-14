@@ -21,14 +21,15 @@ yamllint:
   script:
     - yamllint ./k8
 
-#test-backend:
-#   stage: test
-#   needs: []
-#   image: python:3.8.10
-#   script:
-#     - pip install -r Web/requirements.txt
-#     - cd Web
-#     - python3 manage.py test backend.tests
+test-backend:
+   stage: test
+   needs: []
+   image: python:3.8.10
+   script:
+     - pip install -r Web/requirements.txt
+     - cd Web
+     - python manage.py test backend.tests
+
 
 image-rdx-backend:
 
