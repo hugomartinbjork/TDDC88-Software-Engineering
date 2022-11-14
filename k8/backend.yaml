@@ -1,0 +1,103 @@
+# yamllint disable rule:line-length
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rdx-backend-app-deployment
+  labels:
+    app: rdx-backend-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rdx-backend-app
+
+  template:
+    metadata:
+      labels:
+        app: rdx-backend-app
+
+    spec:
+
+      imagePullSecrets:
+        - name: liu-gitlab-regcred
+
+      containers:
+        - name: rdx
+          image: gitlab.liu.se:5000/tddc88-2022/c4/rdx-solutions-backend-project/rdx-backend:latest
+          envFrom:
+            - secretRef:
+                name: rdx-k8-web-prod-env
+          env:
+            - name: PORT
+              value: "8000"
+
+          ports:
+            - name: web
+              containerPort: 8000
+              protocol: TCP
+          resources:
+            limits:
+              cpu: 100m
+              memory: 150Mi
+            requests:
+              cpu: 10m
+              memory: 42Mi
+
+          # readinessProbe:
+          #  httpGet:
+          #   port: web
+          #  path: "/api/ready"
+          # livenessProbe:
+          #  httpGet:
+            #  port: web
+             # path: "/api/health"
+          #  port: web
+          # path: "/api/health"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: rdx-backend-app
+  name: rdx-backend-app-service
+spec:
+  type: ClusterIP
+  ports:
+    - name: web
+      protocol: TCP
+      targetPort: 8000
+      port: 80
+  selector:
+    app: rdx-backend-app
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rdx-backend-app-ingress
+spec:
+  ingressClassName: nginx-public
+  rules:
+
+    - host: rdx.kubernetes-public.it.liu.se
+
+      http:
+        paths:
+          - path: /api/
+            pathType: Prefix
+            backend:
+              service:
+                name: rdx-backend-app-service
+                port:
+                  number: 80
+          - path: /admin/
+            pathType: Prefix
+            backend:
+              service:
+                name: rdx-backend-app-service
+                port:
+                  number: 80
+
+---

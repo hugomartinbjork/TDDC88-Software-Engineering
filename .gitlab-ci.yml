@@ -1,0 +1,101 @@
+# yamllint disable rule:line-length
+---
+stages:
+  - lint
+  - build
+  - image
+  - test
+  - deploy
+
+variables:
+  _BUILDAH_STARTED_IN_USERNS: ""
+  BUILDAH_ISOLATION: chroot
+  STORAGE_DRIVER: vfs
+  BUILDAH_FORMAT: docker
+
+yamllint:
+  stage: lint
+  needs: []
+  image: pipelinecomponents/yamllint
+  allow_failure: false
+  script:
+    - yamllint ./k8
+
+test-backend:
+   stage: test
+   needs: []
+   image: python:3.8.10
+   script:
+     - pip install -r Web/requirements.txt
+     - cd Web
+     - python manage.py test backend.tests
+
+
+image-rdx-backend:
+
+  stage: image
+  image: docker.io/buildah/buildah
+  only:
+     - main
+  needs: []
+
+
+  script:
+    - cd Web
+    - export DIR= "Web"
+    - export NAME="rdx-backend"
+
+    - buildah build-using-dockerfile --tag "${NAME}" "${DIR}"
+    - buildah push --creds "${CI_REGISTRY_USER}:${CI_JOB_TOKEN}" "${NAME}" "docker://${CI_REGISTRY_IMAGE}/${NAME}:latest" && exit 0 || true
+    - buildah push --creds "${CI_REGISTRY_USER}:${CI_JOB_TOKEN}" "${NAME}" "docker://${CI_REGISTRY_IMAGE}/${NAME}:latest"
+
+
+
+
+deploy-test-k8s-connection:
+  stage: deploy
+  image: bitnami/kubectl
+  needs: []
+  only:
+    - main
+  script:
+    - kubectl get all
+deploy-k8s-regcred:
+  stage: deploy
+  image: bitnami/kubectl
+  needs:
+    - deploy-test-k8s-connection
+  only:
+    - main
+  script:
+    - kubectl get secrets | grep liu-gitlab-regcred && exit 0
+    - kubectl create secret docker-registry liu-gitlab-regcred --docker-server=https://gitlab.liu.se:5000 --docker-username=k8s --docker-password=${REGISTRY_PASSWORD}
+    - kubectl get secret liu-gitlab-regcred
+
+deploy-rdx-backend:
+  stage: deploy
+  image: bitnami/kubectl
+
+  only:
+    - main
+
+  needs:
+    - deploy-test-k8s-connection
+    - deploy-k8s-regcred
+    - image-rdx-backend
+    - yamllint
+  script:
+    - kubectl apply -f k8/backend.yaml
+    - kubectl rollout restart deployment rdx-backend-app-deployment
+
+
+deploy-postgres:
+  stage: deploy
+  image: bitnami/kubectl
+  only:
+  - main
+  script:
+   - kubectl get all
+   - kubectl apply -f k8/postgres.yaml
+   - sleep 5
+   - kubectl get all
