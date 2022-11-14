@@ -120,11 +120,22 @@ class Storage(View):
             storage = (
                 self.storage_management_service.get_storage_by_id(
                     storage_id))
+            
+            compartments  = self.storage_management_service.get_compartment_by_storage_id(storage_id)
+            print(compartments)
+            data = {}
+            data['id'] = storage.id
+            data['location'] = {'building': storage.building,
+                                'floor': storage.floor}
+            serialized_compartments = []
+            for compartment in compartments:
+                serialized_compartments.append(CompartmentSerializer(compartment).data)
+            data['compartments'] = serialized_compartments
             if storage is None:
                 raise Http404("Could not find storage")
-            serializer = StorageSerializer(storage)
-            if serializer.is_valid:
-                return JsonResponse(serializer.data, status=200)
+            #serializer = StorageSerializer(storage)
+            #if serializer.is_valid:
+            return JsonResponse(data, status=200, safe=False)
             return HttpResponseBadRequest
 
 
