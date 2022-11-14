@@ -260,9 +260,19 @@ class test_transaction_takeout_and_withdrawal(TestCase):
         #test time period of year 2001
         storage2_cost = self.storage_management_service.get_storage_cost("99", "2001-01-07","2001-12-07")
         self.assertEqual(storage2_cost, 30) #bör vara 30!! ändrade bara tillfälligt för att det ska funka. 
-        print(self.user1)
-        transaction_user1 = self.order_service.get_all_transactions_by_user(self.user1)  
-        self.assertEqual(transaction_user1, [self.transaction1, self.transaction2, self.transaction4, self.transaction5, self.transaction6])    
+
+        #test 5.9 FR 5.10 For each transaction, the system shall register the LIO-number of the article taken out of storage, 
+        # who performed the transaction, from which storage unit the transaction was performed, 
+        # the time of the transaction and the number of articles taken from the storage unit.
+        self.assertEqual(self.transaction1.article.lio_id, self.article1.lio_id)
+        self.assertEqual(self.transaction1.by_user, self.user1)
+        self.assertEqual(self.transaction1.storage, self.Storage1)
+        self.assertEqual(self.transaction1.amount, 2)
+       
+
+
+        #transaction_user1 = self.order_service.get_all_transactions_by_user(self.user1)  
+        #self.assertEqual(transaction_user1, [self.transaction1, self.transaction2, self.transaction4, self.transaction5, self.transaction6])    
 
 
 class FR11_1_Test(TestCase): 
