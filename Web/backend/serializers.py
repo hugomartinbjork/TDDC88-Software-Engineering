@@ -3,6 +3,7 @@ from unittest import mock
 from rest_framework import serializers
 
 from backend.coremodels.alternative_article_name import AlternativeArticleName
+from backend.coremodels.article_has_supplier import ArticleHasSupplier
 from backend.coremodels.cost_center import CostCenter
 from backend.coremodels.article import Article
 from backend.coremodels.article import GroupInfo
@@ -42,11 +43,12 @@ class CompartmentSerializer(serializers.ModelSerializer):
                   'order_point', 'standard_order_amount',
                   'maximal_capacity', 'amount')
 
+
 class StorageSerializer(serializers.ModelSerializer):
     ''' compartments = storageManagemetnServisce(storage.id)'''
     class Meta:
         model = Storage
-        fields = ('id','building', 'floor')
+        fields = ('id', 'building', 'floor')
 
 
 class GroupSerializer(serializers.ModelSerializer):
@@ -92,3 +94,78 @@ class AlternativeNameSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = Storage,Compartment
 #         field
+
+
+class UnitsSerializer(serializers.ModelSerializer):
+    outputPerInput = serializers.IntegerField(source='output_per_input')
+
+    class Meta:
+        model = Article
+        fields = ('output', 'input', 'outputPerInput')
+
+
+class ArticleSupplierSerializer(serializers.ModelSerializer):
+    supplierName = serializers.CharField(
+        source='article_supplier.name', read_only=True)
+    supplierArticleNr = serializers.CharField(
+        source='supplier_article_nr', read_only=True)
+
+    class Meta:
+        model = ArticleHasSupplier
+        fields = ('supplierName', 'supplierArticleNr')
+
+
+class ApiArticleSerializer(serializers.ModelSerializer):
+    units = serializers.SerializerMethodField('get_units')
+    alternativeNames = AlternativeNameSerializer(
+        source='alternativearticlename_set', read_only=True, many=True)
+    suppliers = ArticleSupplierSerializer(
+        source='articlehassupplier_set', read_only=True, many=True)
+    alternativeProducts = serializers.PrimaryKeyRelatedField(
+        source='alternative_articles', read_only=True, many=True)
+
+    class Meta:
+        model = Article
+        fields = ('name', 'price', 'Z41', 'units', 'alternativeNames',
+                  'suppliers', 'alternativeProducts')
+
+    def get_units(self, object):
+        return UnitsSerializer(object).data
+
+
+class LocationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Storage
+        fields = ('floor', 'building')
+
+
+class ApiCompartmentSerializer(serializers.ModelSerializer):
+    article = ApiArticleSerializer(read_only=True)
+    quantity = serializers.CharField(source='amount', read_only=True)
+    qrCode = serializers.CharField(source='id', read_only=True)
+    normalOrderQuantity = serializers.IntegerField(
+        source='standard_order_amount')
+    orderQuantityLevel = serializers.IntegerField(
+        source='order_point', read_only=True)
+    storageId = serializers.PrimaryKeyRelatedField(
+        source='storage.id', read_only=True)
+
+    class Meta:
+        model = Compartment
+        fields = ('article', 'quantity', 'qrCode', 'normalOrderQuantity',
+                  'orderQuantityLevel', 'storageId', 'placement')
+
+
+class NearbyStoragesSerializer(serializers.ModelSerializer):
+
+    id = serializers.PrimaryKeyRelatedField(
+        source='storage.id', read_only=True)
+    location = LocationSerializer(source='storage', read_only=True)
+    compartment = serializers.SerializerMethodField('get_self_reference')
+
+    class Meta:
+        model = Compartment
+        fields = ('id', 'location', 'compartment')
+
+    def get_self_reference(self, object):
+        return ApiCompartmentSerializer(object).data

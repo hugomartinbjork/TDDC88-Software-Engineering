@@ -96,3 +96,5 @@
 #         economyresult = self.storage_service.get_storage_cost(
 #                                 "", "2000-06-15", "2000-08-15")
 #         self.assertAlmostEquals(economyresult, 40)
+
+
