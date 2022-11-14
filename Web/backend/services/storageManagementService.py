@@ -36,6 +36,11 @@ class StorageManagementService():
     def get_compartment_by_article(self, article: Article) -> Compartment:
         '''Returns storage space using article.'''
         return self.storage_access.get_compartment_by_id(id)
+    
+    def get_compartment_by_storage_id(self, id:str) -> int:
+        '''Returns compartments with storage_id.'''
+        return self.storage_access.get_compartments_by_storage(
+            storage_id=id)
 
     def set_storage(self, id: str, amount: int) -> int:
         '''Set storage value. Returns amount.'''
