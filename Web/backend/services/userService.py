@@ -33,7 +33,7 @@ class UserService(BaseBackend):
                         status=status.HTTP_200_OK)
 
     def get_all_transactions_by_user(self, current_user) -> dict:
-        '''Return every transaction mabe by user.'''
+        '''Return every transaction made by user.'''
         user_convert = list(current_user)
         all_transactions = Transaction.objects.filter(
             by_user=user_convert[0]).all().values()

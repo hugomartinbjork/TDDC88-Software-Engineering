@@ -1,23 +1,19 @@
 from django.contrib import admin
+from django.contrib.auth.models import Group
+from django.contrib.auth.models import User
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from backend.coremodels.alternative_article_name import AlternativeArticleName
-from backend.coremodels.inputOutput import InputOutput
 from backend.coremodels.article import Article
 from backend.coremodels.centralStorageSpace import CentralStorageSpace
 from backend.coremodels.storage import Storage
-# from backend.coremodels.storageComponent import storage
 from backend.coremodels.cost_center import CostCenter
-from backend.coremodels.user_info import UserInfo
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.contrib.auth.models import User
-from backend.coremodels.article import GroupInfo
-from django.contrib.auth.models import Group
-from backend.coremodels.qr_code import QRCode
 from backend.coremodels.compartment import Compartment
 from backend.coremodels.article_has_supplier import ArticleHasSupplier
 from backend.coremodels.supplier import Supplier
 from backend.coremodels.transaction import Transaction
 from backend.coremodels.order import Order
-from django.utils.html import format_html
+from backend.coremodels.user_info import UserInfo
+from backend.coremodels.article import GroupInfo
 
 
 # Register your models here.
@@ -93,7 +89,6 @@ class StorageAdmin(admin.ModelAdmin):
 
 
 # Display QRCode in Backend
-admin.site.register(QRCode)
 admin.site.register(Storage, StorageAdmin)
 
 admin.site.register(Order)
@@ -109,5 +104,3 @@ class TransactioInline(admin.TabularInline):
 
 
 admin.site.register(Transaction)
-
-admin.site.register(InputOutput)

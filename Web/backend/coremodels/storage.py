@@ -12,5 +12,12 @@ class Storage(models.Model):
     cost_center = models.ForeignKey(
         CostCenter,  on_delete=models.CASCADE, null=True)
 
+
+    class Meta:
+        permissions = (("get_storage", "Can get storages from database"),
+        ("post_storage", "Can create a storage"),
+        ("put_storage", "Can edit a storage"),
+        ("delete_storage_new", "Can delete a storage"),)
+
     def __str__(self):
         return self.name
