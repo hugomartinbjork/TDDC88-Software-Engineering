@@ -151,10 +151,9 @@ class Compartments(APIView):
     def post(self, request):
         '''Post compartment.'''
         if request.method == 'POST':
-            json_body = request.POST
-            storage_id = json_body['storage_id']
-            placement = json_body['placement']
-            qr_code = json_body['qr_code']
+            storage_id = request.data.get("storageId")
+            placement = request.data.get("placement")
+            qr_code = request.data.get("qrCode")
             compartment = self.storage_management_service.create_compartment(
                 storage_id, placement, qr_code
             )
