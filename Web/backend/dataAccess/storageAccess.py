@@ -19,7 +19,6 @@ class StorageAccess():
     def get_storage(self, id: str) -> Storage:
         '''Returns storage from id.'''
         try:
-            print(id)
             storage = Storage.objects.get(id=id)
             return storage
         except Exception:
