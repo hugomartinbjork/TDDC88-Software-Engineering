@@ -24,10 +24,6 @@ from ..dataAccess.orderAccess import OrderAccess
 # from datetime import datetime
 # import datetime
 
-# Testing FR 5.7 
-# Desc: The system shall display the estimated time of arrival of articles not in stock
-
-
 # #Testing FR4.4
 # # Desc: An article shall consist of an article group, article description, alternative article description, LIO-number, article text,
 # #       supplier, supplier article number, order procedure, picture link, standard cost, minimal order quantity, 
