@@ -43,11 +43,10 @@ class CompartmentSerializer(serializers.ModelSerializer):
                   'maximal_capacity', 'amount')
 
 class StorageSerializer(serializers.ModelSerializer):
-    
-
+    ''' compartments = storageManagemetnServisce(storage.id)'''
     class Meta:
         model = Storage
-        fields = ('id','building', 'floor', 'tracks')
+        fields = ('id','building', 'floor')
 
 
 class GroupSerializer(serializers.ModelSerializer):
