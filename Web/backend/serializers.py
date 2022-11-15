@@ -1,6 +1,9 @@
+from dataclasses import field
+from unittest import mock
 from rest_framework import serializers
 
 from backend.coremodels.alternative_article_name import AlternativeArticleName
+from backend.coremodels.article_has_supplier import ArticleHasSupplier
 from backend.coremodels.cost_center import CostCenter
 from backend.coremodels.article import Article
 from backend.coremodels.article import GroupInfo
@@ -16,15 +19,7 @@ from backend.coremodels.inputOutput import InputOutput
 class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
-        fields = ('name', 'lio_id', 'description',
-                  'article_group', 'image', 'Z41', 'price',
-                  'alternative_articles')
-
-
-class StorageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Storage
-        fields = ('name',)
+        fields = '__all__'
 
 
 class CostCenterSerializer(serializers.ModelSerializer):
@@ -40,11 +35,20 @@ class UserInfoSerializer(serializers.ModelSerializer):
 
 
 class CompartmentSerializer(serializers.ModelSerializer):
+    article = ArticleSerializer(many=False, read_only=True)
+
     class Meta:
         model = Compartment
         fields = ('id', 'storage', 'article',
                   'order_point', 'standard_order_amount',
                   'maximal_capacity', 'amount')
+
+
+class StorageSerializer(serializers.ModelSerializer):
+    ''' compartments = storageManagemetnServisce(storage.id)'''
+    class Meta:
+        model = Storage
+        fields = ('id', 'building', 'floor')
 
 
 class GroupSerializer(serializers.ModelSerializer):
@@ -56,16 +60,22 @@ class GroupSerializer(serializers.ModelSerializer):
 class OrderedArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderedArticle
-        fields = ('article')
+        fields = ('quantity', 'unit')
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    article = OrderedArticleSerializer(many=True, read_only=True)
 
     class Meta:
         model = Order
         fields = ['id', 'to_storage', 'order_date',
-                  'estimated_delivery_date', 'order_state', 'article']
+                  'estimated_delivery_date', 'order_state']
+
+    def create(self, validated_data):
+        ordered_articles_data = validated_data.pop('article')
+        order = Order.objects.create(**validated_data)
+        for ordered_article in ordered_articles_data:
+            OrderedArticle.objects.create(order=order, **ordered_article)
+        return order
 
 
 class TransactionSerializer(serializers.ModelSerializer):
@@ -80,37 +90,83 @@ class AlternativeNameSerializer(serializers.ModelSerializer):
         model = AlternativeArticleName
         fields = ('name',)
 
-
-class UpdateInputOutoutSerializer(serializers.ModelSerializer):
-
-    input = serializers.CharField(source="input_unit_name")
-    output = serializers.CharField(source="output_unit_name")
-    outputPerInput = serializers.IntegerField(source="output_unit_per_input_unit")
-
-    class Meta:
-        model = InputOutput
-        fields = ('input', 'output', 'outputPerInput',)
+# class MultiStorageSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Storage,Compartment
+#         field
 
 
-class UpdateArticleSerializer(serializers.ModelSerializer):
-    input_output = UpdateInputOutoutSerializer()
-    #units = serializers.CharField(source="input_output")
+class UnitsSerializer(serializers.ModelSerializer):
+    outputPerInput = serializers.IntegerField(source='output_per_input')
 
     class Meta:
         model = Article
-        fields = ('input_output', 'price', 'name', 'lio_id', 'alternative_articles', 'Z41',)
+        fields = ('output', 'input', 'outputPerInput')
 
 
-#Class for serializing data in ArticleToCompartmentByQRcode view
-class UpdateCompartmentSerializer(serializers.ModelSerializer):
-    #article = UpdateArticleSerializer()
+class ArticleSupplierSerializer(serializers.ModelSerializer):
+    supplierName = serializers.CharField(
+        source='article_supplier.name', read_only=True)
+    supplierArticleNr = serializers.CharField(
+        source='supplier_article_nr', read_only=True)
 
-    storageId = serializers.CharField(source="storage")
-    qrCode = serializers.CharField(source="id")
-    quantity = serializers.IntegerField(source="amount")
-    normalOrderQuantity = serializers.IntegerField(source="standard_order_amount")
-    orderQuantityLevel = serializers.IntegerField(source="order_point")
+    class Meta:
+        model = ArticleHasSupplier
+        fields = ('supplierName', 'supplierArticleNr')
+
+
+class ApiArticleSerializer(serializers.ModelSerializer):
+    units = serializers.SerializerMethodField('get_units')
+    alternativeNames = AlternativeNameSerializer(
+        source='alternativearticlename_set', read_only=True, many=True)
+    suppliers = ArticleSupplierSerializer(
+        source='articlehassupplier_set', read_only=True, many=True)
+    alternativeProducts = serializers.PrimaryKeyRelatedField(
+        source='alternative_articles', read_only=True, many=True)
+    lioNr = serializers.CharField(
+        source='lio_id', read_only=True)
+
+    class Meta:
+        model = Article
+        fields = ('units', 'price', 'suppliers', 'name', 'alternativeNames', 'lioNr', 'alternativeProducts', 'Z41')
+
+    def get_units(self, object):
+        return UnitsSerializer(object).data
+
+
+class LocationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Storage
+        fields = ('floor', 'building')
+
+
+class ApiCompartmentSerializer(serializers.ModelSerializer):
+    article = ApiArticleSerializer(read_only=True)
+    quantity = serializers.CharField(source='amount', read_only=True)
+    qrCode = serializers.CharField(source='id', read_only=True)
+    normalOrderQuantity = serializers.IntegerField(
+        source='standard_order_amount')
+    orderQuantityLevel = serializers.IntegerField(
+        source='order_point', read_only=True)
+    storageId = serializers.PrimaryKeyRelatedField(
+        source='storage.id', read_only=True)
 
     class Meta:
         model = Compartment
-        fields = ('placement', 'storageId', 'qrCode', 'quantity', 'normalOrderQuantity', 'orderQuantityLevel', 'article')
+        fields = ('placement', 'storageId', 'qrCode', 'quantity', 'normalOrderQuantity',
+                  'orderQuantityLevel', 'article')
+
+
+class NearbyStoragesSerializer(serializers.ModelSerializer):
+
+    id = serializers.PrimaryKeyRelatedField(
+        source='storage.id', read_only=True)
+    location = LocationSerializer(source='storage', read_only=True)
+    compartment = serializers.SerializerMethodField('get_self_reference')
+
+    class Meta:
+        model = Compartment
+        fields = ('id', 'location', 'compartment')
+
+    def get_self_reference(self, object):
+        return ApiCompartmentSerializer(object).data

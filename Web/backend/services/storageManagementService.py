@@ -1,5 +1,6 @@
 # from requests import request
 # from Web.backend.views.views import Compartment
+from math import floor
 from backend.dataAccess.orderAccess import OrderAccess
 from backend.dataAccess.storageAccess import StorageAccess
 from backend.dataAccess.userAccess import UserAccess
@@ -36,6 +37,11 @@ class StorageManagementService():
     def get_compartment_by_article(self, article: Article) -> Compartment:
         '''Returns storage space using article.'''
         return self.storage_access.get_compartment_by_id(id)
+    
+    def get_compartment_by_storage_id(self, id:str) -> int:
+        '''Returns compartments with storage_id.'''
+        return self.storage_access.get_compartments_by_storage(
+            storage_id=id)
 
     def get_stock(self, id: str, article_id: str) -> int:
         '''Return stock.'''
@@ -114,28 +120,6 @@ class StorageManagementService():
     def get_storage_by_costcenter(self, cost_center: str) -> Storage:
         '''Get storage using cost-center.'''
         return self.storage_access.get_storage_by_costcenter(cost_center)
-
-    def set_storage(self, id: str, amount: int) -> int:
-        '''Set storage value. Returns amount.'''
-        return self.storage_access.set_storage_amount(compartment_id=id,
-                                                      amount=amount)
-
-    def set_article(self, current_compartment: Compartment, new_article: Article):
-        '''Sets article in compartment.'''
-        self.storage_access.set_article(current_compartment, new_article)
-    
-    def set_amount(self, current_compartment: Compartment, new_amount: int):
-        '''Sets amount in compartment.'''
-        self.storage_access.set_amount(current_compartment, new_amount)
-        
-    def set_standard_order_amount(self, current_compartment: Compartment, new_std_order_amount: int):
-        '''Sets amount in compartment.'''
-        self.storage_access.set_standard_order_amount(current_compartment, new_std_order_amount)
-
-    def set_order_point(self, current_compartment: Compartment, new_order_point: int):
-        '''Sets amount in compartment.'''
-        self.storage_access.set_order_point(current_compartment, new_order_point)
-
 
 # FR 10.1.3 #
 # alltid takeout/takein
@@ -311,3 +295,56 @@ class StorageManagementService():
         return compartment
 
     # FR 9.4.1 och FR 9.4.2 ##
+
+    # 25.2.1
+    def get_nearby_storages(self, qr_code: str) -> Compartment:
+        '''Returns nearby storages containing the
+        article which is contained in the compartment which 
+        the qr_code points to. If there are no nearby storages on
+        the same floor, nearby storages in the building is
+        returned. If there are none in the building, other 
+        storages are returned. If there are no other storages
+        containing the article, None is returned.'''
+        subject_compartment = self.get_compartment_by_qr(qr_code)
+        if subject_compartment is None:
+            return None
+        subject_storage = subject_compartment.storage
+        subject_article_id = subject_compartment.article.lio_id
+
+        subject_floor = subject_storage.floor
+        subject_building = subject_storage.building
+
+        compartments = (
+            self.storage_access.get_compartments_containing_article(
+                                                subject_article_id))
+        if compartments is None:
+            return None
+        else:
+            floor_neigh = False
+            building_neigh = False
+            storages_on_floor = {}
+            storages_in_building = {}
+            storages_elsewhere = {}
+            for compartment in compartments:
+                if (compartment.storage.floor == subject_floor):
+                    storages_on_floor[compartment.storage] = compartment
+                    floor_neigh = True
+                elif (compartment.storage.building == subject_building):
+                    storages_in_building[compartment.storage] = compartment
+                    building_neigh = True
+                else:
+                    storages_elsewhere[compartment.storage] = compartment
+            if floor_neigh:
+                return storages_on_floor
+            elif building_neigh:
+                return storages_in_building
+            else:
+                return storages_elsewhere
+
+    def update_compartment(self, current_compartment: Compartment, new_article: Article, new_amount: int, new_std_order_amount: int, new_order_point: int):
+        '''Updates attributes in compartment.'''
+
+        self.storage_access.set_article(current_compartment, new_article)
+        self.storage_access.set_amount(current_compartment, new_amount)
+        self.storage_access.set_standard_order_amount(current_compartment, new_std_order_amount)
+        self.storage_access.set_order_point(current_compartment, new_order_point)
