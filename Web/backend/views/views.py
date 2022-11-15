@@ -844,3 +844,32 @@ class SearchForArticleInStorages(View):
                     data2.append(article)
 
             return JsonResponse(data2, safe=False, status=200)
+
+
+class getEconomy(APIView):
+    '''Returns the total value in storage, and the average turnover rate'''
+    @si.inject
+    def __init__(self, _deps, *args):
+        storage_management_service = _deps['StorageManagementService']
+        self.storage_management_service: StorageManagementService = (
+            storage_management_service())
+
+    def get(self, request, storage_id):
+        '''Takes the storage_id from the url'''
+        storage = self.storage_management_service.get_storage_by_id(
+            storage_id)
+        if storage is None:
+            raise Http404("Could not find storage")
+        else:
+            start_date = '2022-01-01'
+            end_date = '2022-12-31'
+            '''Below is not an average value, but the current value right now since 
+            get_storage_value doesn't take transactions into account'''
+            value = self.storage_management_service.get_storage_value(
+                storage_id)
+            cost = self.storage_management_service.get_storage_cost(
+                storage_id, start_date, end_date)
+            data = {}
+            data["totalValue"] = value
+            data["averageTurnoverRate"] = int((value/cost)*365)
+            return JsonResponse(data, safe=False, status=200)
