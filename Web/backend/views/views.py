@@ -121,21 +121,22 @@ class Storage(View):
             storage = (
                 self.storage_management_service.get_storage_by_id(
                     storage_id))
-            
-            compartments  = self.storage_management_service.get_compartment_by_storage_id(storage_id)
-            print(compartments)
+
+            compartments = self.storage_management_service.get_compartment_by_storage_id(
+                storage_id)
             data = {}
             data['id'] = storage.id
             data['location'] = {'building': storage.building,
                                 'floor': storage.floor}
             serialized_compartments = []
             for compartment in compartments:
-                serialized_compartments.append(CompartmentSerializer(compartment).data)
+                serialized_compartments.append(
+                    CompartmentSerializer(compartment).data)
             data['compartments'] = serialized_compartments
             if storage is None:
                 raise Http404("Could not find storage")
             #serializer = StorageSerializer(storage)
-            #if serializer.is_valid:
+            # if serializer.is_valid:
             return JsonResponse(data, status=200, safe=False)
             return HttpResponseBadRequest
 
@@ -171,7 +172,6 @@ class NearbyStorages(View):
             if valid:
                 return JsonResponse(list(serializer), status=200, safe=False)
             return HttpResponseBadRequest
-
 
 
 class Compartments(View):
@@ -407,7 +407,25 @@ class SeeAllStorages(View):
             if all_storages is None:
                 raise Http404("Could not find any storage units")
             else:
-                return JsonResponse(list(all_storages), safe=False, status=200)
+                serialized_storages = []
+                for storage in all_storages:
+                    data = {}
+                    data['id'] = storage["id"]
+                    data['location'] = {'building': storage["building"],
+                                        'floor': storage["floor"]}
+                    compartments = self.storage_management_service.get_compartment_by_storage_id(
+                        storage["id"])
+                    serialized_compartments = []
+                    for compartment in compartments:
+                        serialized_compartments.append(
+                            CompartmentSerializer(compartment).data)
+                    data['compartments'] = serialized_compartments
+                    serialized_storages.append(data)
+
+                print(serialized_storages)
+                return JsonResponse(serialized_storages, status=200, safe=False)
+
+            # return JsonResponse(list(all_storages), safe=False, status=200)
 
 
 class AddInputUnit(View):
@@ -426,12 +444,12 @@ class AddInputUnit(View):
             if compartment is None:
                 return Http404("Could not find storage space")
             StorageManagementService.add_to_storage(self=self,
-                                                  id=compartment_id,
-                                                  amount=amount,
-                                                  username=user.username,
-                                                  add_output_unit=False,
-                                                  time_of_transaction=(
-                                                      time_of_transaction))
+                                                    id=compartment_id,
+                                                    amount=amount,
+                                                    username=user.username,
+                                                    add_output_unit=False,
+                                                    time_of_transaction=(
+                                                        time_of_transaction))
             return HttpResponse(status=200)
 
 # AddOutputUnit is used to add articles to the storage space in
@@ -453,16 +471,16 @@ class GetUserTransactions(View):
 
         if current_user is not None:
             all_transactions_by_user = (
-            self.user_service.get_all_transactions_by_user(
-                current_user=current_user))
+                self.user_service.get_all_transactions_by_user(
+                    current_user=current_user))
 
             if all_transactions_by_user is not None:
                 return JsonResponse(list(all_transactions_by_user),
-                                    safe=False, status=200) 
-            else:  #Exception
+                                    safe=False, status=200)
+            else:  # Exception
                 return Response({'error': 'Could not find any transactions'},
                                 status=status.HTTP_404_NOT_FOUND)
-        else:  #Exception
+        else:  # Exception
             return Response({'error': 'Could not find user'},
                             status=status.HTTP_404_NOT_FOUND)
 
@@ -483,13 +501,13 @@ class ReturnUnit(View):
             if compartment is None:
                 return Http404("Could not find storage space")
             StorageManagementService.add_to_return_storage(
-                                                        self=self,
-                                                        id=compartment_id,
-                                                        amount=amount,
-                                                        username=user.username,
-                                                        add_output_unit=True,
-                                                        time_of_transaction=(
-                                                            time_of_transaction))
+                self=self,
+                id=compartment_id,
+                amount=amount,
+                username=user.username,
+                add_output_unit=True,
+                time_of_transaction=(
+                    time_of_transaction))
             return HttpResponse(status=200)
 
 
@@ -498,7 +516,8 @@ class Transactions(APIView):
     @si.inject
     def __init__(self, _deps):
         self.user_service: UserService = _deps['UserService']()
-        self.storage_management_service: StorageManagementService = (_deps['StorageManagementService']())
+        self.storage_management_service: StorageManagementService = (
+            _deps['StorageManagementService']())
 
     def get(self, request):
         '''Get all transactions.'''
@@ -512,7 +531,8 @@ class Transactions(APIView):
 
     def post(self, request):
         '''Description needed.'''
-        compartment = self.storage_management_service.get_compartment_by_qr(qr_code=request.data.get("qrCode"))
+        compartment = self.storage_management_service.get_compartment_by_qr(
+            qr_code=request.data.get("qrCode"))
         if compartment is None:
             return Response({'error': 'Could not find compartment'},
                             status=status.HTTP_400_BAD_REQUEST)
@@ -568,6 +588,7 @@ class Transactions(APIView):
                 return JsonResponse(TransactionSerializer(transaction).data,
                                     status=200)
 
+
 class TransactionsById(APIView):
     '''Get transaction by ID view.'''
     @si.inject
@@ -597,7 +618,7 @@ class TransactionsById(APIView):
             raise Http404("Could not find the transaction")
         else:
             return JsonResponse(TransactionSerializer(transaction).data, safe=False, status=200)
-    
+
 
 class GetStorageValue(View):
     '''Get storage value view.'''
