@@ -20,7 +20,7 @@ class Article(models.Model):
     alternative_articles = models.ManyToManyField('self', blank=True)
 
     class Meta:
-        permissions = (("get_article", "Can get articles from database"),
+        permissions = (
         ("post_article", "Can create an article"),
         ("put_article", "Can edit an article"),
         ("delete_article_new", "Can delete an article"),)

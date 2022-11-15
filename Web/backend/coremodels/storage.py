@@ -14,8 +14,8 @@ class Storage(models.Model):
 
 
     class Meta:
-        permissions = (("get_storage", "Can get storages from database"),
-        ("post_storage", "Can create a storage"),
+        permissions = (("get_storage_cost", "Can see storage cost"),
+        ("get_storage_value", "Can see storage value"),
         ("put_storage", "Can edit a storage"),
         ("delete_storage_new", "Can delete a storage"),)
 

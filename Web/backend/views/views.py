@@ -379,6 +379,8 @@ class ReturnUnit(View):
 
     def post(self, request, compartment_id, amount, time_of_transaction=now):
         '''Post return to storage.'''
+        if not request.user.has_perm('backend.return_unit'):
+                raise PermissionDenied
         compartment = StorageManagementService.get_compartment_by_id(
             self=self, id=compartment_id)
         user = request.user
@@ -406,6 +408,7 @@ class Transactions(APIView):
     def get(self, request):
         '''Get all transactions.'''
         if request.method == 'GET':
+            #Custom permission to be able to see all transactions. Can be found in the coremodel transaction.py
             if not request.user.has_perm('backend.get_all_transaction'):
                 raise PermissionDenied
             all_transactions = (
@@ -417,6 +420,7 @@ class Transactions(APIView):
 
     def post(self, request):
         '''Description needed.'''
+        #Can create transactions if the user has permission
         if not request.user.has_perm('backend.add_transaction'):
                 raise PermissionDenied
         compartment = self.storage_management_service.get_compartment_by_qr(qr_code=request.data.get("qrCode"))
@@ -486,6 +490,7 @@ class TransactionsById(APIView):
     def get(self, request, transaction_id):
         '''Get transaction.'''
         if request.method == 'GET':
+            #Custom permission to be able to get transactiopns by id. Can be found in the coremodel transaction.py
             if not request.user.has_perm('backend.get_transaction_by_id'):
                 raise PermissionDenied
             transaction = (
@@ -498,7 +503,8 @@ class TransactionsById(APIView):
     def put(self, request, transaction_id):
         '''Put transaction.'''
         if request.method == 'PUT':
-            if not request.user.has_perm('backend.put_transaction'):
+            #Can only change a transaction if they have the permission
+            if not request.user.has_perm('backend.change_transaction'):
                 raise PermissionDenied
             new_time_of_transaction = request.data.get("time_of_transaction")
             transaction = (
@@ -521,7 +527,8 @@ class GetStorageValue(View):
     def get(self, request, storage_id):
         '''Get storage unit value using id.'''
         if request.method == 'GET':
-            if not request.user.has_perm('backend.get_storage'):
+            #Custom permission to be able to see storage value. Can be found in the coremodel storage.py
+            if not request.user.has_perm('backend.get_storage_value'):
                 raise PermissionDenied
             storage = self.storage_management_service.get_storage_by_id(
                 storage_id)
@@ -546,7 +553,8 @@ class GetStorageCost(APIView):
         start_date = request.data.get('start_date')
         end_date = request.data.get('end_date')
         if request.method == 'GET':
-            if not request.user.has_perm('backend.get_storage'):
+            #Custom permission to be able to see storage cost. Can be found in the coremodel storage.py
+            if not request.user.has_perm('backend.get_storage_cost'):
                 raise PermissionDenied
             storage = self.storage_management_service.get_storage_by_id(
                 storage_id)
@@ -583,7 +591,8 @@ class GetArticleAlternatives(View):
     def get(self, request, article_id, storage_id=None):
         '''Get.'''
         if request.method == 'GET':
-            if not request.user.has_perm('backend.get_article'):
+            #If a user can view articles, then they can get their alternative articles 
+            if not request.user.has_perm('backend.view_article'):
                 raise PermissionDenied
             article = self.article_management_service.get_alternative_articles(
                 article_id)
@@ -626,7 +635,8 @@ class SearchForArticleInStorages(View):
         '''Return articles in a given storage which matches
            Search.'''
         if request.method == 'GET':
-            if not request.user.has_perm('backend.get_article'):
+            #If a user has permission to view articles, then they can search for them
+            if not request.user.has_perm('backend.view_article'):
                 raise PermissionDenied
             # Getting the storage unit which is connected
             # to the users cost center.
