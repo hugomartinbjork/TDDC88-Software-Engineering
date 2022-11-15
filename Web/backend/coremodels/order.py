@@ -14,10 +14,10 @@ class Order(models.Model):
         choices=OrderOperator.choices, default=1, null=False)
 
     class Meta:
-        permissions = (("get_order", "Can get orders from database"),
-        ("post_order", "Can create an order"),
-        ("put_order", "Can edit an order"),
-        ("delete_order_new", "Can delete an order"),)
+        permissions = (("get_order", "Can get orders from database"),)
+        
+        
+        
 
     def __str__(self):
         return (str(self.id)

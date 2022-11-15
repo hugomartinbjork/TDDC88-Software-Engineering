@@ -23,7 +23,8 @@ class Transaction(models.Model):
 
     class Meta:
         permissions = (("get_all_transaction", "Can get all transactions"),
-        ("get_transaction_by_id", "Can get a transaction by id"),)
+        ("get_transaction_by_id", "Can get a transaction by id"),
+        ("get_user_transactions", "Can get a users transactions"),)
 
     def __str__(self):
         return str(self.id)

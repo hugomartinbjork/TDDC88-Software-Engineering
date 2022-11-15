@@ -16,8 +16,8 @@ class Storage(models.Model):
     class Meta:
         permissions = (("get_storage_cost", "Can see storage cost"),
         ("get_storage_value", "Can see storage value"),
-        ("put_storage", "Can edit a storage"),
-        ("delete_storage_new", "Can delete a storage"),)
+        ("return_to_storage", "Can return article to storage"),
+        ("add_input_unit", "Can ad an input unit to storage"),)
 
     def __str__(self):
         return self.name
