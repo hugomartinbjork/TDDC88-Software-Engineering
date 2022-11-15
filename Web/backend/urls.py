@@ -67,7 +67,7 @@ urlPatterns = [
     path('orders/<int:id>/', views.OrderId.as_view()),
 
     # Economy (no URLS implemented yet)
-    # path('economy/<storage_id>') part of API, not yet implemented
+    path('economy/<storage_id>/', views.getEconomy.as_view()),
 
 
     # grup is not part if API? Delete?
