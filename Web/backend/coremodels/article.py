@@ -18,6 +18,20 @@ class Article(models.Model):
     article_group = models.ManyToManyField(GroupInfo)  # Look at database
     # schema and requirement
     alternative_articles = models.ManyToManyField('self', blank=True)
+    input = models.CharField(max_length=100,
+                             choices=UnitOperator.choices, default=UnitOperator.MILLILITRES)
+    output = models.CharField(max_length=100,
+                              choices=UnitOperator.choices, default=UnitOperator.MILLILITRES)
+
+    output_per_input = models.IntegerField(null=True, default=1)
+
+
+    class Meta:
+        permissions = (
+        ("post_article", "Can create an article"),
+        ("put_article", "Can edit an article"),
+        ("delete_article_new", "Can delete an article"),)
+
 
     def __str__(self):
         return self.name

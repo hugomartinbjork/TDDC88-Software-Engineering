@@ -11,10 +11,24 @@ from ..__init__ import dataAccessInjector as di
 @di.register(name="OrderAccess")
 class OrderAccess():
     '''Order Access.'''
+
+    def get_orders(self) -> Order:
+        try:
+            return Order.objects.all()
+        except Exception:
+            return None
+
+    def delete_order(self, id):
+        '''Does not work'''
+        try:
+            return Order.objects.filter(id=id).delete()
+        except Exception:
+            return None
+
     def get_order_by_id(self, id: int) -> Order:
         '''Get order by id.'''
         try:
-            order = Order.objects.get(id=id)
+            order = Order.objects.filter(id=id).first()
             return order
         except Exception:
             return None
@@ -26,6 +40,7 @@ class OrderAccess():
             to_storage=storage_id, of_article=article_id).first()
         return order
 
+    # Can probably be deleted.
     def get_ordered_article(self, order_id: int) -> Article:
         '''Retrieve article that has been ordered.'''
         try:
@@ -78,8 +93,16 @@ class OrderAccess():
         article = Article.objects.get(lio_id=lio_id)
         try:
             ordered_article = OrderedArticle(
-                quantity=quantity, article=article, order=order, output_per_input=unit)
+                quantity=quantity, article=article, order=order, unit=unit)
             ordered_article.save()
             return ordered_article
+        except Exception:
+            return None
+
+    def get_ordered_articles(order_id):
+        try:
+            ordered_articles = OrderedArticle.objects.filter(
+                order_id=order_id)
+            return ordered_articles
         except Exception:
             return None

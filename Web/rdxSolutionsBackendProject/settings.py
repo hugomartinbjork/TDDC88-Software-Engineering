@@ -51,14 +51,20 @@ INSTALLED_APPS = [
 
 ]
 
+
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'knox.auth.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
     ],
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
-    ]
+    ],
+    'AUTHENTICATION_BACKENDS' : [
+    'django.contrib.auth.backends.ModelBackend',
+]
 }
 
 REST_KNOX = {

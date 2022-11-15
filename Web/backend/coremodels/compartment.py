@@ -16,5 +16,8 @@ class Compartment(models.Model):
     amount = models.PositiveSmallIntegerField(default=0)
     placement = models.CharField(max_length=30, null=True)
 
+    class Meta:
+        permissions = ()
+
     def __str__(self):
         return str(self.storage) + " " + str(self.article)
