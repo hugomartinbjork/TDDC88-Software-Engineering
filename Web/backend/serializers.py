@@ -41,7 +41,7 @@ class CompartmentSerializer(serializers.ModelSerializer):
         model = Compartment
         fields = ('id', 'storage', 'article',
                   'order_point', 'standard_order_amount',
-                  'maximal_capacity', 'amount')
+                  'maximal_capacity', 'amount', 'placement')
 
 
 class StorageSerializer(serializers.ModelSerializer):
@@ -114,8 +114,24 @@ class ArticleSupplierSerializer(serializers.ModelSerializer):
         model = ArticleHasSupplier
         fields = ('supplierName', 'supplierArticleNr')
 
+class NoArticleCompartmentSerializer(serializers.ModelSerializer):
+    quantity = serializers.CharField(source='amount', read_only=True)
+    qrCode = serializers.CharField(source='id', read_only=True)
+    normalOrderQuantity = serializers.IntegerField(
+        source='standard_order_amount')
+    orderQuantityLevel = serializers.IntegerField(
+        source='order_point', read_only=True)
+    storageId = serializers.PrimaryKeyRelatedField(
+        source='storage.id', read_only=True)
+
+    class Meta:
+        model = Compartment
+        fields = ('quantity', 'qrCode', 'normalOrderQuantity',
+                  'orderQuantityLevel', 'storageId', 'placement')
 
 class ApiArticleSerializer(serializers.ModelSerializer):
+    lioNr = serializers.CharField(
+        source='lio_id', read_only=True)
     units = serializers.SerializerMethodField('get_units')
     alternativeNames = AlternativeNameSerializer(
         source='alternativearticlename_set', read_only=True, many=True)
@@ -123,11 +139,14 @@ class ApiArticleSerializer(serializers.ModelSerializer):
         source='articlehassupplier_set', read_only=True, many=True)
     alternativeProducts = serializers.PrimaryKeyRelatedField(
         source='alternative_articles', read_only=True, many=True)
+    compartments = NoArticleCompartmentSerializer(
+        source='compartment_set', read_only = True, many = True
+    )
 
     class Meta:
         model = Article
-        fields = ('name', 'price', 'Z41', 'units', 'alternativeNames',
-                  'suppliers', 'alternativeProducts')
+        fields = ('compartments', 'units', 'price', 'suppliers', 'name', 'alternativeNames', 'lioNr', 'alternativeProducts', 
+        'Z41')
 
     def get_units(self, object):
         return UnitsSerializer(object).data
