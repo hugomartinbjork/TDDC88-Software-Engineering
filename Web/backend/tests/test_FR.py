@@ -13,6 +13,7 @@ from backend.services.userService import UserService
 from backend.coremodels.transaction import Transaction
 import unittest
 from django.contrib.auth.models import User
+from django.contrib.auth.models import Group
 from unittest.mock import MagicMock
 from unittest.mock import MagicMock, Mock
 from ..services.orderServices import OrderService
@@ -294,7 +295,7 @@ class test_transaction_takeout_and_withdrawal(TestCase):
         self.assertEqual(self.transaction1.amount, 2)
        
 
-
+        
         #transaction_user1 = self.order_service.get_all_transactions_by_user(self.user1)  
         #self.assertEqual(transaction_user1, [self.transaction1, self.transaction2, self.transaction4, self.transaction5, self.transaction6])    
 
@@ -359,3 +360,64 @@ class FR_5_7(TestCase):
         # When we don't have enough in the central
         # storage, the wait time is 14 days
         self.assertEqual(calculated_wait_time, 14)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class FR1_2_Test(TestCase): 
+    def setUp(self):
+
+        #create User service instance & a cost center
+        self.order_service : UserService = UserService()
+        self.cost_center1 = CostCenter.objects.create(id="1234")
+        self.cost_center2 = CostCenter.objects.create(id="12345")
+       
+        
+        #create 2 mock users with 2 different roles
+
+        #2 roles one "manager-role" & one "nurse-role"
+        self.role1 = Group.objects.create(name = "manager")
+        self.role2 = Group.objects.create(name = "nurse")
+
+        #create one user with cost-center with id "1234" and the role as "manager"
+        self.user1 = User.objects.create(username="userOne", password="TDDC88")
+        self.use_info1 = UserInfo.objects.create(user = self.user1, cost_center = self.cost_center1, group = self.role1)
+
+        #create one user with cost-center with id "12345" and the role as "nurse"
+        self.user2 = User.objects.create(username="userTwo", password="TDDC88")
+        self.use_info2 = UserInfo.objects.create(user = self.user2, cost_center = self.cost_center2, group = self.role2)
+          
+    def test_FR1_2(self):
+
+        #test that a user have a  a role, username, password, cost-center
+        self.assertEqual(self.use_info1.group, self.role1)
+        self.assertEqual(self.use_info1.user.username, "userOne")
+        self.assertNotEqual(self.use_info1.user.username, "userTwo")
+        self.assertEqual(self.use_info1.user.password, "TDDC88")
+        self.assertNotEqual(self.use_info1.user.password, "TDDC888")
+        self.assertEqual(self.use_info1.cost_center, self.cost_center1)
+        self.assertNotEqual(self.use_info1.cost_center, self.cost_center2)
+       
+
+        
+       
