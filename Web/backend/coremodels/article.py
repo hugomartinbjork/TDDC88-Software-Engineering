@@ -26,5 +26,12 @@ class Article(models.Model):
     output_per_input = models.IntegerField(null=True, default=1)
 
 
+    class Meta:
+        permissions = (
+        ("post_article", "Can create an article"),
+        ("put_article", "Can edit an article"),
+        ("delete_article_new", "Can delete an article"),)
+
+
     def __str__(self):
         return self.name
