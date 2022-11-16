@@ -861,8 +861,8 @@ class getEconomy(APIView):
         if storage is None:
             raise Http404("Could not find storage")
         else:
-            start_date = '2022-01-01'
-            end_date = '2022-12-31'
+            start_date = '2022-01-01T00:00:00.000000Z'
+            end_date = '2022-12-31T23:59:59.999999Z'
             '''Below is not an average value, but the current value right now since 
             get_storage_value doesn't take transactions into account'''
             value = self.storage_management_service.get_storage_value(
