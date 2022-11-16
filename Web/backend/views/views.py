@@ -632,7 +632,6 @@ class Transactions(APIView):
                 return JsonResponse(TransactionSerializer(transaction).data,
                                     status=200)
 
-
 class TransactionsById(APIView):
     '''Get transaction by ID view.'''
     @si.inject

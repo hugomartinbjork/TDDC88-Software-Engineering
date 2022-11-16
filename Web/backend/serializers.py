@@ -79,10 +79,17 @@ class OrderSerializer(serializers.ModelSerializer):
 
 
 class TransactionSerializer(serializers.ModelSerializer):
+    userId = serializers.PrimaryKeyRelatedField(source='by_user.id', read_only=True)
+    timeStamp = serializers.CharField(source='time_of_transaction', read_only=True)
+    lioNr = serializers.PrimaryKeyRelatedField(source='article.lio:id', read_only=True)
+    storageId = serializers.PrimaryKeyRelatedField(source='storage.id', read_only=True)
+    quantity = serializers.CharField(source='amount', read_only=True)
+   #operation = serializers.CharField(source='operation', read_only=True)
+
     class Meta:
         model = Transaction
-        fields = ('id', 'storage', 'by_user', 'article',
-                  'amount', 'time_of_transaction', 'operation')
+        fields = ('id', 'userId', 'timeStamp', 'lioNr',
+                  'storageId', 'quantity', 'unit', 'operation')
 
 
 class AlternativeNameSerializer(serializers.ModelSerializer):

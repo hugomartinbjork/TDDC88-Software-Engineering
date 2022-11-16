@@ -90,10 +90,14 @@ class StorageManagementService():
         article = self.storage_access.get_article_in_compartment(
             compartment_id=compartment_id)
         user = User.objects.get(username=username)
+        if add_output_unit:
+            unit = "output"
+        else:
+            unit = "input"
         transaction = Transaction.objects.create(
             storage=storage, article=article, operation=4,
             by_user=user, amount=amount,
-            time_of_transaction=time_of_transaction)
+            time_of_transaction=time_of_transaction, unit=unit)
         return transaction
 
     # Storage is not connected to a costcenter atm
@@ -147,11 +151,13 @@ class StorageManagementService():
             amount_in_storage = Compartment.objects.get(
                 id=id).amount + amount
             new_amount = amount
+            unit = "output"
         else:
             amount_in_storage = Compartment.objects.get(
                 id=id).amount + amount*converter
             new_amount = amount*converter
-
+            unit = "input"
+       
         if (amount_in_storage < 0):
             return None
         else:
@@ -159,7 +165,7 @@ class StorageManagementService():
             new_transaction = Transaction.objects.create(
                 storage=storage_id, article=article, operation=3,
                 by_user=user, amount=new_amount,
-                time_of_transaction=time_of_transaction)
+                time_of_transaction=time_of_transaction, unit=unit)
             new_transaction.save()
             return new_transaction
             # except:
@@ -198,10 +204,12 @@ class StorageManagementService():
             amount_in_storage = Compartment.objects.get(
                 id=id).amount + amount
             new_return_amount = amount
+            unit = "output"
         else:
             amount_in_storage = Compartment.objects.get(
                 id=id).amount + amount*converter
             new_return_amount = amount*converter
+            unit = "input"
         if (amount_in_storage < 0):
             return None
         else:
@@ -211,7 +219,7 @@ class StorageManagementService():
             new_transaction = Transaction.objects.create(
                 storage=storage_id, article=article, operation=2,
                 by_user=user, amount=new_return_amount,
-                time_of_transaction=time_of_transaction)
+                time_of_transaction=time_of_transaction, unit=unit)
             new_transaction.save()
             return new_transaction
 
@@ -227,6 +235,7 @@ class StorageManagementService():
             amount_in_storage = Compartment.objects.get(
                 id=id).amount - amount
             new_amount = amount
+            unit = "output"
         else:
             # eftersom det inte verkar finnas funktionalitet för
             # input/output-amounts så har jag satt denna till 2 bara för
@@ -236,6 +245,7 @@ class StorageManagementService():
             amount_in_storage = Compartment.objects.get(
                 id=id).amount - amount*converter
             new_amount = amount*converter
+            unit ="input"
         if (amount_in_storage < 0):
             return None
         else:
@@ -243,7 +253,7 @@ class StorageManagementService():
             new_transaction = Transaction.objects.create(
                 storage=compartment.storage, article=article,
                 operation=1, by_user=user, amount=new_amount,
-                time_of_transaction=time_of_transaction)
+                time_of_transaction=time_of_transaction, unit=unit)
             new_transaction.save()
             return new_transaction
 

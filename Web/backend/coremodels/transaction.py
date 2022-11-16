@@ -17,6 +17,7 @@ class Transaction(models.Model):
     amount = models.PositiveSmallIntegerField(default=0)
     time_of_transaction = models.DateField(
         default=now, null=True, blank=True)
+    unit = models.CharField(default="output", blank=True, max_length=6)
     operation = models.IntegerField(
         choices=TransactionOperator.choices, default=0, null=False)
 
