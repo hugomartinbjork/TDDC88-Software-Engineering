@@ -564,8 +564,13 @@ class Transactions(APIView):
             # Custom permission to be able to see all transactions. Can be found in the coremodel transaction.py
             if not request.user.has_perm('backend.get_all_transaction'):
                 raise PermissionDenied
+            fromDate =request.query_params.get('fromDate', None)
+            print(fromDate)
+            toDate = request.query_params.get('toDate', None)
+            print(toDate)
+            limit = request.query_params.get('limit', None)
             all_transactions = (
-                self.storage_management_service.get_all_transactions())
+                self.storage_management_service.get_all_transactions(fromDate=fromDate,toDate=toDate,limit=limit))
         if all_transactions is None:
             raise Http404("Could not find any transactions")
         else:

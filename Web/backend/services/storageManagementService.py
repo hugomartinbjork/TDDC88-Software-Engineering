@@ -70,9 +70,9 @@ class StorageManagementService():
             value += compartment.article.price * compartment.amount
         return value
 
-    def get_all_transactions(self) -> dict:
-        '''Returns every transaction.'''
-        return self.storage_access.get_all_transactions()
+    def get_all_transactions(self, fromDate=None, toDate=None, limit=None) -> dict:
+        '''Returns every transaction. Takes fromDate, toDate and limit as optimal parameters for limiting the return.'''
+        return self.storage_access.get_all_transactions(fromDate, toDate, limit)
 
     def get_transaction_by_id(self, transaction_id: str) -> Transaction:
         '''Returns a transaction by id'''
