@@ -903,6 +903,14 @@ class MoveArticle(APIView):
             if from_compartment is None or to_compartment is None:
                 return Response({'error': 'Could not find compartment'},
                                 status=status.HTTP_400_BAD_REQUEST)
+           
+            if (from_compartment.amount-quantity) < 0:
+                return Response({'error': 'Not enough articles in compartment'},
+                                status=status.HTTP_400_BAD_REQUEST)
+            
+            if from_compartment.article.lio_id != to_compartment.article.lio_id :
+                return Response({'error': 'Not matching articles'},
+                                status=status.HTTP_400_BAD_REQUEST)
             else:
                 if unit == "output":
                     add_output_unit = False
@@ -924,6 +932,16 @@ class MoveArticle(APIView):
                         username=user.username,
                         add_output_unit=add_output_unit,
                         time_of_transaction=time_of_transaction))
+                '''Prints JsonResponse directly instead of using Serializer'''
+                data = {}
+                '''Id of the transaction created when takeout'''
+                data['id'] = str(from_transaction.id)
+                data['userId'] = str(user.id)
+                data['timeStamp'] = time_of_transaction
+                data['fromCompartmentQrCode'] = from_compartment_qr_code
+                data['toCompartmentQrCode'] = to_compartment_qr_code
+                data['lioNr'] = from_compartment.article.lio_id
+                data['unit'] = unit
+                data['qunatity'] = quantity
 
-                return JsonResponse(TransactionSerializer(from_transaction).data,
-                                    status=200)
+                return JsonResponse(data, safe=False, status=200)
