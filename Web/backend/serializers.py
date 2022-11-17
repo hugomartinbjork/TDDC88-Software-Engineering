@@ -115,7 +115,7 @@ class ArticleSupplierSerializer(serializers.ModelSerializer):
         fields = ('supplierName', 'supplierArticleNr')
 
 class NoArticleCompartmentSerializer(serializers.ModelSerializer):
-    quantity = serializers.CharField(source='amount', read_only=True)
+    quantity = serializers.IntegerField(source='amount', read_only=True)
     qrCode = serializers.CharField(source='id', read_only=True)
     normalOrderQuantity = serializers.IntegerField(
         source='standard_order_amount')
@@ -126,13 +126,18 @@ class NoArticleCompartmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Compartment
-        fields = ('quantity', 'qrCode', 'normalOrderQuantity',
-                  'orderQuantityLevel', 'storageId', 'placement')
+        fields = ('placement', 'storageId', 'qrCode',  'quantity',  'normalOrderQuantity',
+                  'orderQuantityLevel')
 
 class ApiArticleSerializer(serializers.ModelSerializer):
     lioNr = serializers.CharField(
         source='lio_id', read_only=True)
-    units = serializers.SerializerMethodField('get_units')
+    inputUnit = serializers.CharField(
+        source='input', read_only=True)
+    outputUnit = serializers.CharField(
+        source='output', read_only=True)
+    outputPerInputUnit = serializers.IntegerField(
+        source='output_per_input', read_only=True)
     alternativeNames = AlternativeNameSerializer(
         source='alternativearticlename_set', read_only=True, many=True)
     suppliers = ArticleSupplierSerializer(
@@ -145,7 +150,7 @@ class ApiArticleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Article
-        fields = ('compartments', 'units', 'price', 'suppliers', 'name', 'alternativeNames', 'lioNr', 'alternativeProducts', 
+        fields = ('compartments', 'inputUnit', 'outputUnit', 'outputPerInputUnit', 'price', 'suppliers', 'name', 'alternativeNames', 'lioNr', 'alternativeProducts', 
         'Z41')
 
     def get_units(self, object):

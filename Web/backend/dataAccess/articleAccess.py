@@ -41,3 +41,11 @@ class ArticleAccess():
             return supplier_article_nr
         except Exception:
             return None
+
+    def get_article_by_name(self, name: str) -> Article:
+        '''Returns article based on name'''
+        try:
+            article = Article.objects.get(name=name)
+            return article
+        except:
+            return None
