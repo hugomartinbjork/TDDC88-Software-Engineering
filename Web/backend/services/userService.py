@@ -1,5 +1,4 @@
 # from genericpath import exists
-from django.contrib.auth import login
 # from django.conf import settings
 from backend.coremodels.transaction import Transaction
 from rest_framework.authtoken.models import Token
@@ -22,15 +21,14 @@ class UserService(BaseBackend):
         except User.DoesNotExist:
             return None
 
-    def create_auth_token(self, request, user):
+    def create_auth_token(self, request):
         '''Create authentication token.'''
-        login(request, user)
+        #try:
         token, created = Token.objects.get_or_create(user=request.user)
-        data = {
-            'token': token.key,
-        }
-        return Response({'success': 'successfull login', 'data': data},
-                        status=status.HTTP_200_OK)
+        print(token.key)
+        return token.key
+       # except Exception:
+       #     return None
 
     def get_all_transactions_by_user(self, current_user) -> dict:
         '''Return every transaction made by user.'''

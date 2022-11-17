@@ -1,5 +1,5 @@
 from logging.config import valid_ident
-from ..serializers import AlternativeNameSerializer, StorageSerializer
+from ..serializers import AlternativeNameSerializer, StorageSerializer, UserInfoSerializer
 from ..serializers import ArticleSerializer, OrderSerializer, OrderedArticleSerializer
 from ..serializers import CompartmentSerializer, TransactionSerializer
 from ..serializers import GroupSerializer
@@ -10,6 +10,8 @@ from backend.services.groupManagementService import GroupManagementService
 from backend.services.storageManagementService import StorageManagementService
 from backend.services.orderServices import OrderService
 
+from backend.coremodels.user_info import UserInfo
+
 from backend.__init__ import serviceInjector as si
 from django.views import View
 from django.http import Http404, JsonResponse, HttpResponseBadRequest
@@ -19,7 +21,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
@@ -248,11 +250,32 @@ class Order(APIView):
         # A user can view orders if they have permission
         if not request.user.has_perm('backend.view_order'):
             raise PermissionDenied
+
         orders = self.order_service.get_orders()
-        serializer = OrderSerializer(orders, many=True)
-        if serializer.is_valid:
-            return Response(serializer.data)
-        return HttpResponseBadRequest
+        ordered_articles = self.order_service.get_all_ordered_articles()
+
+        serialized_articles = []
+        for ordered_article in ordered_articles:
+            real_article = self.article_management_service.get_article_by_lio_id(
+                ordered_article.article.lio_id)
+            print(ordered_article)
+            serialized_article = ArticleSerializer(real_article)
+            serialized_order_article = OrderedArticleSerializer(
+                ordered_article)
+            serialized_articles.append(serialized_article.data)
+            serialized_articles.append(serialized_order_article.data)
+            if ordered_article is None:
+                return HttpResponseBadRequest
+
+        for order in orders:
+            serialized_order = OrderSerializer(order)
+
+            if serialized_order.is_valid:
+                data = {}
+                data.update(serialized_order.data)
+                data['articles'] = serialized_articles
+                return Response(data, status=200)
+            return HttpResponseBadRequest
 
     def post(self, request, format=None):
         '''Places an order'''
@@ -367,10 +390,9 @@ class OrderId(APIView):
         return HttpResponseBadRequest
 
 
-class Login(APIView):
-    '''Login view.'''
-    # Dependencies are injected, I hope that we will be able to mock (i.e.
-    # make stubs of) these for testing
+class LoginWithCredentials(APIView):
+    '''Login a user using credentials username and password and returns
+    the user along with bearer auth token'''
     @si.inject
     def __init__(self, _deps, *args):
         self.user_service: UserService = _deps['UserService']()
@@ -381,19 +403,22 @@ class Login(APIView):
         password = request.data.get('password')
 
         if not username or not password:
-            return Response({'error': 'Please fill in all fields'},
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Authorization information is missing or invalid'},
+                            status=status.HTTP_401_UNAUTHORIZED)
 
-        check_user = User.objects.filter(username=username).exists()
-        if check_user is False:
-            return Response({'error': 'Username does not exist'},
-                            status=status.HTTP_400_BAD_REQUEST)
+        auth = authenticate(username=username, password=password)
+        if auth is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
-        user = authenticate(username=username, password=password)
-        if user is not None:
-            return self.user_service.create_auth_token(request, user)
-        else:
-            return Response({'error': 'invalid details'}, status=status.HTTP_400_BAD_REQUEST)
+        login(request, auth)
+        user = UserInfo.objects.filter(user=request.user).first()
+        token = self.user_service.create_auth_token(request)
+        serialized_user = UserInfoSerializer(user)
+        data = {
+            "user:": serialized_user.data,
+            "token:": token
+        }
+        return JsonResponse(data, status=status.HTTP_200_OK)
 
 
 class LoginWithId(APIView):
@@ -411,11 +436,14 @@ class LoginWithId(APIView):
                             status=status.HTTP_404_NOT_FOUND)
 
         user = self.user_service.authenticate_with_id(id=user_id)
-        if user is not None:
-            return self.user_service.create_auth_token(request, user)
-        else:
-            return Response({'error': 'invalid details'},
-                            status=status.HTTP_400_BAD_REQUEST)
+
+        if user is None:
+            return Response({'error': 'invalid details'}, status=status.HTTP_400_BAD_REQUEST)
+        token = self.user_service.create_auth_token(request, user)
+        if token is None:
+            return HttpResponseBadRequest
+
+        return Response("pooop")
 
 
 class SeeAllStorages(View):
@@ -903,12 +931,12 @@ class MoveArticle(APIView):
             if from_compartment is None or to_compartment is None:
                 return Response({'error': 'Could not find compartment'},
                                 status=status.HTTP_400_BAD_REQUEST)
-           
+
             if (from_compartment.amount-quantity) < 0:
                 return Response({'error': 'Not enough articles in compartment'},
                                 status=status.HTTP_400_BAD_REQUEST)
-            
-            if from_compartment.article.lio_id != to_compartment.article.lio_id :
+
+            if from_compartment.article.lio_id != to_compartment.article.lio_id:
                 return Response({'error': 'Not matching articles'},
                                 status=status.HTTP_400_BAD_REQUEST)
             else:
