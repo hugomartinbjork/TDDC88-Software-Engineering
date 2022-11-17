@@ -43,11 +43,6 @@ class StorageManagementService():
         return self.storage_access.get_compartments_by_storage(
             storage_id=id)
 
-    def set_storage(self, id: str, amount: int) -> int:
-        '''Set storage value. Returns amount.'''
-        return self.storage_access.set_storage_amount(compartment_id=id,
-                                                      amount=amount)
-
     def get_stock(self, id: str, article_id: str) -> int:
         '''Return stock.'''
         return self.storage_access.get_compartment_stock(compartment_id=id,
@@ -347,3 +342,11 @@ class StorageManagementService():
                 return storages_in_building
             else:
                 return storages_elsewhere
+
+    def update_compartment(self, current_compartment: Compartment, new_article: Article, new_amount: int, new_std_order_amount: int, new_order_point: int):
+        '''Updates attributes in compartment.'''
+
+        self.storage_access.set_article(current_compartment, new_article)
+        self.storage_access.set_amount(current_compartment, new_amount)
+        self.storage_access.set_standard_order_amount(current_compartment, new_std_order_amount)
+        self.storage_access.set_order_point(current_compartment, new_order_point)

@@ -1,5 +1,5 @@
 from logging.config import valid_ident
-from ..serializers import AlternativeNameSerializer, StorageSerializer
+from ..serializers import AlternativeNameSerializer, StorageSerializer, ApiCompartmentSerializer
 from ..serializers import ArticleSerializer, OrderSerializer, OrderedArticleSerializer
 from ..serializers import CompartmentSerializer, TransactionSerializer
 from ..serializers import GroupSerializer
@@ -846,6 +846,46 @@ class SearchForArticleInStorages(View):
             return JsonResponse(data2, safe=False, status=200)
 
 
+class ArticleToCompartmentByQRcode(APIView):
+    '''Change Article linked to Compartment by using QR code.'''
+    @si.inject
+    def __init__(self, _deps):
+        self.storage_management_service: StorageManagementService = (
+            _deps['StorageManagementService']())
+        self.article_management_service: ArticleManagementService = (
+            _deps['ArticleManagementService']())
+
+    def post(self, request, qr_code):
+        '''Sets new article in payload to compartment matching qr_code.'''
+        
+        current_compartment = (
+            self.storage_management_service.get_compartment_by_qr(
+                qr_code=qr_code))
+        
+        if current_compartment is not None:
+            article_id = request.data.get("lioNr")
+            new_article = (
+                self.article_management_service.get_article_by_lio_id((
+                    article_id)))
+
+            if new_article is not None:
+                #Get attributes from payload
+                new_amount = request.data.get("quantity")
+                new_standard_order_amount = request.data.get(
+                    ("normalOrderQuantity"))
+                new_order_point = request.data.get("orderQuantityLevel")
+
+                #Updates attributes in compartment
+                self.storage_management_service.update_compartment(current_compartment, new_article, new_amount, new_standard_order_amount, new_order_point)
+
+                return JsonResponse(ApiCompartmentSerializer
+                                    (current_compartment).data)
+            else:  #Exception
+                return Response({'error': 'Could not find article'},
+                                status=status.HTTP_400_BAD_REQUEST)
+        else:  #Exception
+            return Response({'error': 'Could not find compartment'},
+                            status=status.HTTP_400_BAD_REQUEST)
 class getEconomy(APIView):
     '''Returns the total value in storage, and the average turnover rate'''
     @si.inject
