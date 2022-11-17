@@ -197,8 +197,8 @@ class test_transaction_takeout_and_withdrawal(TestCase):
         
         #create 2 mock users
         self.user1 = User.objects.create(username="userOne", password="TDDC88")
-        self.use_info1 = UserInfo.objects.create(user=self.user1)
-        self.use_info1.set(cost_center=cost_center1)
+        self.use_info1 = UserInfo.objects.create(
+            user=self.user1, cost_center=cost_center1)
         self.user2 = User.objects.create(username="userTwo", password="TDDC88")
         self.use_info2 = UserInfo.objects.create(user = self.user2, cost_center = cost_center1)
 
