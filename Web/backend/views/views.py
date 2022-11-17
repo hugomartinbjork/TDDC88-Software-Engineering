@@ -10,8 +10,6 @@ from backend.services.groupManagementService import GroupManagementService
 from backend.services.storageManagementService import StorageManagementService
 from backend.services.orderServices import OrderService
 
-from backend.coremodels.user_info import UserInfo
-
 from backend.__init__ import serviceInjector as si
 from django.views import View
 from django.http import Http404, JsonResponse, HttpResponseBadRequest
@@ -411,7 +409,7 @@ class LoginWithCredentials(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         login(request, auth)
-        user = UserInfo.objects.filter(user=request.user).first()
+        user = self.user_service.get_user_info(request.user)
         token = self.user_service.create_auth_token(request)
         serialized_user = UserInfoSerializer(user)
         data = {
@@ -422,7 +420,7 @@ class LoginWithCredentials(APIView):
 
 
 class LoginWithId(APIView):
-    '''Id login view.'''
+    '''Id login view. Currently not working.'''
     @si.inject
     def __init__(self, _deps, *args):
         self.user_service: UserService = _deps['UserService']()
@@ -443,7 +441,7 @@ class LoginWithId(APIView):
         if token is None:
             return HttpResponseBadRequest
 
-        return Response("pooop")
+        return Response("not working atm")
 
 
 class SeeAllStorages(View):

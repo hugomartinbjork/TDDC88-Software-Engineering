@@ -2,6 +2,7 @@ from backend.coremodels.user_info import UserInfo
 from backend.coremodels.cost_center import CostCenter
 from django.contrib.auth.models import User
 from ..__init__ import dataAccessInjector as di
+from rest_framework.authtoken.models import Token
 
 
 @di.register(name="UserAccess")
@@ -14,5 +15,19 @@ class UserAccess():
             user_info = UserInfo.objects.get(user=user)
             cost_center = user_info.cost_center
             return cost_center
+        except Exception:
+            return None
+
+    def create_auth_token(request):
+        '''Creates and returns authentication token for user in request.'''
+        try:
+            token, created = Token.objects.get_or_create(user=request.user)
+            return token.key
+        except Exception:
+            return None
+
+    def get_user_info(user_id):
+        try:
+            return UserInfo.objects.filter(user=user_id).first()
         except Exception:
             return None
