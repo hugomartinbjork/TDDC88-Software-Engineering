@@ -452,9 +452,6 @@ class LoginWithBarcodeOrNfc(APIView):
 
         auth = user.user
 
-        if user is None:
-            return HttpResponseBadRequest
-
         login(request, auth)
         token = self.user_service.create_auth_token(request)
         if token is None:
