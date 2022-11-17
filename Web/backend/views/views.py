@@ -871,20 +871,24 @@ class ArticleToCompartmentByQRcode(APIView):
             if new_article is not None:
                 #Get attributes from payload
                 new_amount = request.data.get("quantity")
-                new_standard_order_amount = request.data.get(("normalOrderQuantity"))
+                new_standard_order_amount = request.data.get(
+                    ("normalOrderQuantity"))
                 new_order_point = request.data.get("orderQuantityLevel")
 
                 #Updates attributes in compartment
-                self.storage_management_service.update_compartment(current_compartment, new_article, new_amount, new_standard_order_amount, new_order_point)
+                self.storage_management_service.update_compartment(
+                    (current_compartment, new_article, new_amount,
+                        (new_standard_order_amount, new_order_point)))
 
                 print("aaaaaaaaaaaaaaaaaaaaa")
                 print(new_amount)
 
-                return JsonResponse(ApiCompartmentSerializer(current_compartment).data)
-            else: #Exception
+                return JsonResponse(ApiCompartmentSerializer
+                                    (current_compartment).data)
+            else:  #Exception
                 return Response({'error': 'Could not find article'},
                                 status=status.HTTP_400_BAD_REQUEST)
-        else: #Exception
+        else:  #Exception
             return Response({'error': 'Could not find compartment'},
                             status=status.HTTP_400_BAD_REQUEST)
 class getEconomy(APIView):

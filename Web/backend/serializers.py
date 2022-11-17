@@ -16,6 +16,7 @@ from backend.coremodels.transaction import Transaction
 from backend.coremodels.ordered_article import OrderedArticle
 from backend.coremodels.inputOutput import InputOutput
 
+
 class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
@@ -119,8 +120,8 @@ class ApiArticleSerializer(serializers.ModelSerializer):
     #units = serializers.SerializerMethodField('get_units')
     alternativeNames = AlternativeNameSerializer(
         source='alternativearticlename_set', read_only=True, many=True)
-    #suppliers = ArticleSupplierSerializer(
-    #    source='articlehassupplier_set', read_only=True, many=True)
+    suppliers = ArticleSupplierSerializer(
+        source='articlehassupplier_set', read_only=True, many=True)
     alternativeProducts = serializers.PrimaryKeyRelatedField(
         source='alternative_articles', read_only=True, many=True)
     lioNr = serializers.CharField(
@@ -134,7 +135,9 @@ class ApiArticleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Article
-        fields = ('inputUnit', 'outputUnit', 'outputPerInputUnit', 'price', 'suppliers', 'name', 'alternativeNames', 'lioNr', 'alternativeProducts', 'Z41')
+        fields = ('inputUnit', 'outputUnit', 'outputPerInputUnit', 'price',
+                  ('suppliers', 'name', 'alternativeNames', 'lioNr',
+                   ('alternativeProducts', 'Z41')))
 
     def get_units(self, object):
         return UnitsSerializer(object).data
@@ -159,12 +162,11 @@ class ApiCompartmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Compartment
-        fields = ('placement', 'storageId', 'qrCode', 'quantity', 'normalOrderQuantity',
-                  'orderQuantityLevel', 'article')
+        fields = ('placement', 'storageId', 'qrCode', 'quantity',
+                  ('normalOrderQuantity', 'orderQuantityLevel', 'article'))
 
 
 class NearbyStoragesSerializer(serializers.ModelSerializer):
-
     id = serializers.PrimaryKeyRelatedField(
         source='storage.id', read_only=True)
     location = LocationSerializer(source='storage', read_only=True)

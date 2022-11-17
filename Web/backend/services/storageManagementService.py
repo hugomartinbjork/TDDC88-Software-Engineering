@@ -348,5 +348,7 @@ class StorageManagementService():
 
         self.storage_access.set_article(current_compartment, new_article)
         self.storage_access.set_amount(current_compartment, new_amount)
-        self.storage_access.set_standard_order_amount(current_compartment, new_std_order_amount)
-        self.storage_access.set_order_point(current_compartment, new_order_point)
+        self.storage_access.set_standard_order_amount(
+            (current_compartment, new_std_order_amount))
+        self.storage_access.set_order_point(
+            (current_compartment, new_order_point))
