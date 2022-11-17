@@ -116,19 +116,25 @@ class ArticleSupplierSerializer(serializers.ModelSerializer):
 
 
 class ApiArticleSerializer(serializers.ModelSerializer):
-    units = serializers.SerializerMethodField('get_units')
+    #units = serializers.SerializerMethodField('get_units')
     alternativeNames = AlternativeNameSerializer(
         source='alternativearticlename_set', read_only=True, many=True)
-    suppliers = ArticleSupplierSerializer(
-        source='articlehassupplier_set', read_only=True, many=True)
+    #suppliers = ArticleSupplierSerializer(
+    #    source='articlehassupplier_set', read_only=True, many=True)
     alternativeProducts = serializers.PrimaryKeyRelatedField(
         source='alternative_articles', read_only=True, many=True)
     lioNr = serializers.CharField(
         source='lio_id', read_only=True)
+    inputUnit = serializers.CharField(
+        source='input', read_only=True)
+    outputUnit = serializers.CharField(
+        source='output', read_only=True)  
+    outputPerInputUnit = serializers.IntegerField(
+        source='output_per_input', read_only=True)
 
     class Meta:
         model = Article
-        fields = ('units', 'price', 'suppliers', 'name', 'alternativeNames', 'lioNr', 'alternativeProducts', 'Z41')
+        fields = ('inputUnit', 'outputUnit', 'outputPerInputUnit', 'price', 'suppliers', 'name', 'alternativeNames', 'lioNr', 'alternativeProducts', 'Z41')
 
     def get_units(self, object):
         return UnitsSerializer(object).data

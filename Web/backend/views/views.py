@@ -880,7 +880,7 @@ class ArticleToCompartmentByQRcode(APIView):
                 print("aaaaaaaaaaaaaaaaaaaaa")
                 print(new_amount)
 
-                return JsonResponse(ApiCompartmentSerializer(current_compartment.data, status=200))
+                return JsonResponse(ApiCompartmentSerializer(current_compartment).data)
             else: #Exception
                 return Response({'error': 'Could not find article'},
                                 status=status.HTTP_400_BAD_REQUEST)
