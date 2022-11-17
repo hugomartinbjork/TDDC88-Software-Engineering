@@ -876,12 +876,7 @@ class ArticleToCompartmentByQRcode(APIView):
                 new_order_point = request.data.get("orderQuantityLevel")
 
                 #Updates attributes in compartment
-                self.storage_management_service.update_compartment(
-                    (current_compartment, new_article, new_amount,
-                        (new_standard_order_amount, new_order_point)))
-
-                print("aaaaaaaaaaaaaaaaaaaaa")
-                print(new_amount)
+                self.storage_management_service.update_compartment(current_compartment, new_article, new_amount, new_standard_order_amount, new_order_point)
 
                 return JsonResponse(ApiCompartmentSerializer
                                     (current_compartment).data)

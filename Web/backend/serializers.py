@@ -135,9 +135,7 @@ class ApiArticleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Article
-        fields = ('inputUnit', 'outputUnit', 'outputPerInputUnit', 'price',
-                  ('suppliers', 'name', 'alternativeNames', 'lioNr',
-                   ('alternativeProducts', 'Z41')))
+        fields = ('inputUnit', 'outputUnit', 'outputPerInputUnit', 'price', 'suppliers', 'name', 'alternativeNames', 'lioNr', 'alternativeProducts', 'Z41')
 
     def get_units(self, object):
         return UnitsSerializer(object).data
@@ -162,9 +160,7 @@ class ApiCompartmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Compartment
-        fields = ('placement', 'storageId', 'qrCode', 'quantity',
-                  ('normalOrderQuantity', 'orderQuantityLevel', 'article'))
-
+        fields = ('placement', 'storageId', 'qrCode', 'quantity', 'normalOrderQuantity', 'orderQuantityLevel', 'article')
 
 class NearbyStoragesSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(
