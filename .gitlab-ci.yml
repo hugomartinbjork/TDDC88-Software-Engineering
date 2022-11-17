@@ -37,6 +37,7 @@ image-rdx-backend:
   image: docker.io/buildah/buildah
   only:
      - main
+     - dev
   needs: []
 
 
@@ -58,6 +59,7 @@ deploy-test-k8s-connection:
   needs: []
   only:
     - main
+    - dev
   script:
     - kubectl get all
 deploy-k8s-regcred:
@@ -67,6 +69,7 @@ deploy-k8s-regcred:
     - deploy-test-k8s-connection
   only:
     - main
+    - dev
   script:
     - kubectl get secrets | grep liu-gitlab-regcred && exit 0
     - kubectl create secret docker-registry liu-gitlab-regcred --docker-server=https://gitlab.liu.se:5000 --docker-username=k8s --docker-password=${REGISTRY_PASSWORD}
@@ -78,6 +81,7 @@ deploy-rdx-backend:
 
   only:
     - main
+    - dev
 
   needs:
     - deploy-test-k8s-connection
@@ -94,6 +98,7 @@ deploy-postgres:
   image: bitnami/kubectl
   only:
   - main
+  - dev
   script:
    - kubectl get all
    - kubectl apply -f k8/postgres.yaml
