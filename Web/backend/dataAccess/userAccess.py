@@ -9,6 +9,22 @@ from rest_framework.authtoken.models import Token
 class UserAccess():
     '''User access.'''
 
+    def get_user_with_barcode(barcode_id) -> User:
+        '''Returns user corresponding to the sent in barcode id, 
+        or None if user does not exist.'''
+        try:
+            return UserInfo.objects.filter(barcode_id=barcode_id).first()
+        except Exception:
+            return None
+
+    def get_user_with_nfc(nfc_id) -> User:
+        '''Returns user corresponding to the sent in nfc id, 
+        or None if user does not exist.'''
+        try:
+            return UserInfo.objects.filter(nfc_id=nfc_id).first()
+        except Exception:
+            return None
+
     def get_user_cost_center(self, user: User) -> CostCenter:
         '''Return cost center of user.'''
         try:

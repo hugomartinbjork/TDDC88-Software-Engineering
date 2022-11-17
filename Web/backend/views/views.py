@@ -396,7 +396,8 @@ class LoginWithCredentials(APIView):
         self.user_service: UserService = _deps['UserService']()
 
     def post(self, request):
-        '''Login post. Returns token.'''
+        '''Login a user using credentials username and password. 
+        returns User along with auth token'''
         username = request.data.get('username')
         password = request.data.get('password')
 
@@ -407,10 +408,13 @@ class LoginWithCredentials(APIView):
         auth = authenticate(username=username, password=password)
         if auth is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
-
         login(request, auth)
-        user = self.user_service.get_user_info(request.user)
+
         token = self.user_service.create_auth_token(request)
+        if token is None:
+            return HttpResponseBadRequest
+
+        user = self.user_service.get_user_info(request.user)
         serialized_user = UserInfoSerializer(user)
         data = {
             "user:": serialized_user.data,
@@ -419,29 +423,49 @@ class LoginWithCredentials(APIView):
         return JsonResponse(data, status=status.HTTP_200_OK)
 
 
-class LoginWithId(APIView):
-    '''Id login view. Currently not working.'''
+class LoginWithBarcodeOrNfc(APIView):
+    '''Login a user using either barcode or NFC to authenticate user.
+    Returns the user along with bearer auth token'''
     @si.inject
     def __init__(self, _deps, *args):
         self.user_service: UserService = _deps['UserService']()
 
     def post(self, request):
-        '''Login using id. Returns token.'''
-        user_id = request.data.get('id')
-        check_user = User.objects.filter(id=user_id).exists()
-        if check_user is False:
-            return Response({'error': 'User ID does not exist'},
-                            status=status.HTTP_404_NOT_FOUND)
+        '''Login a user using either barcode or NFC.
+        returns User along with auth token'''
+        # body = request.data
+        barcode_id = request.data.get('barcodeId')
+        nfc_id = request.data.get('nfcId')
+        if barcode_id is None and nfc_id is None:
+            return Response({'error': 'Authorization information is missing or invalid'},
+                            status=status.HTTP_401_UNAUTHORIZED)
 
-        user = self.user_service.authenticate_with_id(id=user_id)
+        if barcode_id is not None:
+            user = self.user_service.get_user_with_barcode(
+                barcode_id=barcode_id)
+        elif nfc_id is not None:
+            user = self.user_service.get_user_with_nfc(nfc_id=nfc_id)
 
         if user is None:
-            return Response({'error': 'invalid details'}, status=status.HTTP_400_BAD_REQUEST)
-        token = self.user_service.create_auth_token(request, user)
+            return Response({'error': 'Authorization information is missing or invalid'},
+                            status=status.HTTP_401_UNAUTHORIZED)
+
+        auth = user.user
+
+        if user is None:
+            return HttpResponseBadRequest
+
+        login(request, auth)
+        token = self.user_service.create_auth_token(request)
         if token is None:
             return HttpResponseBadRequest
 
-        return Response("not working atm")
+        serialized_user = UserInfoSerializer(user)
+        data = {
+            "user:": serialized_user.data,
+            "token:": token
+        }
+        return JsonResponse(data, status=status.HTTP_200_OK)
 
 
 class SeeAllStorages(View):
@@ -883,11 +907,11 @@ class ArticleToCompartmentByQRcode(APIView):
 
     def post(self, request, qr_code):
         '''Sets new article in payload to compartment matching qr_code.'''
-        
+
         current_compartment = (
             self.storage_management_service.get_compartment_by_qr(
                 qr_code=qr_code))
-        
+
         if current_compartment is not None:
             article_id = request.data.get("lioNr")
             new_article = (
@@ -895,23 +919,26 @@ class ArticleToCompartmentByQRcode(APIView):
                     article_id)))
 
             if new_article is not None:
-                #Get attributes from payload
+                # Get attributes from payload
                 new_amount = request.data.get("quantity")
                 new_standard_order_amount = request.data.get(
                     ("normalOrderQuantity"))
                 new_order_point = request.data.get("orderQuantityLevel")
 
-                #Updates attributes in compartment
-                self.storage_management_service.update_compartment(current_compartment, new_article, new_amount, new_standard_order_amount, new_order_point)
+                # Updates attributes in compartment
+                self.storage_management_service.update_compartment(
+                    current_compartment, new_article, new_amount, new_standard_order_amount, new_order_point)
 
                 return JsonResponse(ApiCompartmentSerializer
                                     (current_compartment).data)
-            else:  #Exception
+            else:  # Exception
                 return Response({'error': 'Could not find article'},
                                 status=status.HTTP_400_BAD_REQUEST)
-        else:  #Exception
+        else:  # Exception
             return Response({'error': 'Could not find compartment'},
                             status=status.HTTP_400_BAD_REQUEST)
+
+
 class getEconomy(APIView):
     '''Returns the total value in storage, and the average turnover rate'''
     @si.inject
