@@ -189,7 +189,7 @@ class NearbyStorages(View):
             return HttpResponseBadRequest
 
 
-class Compartments(View):
+class Compartments(APIView):
     '''Compartment view.'''
     # Dependencies are injected, I hope that we will be able to mock
     # (i.e. make stubs of) these for testing
@@ -219,12 +219,12 @@ class Compartments(View):
         '''Post compartment.'''
         if request.method == 'POST':
             # A user can add a compartment if they have permission
-            if not request.user.has_perm('backend.add_compartment'):
-                raise PermissionDenied
-            json_body = request.POST
-            storage_id = json_body['storage_id']
+  #          if not request.user.has_perm('backend.add_compartment'):
+   #             raise PermissionDenied
+            json_body = request.data
+            storage_id = json_body['storageId']
             placement = json_body['placement']
-            qr_code = json_body['qr_code']
+            qr_code = json_body['qrCode']
             compartment = self.storage_management_service.create_compartment(
                 storage_id, placement, qr_code
             )

@@ -37,12 +37,17 @@ class UserInfoSerializer(serializers.ModelSerializer):
 
 class CompartmentSerializer(serializers.ModelSerializer):
     article = ArticleSerializer(many=False, read_only=True)
+    storageId = serializers.CharField(source= 'storage_id')
+    normalOrderQuantity = serializers.CharField(source= 'standard_order_amount')
+    orderQuantityLevel = serializers.CharField(source= 'order_point')
+    qrCode = serializers.CharField(source= 'id')
+    quantity = serializers.CharField(source= 'amount')
 
     class Meta:
-        model = Compartment
-        fields = ('id', 'storage', 'article',
-                  'order_point', 'standard_order_amount',
-                  'maximal_capacity', 'amount')
+        model = Compartment 
+        fields = ('placement', 'storageId',
+                  'qrCode', 'quantity','normalOrderQuantity', 'orderQuantityLevel',
+                    'article')
 
 
 class StorageSerializer(serializers.ModelSerializer):
