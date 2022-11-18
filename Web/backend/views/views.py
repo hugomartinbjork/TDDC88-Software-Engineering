@@ -1,5 +1,5 @@
 from logging.config import valid_ident
-from ..serializers import AlternativeNameSerializer, StorageSerializer, ApiCompartmentSerializer, UserInfoSerializer
+from ..serializers import AlternativeNameSerializer, StorageSerializer, ApiCompartmentSerializer, UserInfoSerializer, ApiArticleSerializer
 from ..serializers import ArticleSerializer, OrderSerializer, OrderedArticleSerializer
 from ..serializers import CompartmentSerializer, TransactionSerializer
 from ..serializers import GroupSerializer
@@ -47,52 +47,32 @@ class Article(View):
     def __init__(self, _deps, *args):
         self.article_management_service: ArticleManagementService = (
             _deps['ArticleManagementService']())
-
-    def get(self, request, article_id):
+        self.storage_management_service: StorageManagementService = (
+            _deps['StorageManagementService']())
+    
+    def get(self, request, article_id=None, qr_code=None, name=None, storage_id=None):
         '''Get.'''
         if request.method == 'GET':
             # A user can get articles if they have permission
             if not request.user.has_perm('backend.view_article'):
                 raise PermissionDenied
-            article = self.article_management_service.get_article_by_lio_id(
-                article_id)
-            supplier = self.article_management_service.get_supplier(article)
-            supplier_article_nr = (
-                self.article_management_service.get_supplier_article_nr(
-                    article))
-            compartments = list(article.compartment_set.all())
-            alternative_names = list(article.alternativearticlename_set.all())
+
+            if article_id != None:
+                article = self.article_management_service.get_article_by_lio_id(
+                    article_id)
+            elif qr_code != None:
+                article = self.storage_management_service.get_article_in_compartment(qr_code)
+            elif name != None:
+                article = self.article_management_service.get_article_by_name(name)
+
 
             if article is None:
                 raise Http404("Could not find article")
 
-            serializer = ArticleSerializer(article)
-
-            compartment_list = []
-            unit_list = []
-            for i in compartments:
-                compartment_serializer = CompartmentSerializer(i)
-                unit_serializer = StorageSerializer(i.storage)
-
-                compartment_list.append(compartment_serializer.data)
-                unit_list.append(unit_serializer.data.get('name'))
-
-            alt_names_list = []
-            for j in alternative_names:
-                alternative_names_serializer = AlternativeNameSerializer(j)
-                alt_names_list.append(
-                    alternative_names_serializer.data.get("name"))
+            serializer = ApiArticleSerializer(article)
 
             if serializer.is_valid:
-                serializer_data = {}
-                serializer_data.update(serializer.data)
-                serializer_data["supplier"] = supplier.name
-                serializer_data["supplierArticleNr"] = supplier_article_nr
-                serializer_data["compartments"] = compartment_list
-                serializer_data["units"] = unit_list
-                serializer_data["alternative names"] = alt_names_list
-
-                return JsonResponse(serializer_data, safe=False, status=200)
+                return JsonResponse(serializer.data, safe=False, status=200)
             return HttpResponseBadRequest
 
 
@@ -168,6 +148,9 @@ class NearbyStorages(View):
         contains the qr_code with a
         specific qr_code'''
         if request.method == 'GET':
+            #A user can see nearby storages if they have permission
+            if not request.user.has_perm('backend.view_storage'):
+                raise PermissionDenied
             nearby_storages = (
                 self.storage_management_service.get_nearby_storages(qr_code))
             if nearby_storages is None:
