@@ -219,8 +219,8 @@ class Compartments(APIView):
         '''Post compartment.'''
         if request.method == 'POST':
             # A user can add a compartment if they have permission
-  #          if not request.user.has_perm('backend.add_compartment'):
-   #             raise PermissionDenied
+          #          if not request.user.has_perm('backend.add_compartment'):
+           #             raise PermissionDenied
             json_body = request.data
             storage_id = json_body['storageId']
             placement = json_body['placement']
@@ -246,14 +246,9 @@ class Order(APIView):
     def get(self, request):
         '''Returns all orders)'''
         # A user can view orders if they have permission
-<<<<<<< HEAD
         if not request.user.has_perm('backend.view_order'):
             raise PermissionDenied
 
-=======
- #       if not request.user.has_perm('backend.view_order'):
-  #          raise PermissionDenied
->>>>>>> 32f59625038aa44cd0adc13aa0b873be6ddffda1
         orders = self.order_service.get_orders()
         ordered_articles = self.order_service.get_all_ordered_articles()
 
@@ -284,8 +279,8 @@ class Order(APIView):
         '''Places an order'''
         if request.method == 'POST':
             # A user can add an order if they have permission for it
-#            if not request.user.has_perm('backend.add_order'):
- #               raise PermissionDenied
+            #            if not request.user.has_perm('backend.add_order'):
+         #               raise PermissionDenied
             json_body = request.data
             storage_id = json_body['storageId']
             ordered_articles = json_body['articles']
@@ -333,7 +328,6 @@ class OrderId(APIView):
         if serialized_order.is_valid:
             return Response(serialized_order.data, status=200)
         return HttpResponseBadRequest
-        
 
     def put(self, request, id):
         '''OBS! Not yet finished! Only used for testing. Written by Hugo and Jakob. 
@@ -354,7 +348,7 @@ class OrderId(APIView):
 
     def delete(self, request, id):
         '''Delete order func'''
-        deleted_order=self.order_service.delete_order(id)
+        deleted_order = self.order_service.delete_order(id)
         if deleted_order is None:
             return HttpResponseBadRequest
         return Response(status=status.HTTP_204_NO_CONTENT)
