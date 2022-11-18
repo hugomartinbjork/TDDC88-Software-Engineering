@@ -243,17 +243,13 @@ class Compartments(APIView):
             #Get values from payload
             new_placement = request.data.get("placement")
             new_storage_id = request.data.get("storageId") 
-            #new_qr_code = request.data.get("qr_code")
             new_amount = request.data.get('quantity')
             new_standard_order_amount = request.data.get('normalOrderQuantity')
             new_order_point = request.data.get('orderQuantityLevel')
 
             self.storage_management_service.update_compartment_by_qr(current_compartment, new_placement, new_storage_id, new_amount, new_standard_order_amount, new_order_point)
 
-            serializer = CompartmentSerializer(current_compartment)
-            if serializer.is_valid:
-                return JsonResponse(UpdateCompartmentSerializer(current_compartment).data, status=200)
-            return HttpResponseBadRequest
+            return JsonResponse(ApiCompartmentSerializer(current_compartment).data, status=200)
 
         else:
             return Response({'error': 'Could not find compartment'},

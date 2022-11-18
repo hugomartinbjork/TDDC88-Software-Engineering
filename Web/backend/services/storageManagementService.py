@@ -299,7 +299,7 @@ class StorageManagementService():
 
     # FR 9.4.1 och FR 9.4.2 ##
 
-    def update_compartment_by_qr(self, current_compartment: Compartment, new_placement: str, new_storage_id: str, new_amount: int, new_standard_order_amount: int, new_order_point: int) -> Compartment:
+    def update_compartment_by_qr(self, current_compartment: Compartment, new_placement: str, new_storage_id: str, new_amount: int, new_std_order_amount: int, new_order_point: int) -> Compartment:
         '''Edit compartment using qr code.'''
 
         new_storage = self.storage_access.get_storage(new_storage_id)
@@ -307,9 +307,12 @@ class StorageManagementService():
         #Update compartments attributes
         current_compartment.placement = new_placement
         current_compartment.storage = new_storage
-        current_compartment.amount = new_amount
-        current_compartment.standard_order_amount = new_standard_order_amount
-        current_compartment.order_point = new_order_point
+        self.storage_access.set_amount(current_compartment, new_amount)
+        self.storage_access.set_standard_order_amount(current_compartment, new_std_order_amount)
+        self.storage_access.set_order_point(current_compartment, new_order_point)
+
+        self.storage_access.set_article(current_compartment, new_article)
+
     # 25.2.1
     def get_nearby_storages(self, qr_code: str) -> Compartment:
         '''Returns nearby storages containing the
