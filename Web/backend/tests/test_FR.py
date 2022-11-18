@@ -209,39 +209,39 @@ class test_transaction_takeout_and_withdrawal(TestCase):
         self.transaction1 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="1"),
                                                     amount=2, operation=1, by_user = self.user1,
                                                     storage= self.storage_management_service.get_storage_by_id(id="99"))
-        #Transaction.objects.filter(id=1).update(time_of_transaction="2000-02-15T00:00:00.000000Z")                                            
+        Transaction.objects.filter(id=1).update(time_of_transaction="2000-02-15T00:00:00.000000Z")                                            
         #takeout article 2; amount =2 i.e. cost +60
         self.transaction2 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="2"),
                                                     amount=2, operation=1, by_user = self.user1,
                                                     storage= self.storage_management_service.get_storage_by_id(id="99"))   
-        #Transaction.objects.filter(id=2).update(time_of_transaction="2000-05-15T00:00:00.000000Z")
+        Transaction.objects.filter(id=2).update(time_of_transaction="2000-05-15T00:00:00.000000Z")
         #takeout article 1; amount =1 i.e. +10
         self.transaction1 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="1"),
                                                     amount=1, operation=1, by_user = self.user2,
                                                     storage= self.storage_management_service.get_storage_by_id(id="99"))   
-        #Transaction.objects.filter(id=3).update(time_of_transaction="2000-09-15T00:00:00.000000Z")
+        Transaction.objects.filter(id=3).update(time_of_transaction="2000-09-15T00:00:00.000000Z")
         #transactions 2021    
         #replenish 12 of article 1 i.e. cost = -120                                 
         self.transaction1 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="1"),
                                                     amount=12, operation=3, by_user = self.user1,
                                                     storage= self.storage_management_service.get_storage_by_id(id="99"))
-        #Transaction.objects.filter(id=4).update(time_of_transaction="2001-08-15T00:00:00.000000Z")
+        Transaction.objects.filter(id=4).update(time_of_transaction="2001-08-15T00:00:00.000000Z")
         #takeout article 2, amount 5 i.e. cost =+150
         self.transaction1 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="2"),
                                                     amount=5, operation=1, by_user = self.user1,
                                                     storage= self.storage_management_service.get_storage_by_id(id="99"))
-        #Transaction.objects.filter(id=5).update(time_of_transaction="2001-08-23T00:00:00.000000Z")
+        Transaction.objects.filter(id=5).update(time_of_transaction="2001-08-23T00:00:00.000000Z")
         #return article 2, amount 4 i.e. cost =-120
         self.transaction1 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="2"),
                                                     amount=4, operation=2, by_user = self.user1,
                                                     storage= self.storage_management_service.get_storage_by_id(id="99"))
-       # Transaction.objects.filter(id=6).update(time_of_transaction="2001-08-25T00:00:00.000000Z")
+        Transaction.objects.filter(id=6).update(time_of_transaction="2001-08-25T00:00:00.000000Z")
        
 
 
     def test_FR11_1(self):
         #testtransaction cost for the time period where we had 3 takeouts (totalt of 3 takesouts of article 1 and 2 of aticle 2 = total cost of 90)
-        storage1_cost = self.storage_management_service.get_storage_cost("99", "2000-01-07T00:00:00Z","2000-12-07T00:00:00Z")
+        storage1_cost = self.storage_management_service.get_storage_cost("99", start_date="2000-01-07T00:00:00Z",end_date="2000-12-07T00:00:00Z")
         self.assertEqual(storage1_cost, 90)
 
         #test time period of year 2001
