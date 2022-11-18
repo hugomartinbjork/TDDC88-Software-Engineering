@@ -3,7 +3,6 @@
 stages:
   - lint
   - build
-  - image
   - test
   - deploy
 
@@ -33,7 +32,7 @@ test-backend:
 
 image-rdx-backend:
 
-  stage: image
+  stage: build
   image: docker.io/buildah/buildah
   only:
      - main
@@ -88,6 +87,7 @@ deploy-rdx-backend:
     - deploy-k8s-regcred
     - image-rdx-backend
     - yamllint
+    - test-backend
   script:
     - kubectl apply -f k8/backend.yaml
     - kubectl rollout restart deployment rdx-backend-app-deployment
