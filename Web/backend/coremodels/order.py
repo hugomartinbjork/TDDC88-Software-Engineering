@@ -13,6 +13,11 @@ class Order(models.Model):
     order_state = models.CharField(max_length=100,
                                    choices=OrderOperator.choices, default=OrderOperator.ORDER_PLACED)
 
+    class Meta:
+        permissions = (("get_order", "Can get orders from database"),)
+        
+        
+        
 
     def __str__(self):
         return (str(self.id)
