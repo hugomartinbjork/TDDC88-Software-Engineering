@@ -37,7 +37,8 @@ image-rdx-backend:
   only:
      - main
      - dev
-  needs: []
+  needs:
+     - test-backend
 
 
   script:
@@ -55,7 +56,8 @@ image-rdx-backend:
 deploy-test-k8s-connection:
   stage: deploy
   image: bitnami/kubectl
-  needs: []
+  needs:
+    - test-backend
   only:
     - main
     - dev
@@ -99,6 +101,8 @@ deploy-postgres:
   only:
   - main
   - dev
+  needs:
+   - test-backend
   script:
    - kubectl get all
    - kubectl apply -f k8/postgres.yaml
