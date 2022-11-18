@@ -3,6 +3,7 @@ from unittest import mock
 from rest_framework import serializers
 from django.db.models import Q, Case, When, Value, IntegerField
 
+from django.contrib.auth.models import User
 from backend.coremodels.alternative_article_name import AlternativeArticleName
 from backend.coremodels.article_has_supplier import ArticleHasSupplier
 from backend.coremodels.cost_center import CostCenter
@@ -15,6 +16,7 @@ from backend.coremodels.compartment import Compartment
 from backend.coremodels.order import Order
 from backend.coremodels.transaction import Transaction
 from backend.coremodels.ordered_article import OrderedArticle
+from backend.coremodels.inputOutput import InputOutput
 
 
 class ArticleSerializer(serializers.ModelSerializer):
@@ -26,23 +28,32 @@ class ArticleSerializer(serializers.ModelSerializer):
 class CostCenterSerializer(serializers.ModelSerializer):
     class Meta:
         model = CostCenter
-        fields = ('id', 'name', 'users')
-
+        fields = ('id', 'name')
 
 class UserInfoSerializer(serializers.ModelSerializer):
+    userId = serializers.CharField(source='user_id')
+    username = serializers.CharField(source='user')
+    role = serializers.CharField(source='group')
+    # For some reason this works.
+    costCenters = cost_center = CostCenterSerializer(many=True)
     class Meta:
         model = UserInfo
-        fields = ('user', 'cost_center')
+        fields = ('userId', 'username', 'cost_center', 'costCenters', 'role')
 
 
 class CompartmentSerializer(serializers.ModelSerializer):
     article = ArticleSerializer(many=False, read_only=True)
+    storageId = serializers.CharField(source='storage_id')
+    normalOrderQuantity = serializers.CharField(source='standard_order_amount')
+    orderQuantityLevel = serializers.CharField(source='order_point')
+    qrCode = serializers.CharField(source='id')
+    quantity = serializers.CharField(source='amount')
 
     class Meta:
         model = Compartment
-        fields = ('id', 'storage', 'article',
-                  'order_point', 'standard_order_amount',
-                  'maximal_capacity', 'amount', 'placement')
+        fields = ('placement', 'storageId',
+                  'qrCode', 'quantity', 'normalOrderQuantity',
+                  'orderQuantityLevel', 'article')
 
 
 class StorageSerializer(serializers.ModelSerializer):
@@ -56,27 +67,6 @@ class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = GroupInfo
         fields = ('id', 'group_name')
-
-
-class OrderedArticleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = OrderedArticle
-        fields = ('quantity', 'unit')
-
-
-class OrderSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Order
-        fields = ['id', 'to_storage', 'order_date',
-                  'estimated_delivery_date', 'order_state']
-
-    def create(self, validated_data):
-        ordered_articles_data = validated_data.pop('article')
-        order = Order.objects.create(**validated_data)
-        for ordered_article in ordered_articles_data:
-            OrderedArticle.objects.create(order=order, **ordered_article)
-        return order
 
 
 class TransactionSerializer(serializers.ModelSerializer):
@@ -158,8 +148,29 @@ class ApiArticleSerializer(serializers.ModelSerializer):
             'outputPerInputUnit', 'price', 'suppliers', 'name',
             'alternativeNames', 'lioNr', 'alternativeProducts', 'Z41')
 
-    def get_units(self, object):
-        return UnitsSerializer(object).data
+
+class OrderedArticleSerializer(serializers.ModelSerializer):
+    orderedQuantity = serializers.CharField(source= 'quantity')
+    articleInfo = ApiArticleSerializer(source='article', read_only=True, many=False)
+    
+    class Meta:
+        model = OrderedArticle
+        fields = ('articleInfo', 'orderedQuantity', 'unit')
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    articles = OrderedArticleSerializer(
+        source='orderedarticle_set', read_only=True, many=True)
+    storageId = serializers.CharField(source='to_storage')
+    orderDate = serializers.CharField(source='order_date')
+    estimatedDeliveryDate = serializers.CharField(
+        source='estimated_delivery_date')
+    state = serializers.CharField(source='order_state')
+    
+    class Meta:
+        model = Order
+        fields = ['id', 'storageId', 'orderDate',
+                  'estimatedDeliveryDate', 'state', 'articles']
 
 
 class LocationSerializer(serializers.ModelSerializer):
@@ -181,28 +192,11 @@ class ApiCompartmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Compartment
-        fields = ('article', 'quantity', 'qrCode', 'normalOrderQuantity',
-                  'orderQuantityLevel', 'storageId', 'placement')
-
-
-class ApiSmallCompartmentSerializer(serializers.ModelSerializer):
-    quantity = serializers.CharField(source='amount', read_only=True)
-    qrCode = serializers.CharField(source='id', read_only=True)
-    normalOrderQuantity = serializers.IntegerField(
-        source='standard_order_amount')
-    orderQuantityLevel = serializers.IntegerField(
-        source='order_point', read_only=True)
-    storageId = serializers.PrimaryKeyRelatedField(
-        source='storage.id', read_only=True)
-
-    class Meta:
-        model = Compartment
-        fields = ('quantity', 'qrCode', 'normalOrderQuantity',
-                  'orderQuantityLevel', 'storageId', 'placement')
+        fields = ('placement', 'storageId', 'qrCode', 'quantity',
+                  'normalOrderQuantity', 'orderQuantityLevel', 'article')
 
 
 class NearbyStoragesSerializer(serializers.ModelSerializer):
-
     id = serializers.PrimaryKeyRelatedField(
         source='storage.id', read_only=True)
     location = LocationSerializer(source='storage', read_only=True)
@@ -247,8 +241,9 @@ class ArticleCompartmentProximitySerializer():
         if (not nearest_comps):
             self.valid = False
         
-        self.data = ApiSmallCompartmentSerializer(
+        self.data = NoArticleCompartmentSerializer(
             nearest_comps, many=True, read_only=True).data
 
     def is_valid(self):
         return self.valid
+

@@ -5,7 +5,7 @@ from django.db import models
 
 class CostCenter(models.Model):
     '''Cost center.'''
-    # users = models.OneToOneField(User, on_delete=models.CASCADE)
+    #users = models.OneToOneField(user_info, on_delete=models.CASCADE)
     name = models.CharField(max_length=30)
     id = models.CharField(max_length=30, primary_key=True)
 
