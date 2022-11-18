@@ -114,6 +114,7 @@ class ArticleSupplierSerializer(serializers.ModelSerializer):
         model = ArticleHasSupplier
         fields = ('supplierName', 'supplierArticleNr')
 
+
 class NoArticleCompartmentSerializer(serializers.ModelSerializer):
     quantity = serializers.IntegerField(source='amount', read_only=True)
     qrCode = serializers.CharField(source='id', read_only=True)
@@ -126,8 +127,9 @@ class NoArticleCompartmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Compartment
-        fields = ('placement', 'storageId', 'qrCode',  'quantity',  'normalOrderQuantity',
-                  'orderQuantityLevel')
+        fields = ('placement', 'storageId', 'qrCode', 'quantity',
+                  'normalOrderQuantity', 'orderQuantityLevel')
+
 
 class ApiArticleSerializer(serializers.ModelSerializer):
     lioNr = serializers.CharField(
@@ -145,13 +147,15 @@ class ApiArticleSerializer(serializers.ModelSerializer):
     alternativeProducts = serializers.PrimaryKeyRelatedField(
         source='alternative_articles', read_only=True, many=True)
     compartments = NoArticleCompartmentSerializer(
-        source='compartment_set', read_only = True, many = True
+        source='compartment_set', read_only=True, many=True
     )
 
     class Meta:
         model = Article
-        fields = ('compartments', 'inputUnit', 'outputUnit', 'outputPerInputUnit', 'price', 'suppliers', 'name', 'alternativeNames', 'lioNr', 'alternativeProducts', 
-        'Z41')
+        fields = (
+            'compartments', 'inputUnit', 'outputUnit',
+            'outputPerInputUnit', 'price', 'suppliers', 'name',
+            'alternativeNames', 'lioNr', 'alternativeProducts', 'Z41')
 
     def get_units(self, object):
         return UnitsSerializer(object).data
