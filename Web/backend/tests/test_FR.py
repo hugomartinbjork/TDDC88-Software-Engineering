@@ -254,11 +254,11 @@ class test_transaction_takeout_and_withdrawal(TestCase):
     def test_FR11_1(self):
         #testtransaction cost for the time period where we had 3 takeouts (totalt of 3 takesouts of article 1 and 2 of aticle 2 = total cost of 90)
         print(self.storage_management_service.get_all_transactions)
-        storage1_cost = self.storage_management_service.get_storage_cost("99", "2000-01-07T00:00:00.000000Z","2000-12-07T00:00:00.000000Z")
+        storage1_cost = self.storage_management_service.get_storage_cost("99", "2000-01-07T00:00:00.000000Z","2000-12-07T00:00:00Z")
         self.assertEqual(storage1_cost, 90)
 
         #test time period of year 2001
-        storage2_cost = self.storage_management_service.get_storage_cost("99", "2001-01-07T00:00:00.000000Z","2001-12-07T00:00:00.000000Z")
+        storage2_cost = self.storage_management_service.get_storage_cost("99", "2001-01-07T00:00:00.000000Z","2001-12-07T00:00:00Z")
         self.assertEqual(storage2_cost, 30) #bör vara 30!! ändrade bara tillfälligt för att det ska funka. 
 
        
