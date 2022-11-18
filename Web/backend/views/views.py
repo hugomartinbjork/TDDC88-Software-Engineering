@@ -659,15 +659,15 @@ class TransactionsById(APIView):
         else:
             return JsonResponse(TransactionSerializer(transaction).data, safe=False, status=200)
 
-    def put(self, request, transaction_id):
+    def put(self, request, id):
         '''Put transaction.'''
         if request.method == 'PUT':
             # Can only change a transaction if they have the permission
             if not request.user.has_perm('backend.change_transaction'):
                 raise PermissionDenied
-            new_time_of_transaction = request.data.get("time_of_transaction")
+            new_time_of_transaction = request.data.get("timeStamp")
             transaction = (
-                self.storage_management_service.edit_transaction_by_id(transaction_id, new_time_of_transaction))
+                self.storage_management_service.edit_transaction_by_id(id, new_time_of_transaction))
 
         if transaction is None:
             raise Http404("Could not find the transaction")
@@ -876,7 +876,8 @@ class getEconomy(APIView):
                 storage_id, start_date, end_date)
             data = {}
             data["totalValue"] = value
-            data["averageTurnoverRate"] = int((value/cost)*365)
+            data["cost"] = cost
+            #data["averageTurnoverRate"] = int((value/cost)*365)
             return JsonResponse(data, safe=False, status=200)
 
 

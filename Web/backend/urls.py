@@ -52,7 +52,7 @@ urlPatterns = [
 
     # Transactions
     path('transactions/', views.Transactions.as_view()),
-    # path('transactions/<id>', views.Transactions.as_view()), part of API, not yet implemented
+    path('transactions/<int:id>', views.TransactionsById.as_view()),
 
     # Transaction URLs below, not part of API.
     path('transactions/addinputunit/<str:compartment_id>/<int:amount>/',
