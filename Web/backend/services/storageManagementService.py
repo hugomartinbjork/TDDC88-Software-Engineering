@@ -305,13 +305,11 @@ class StorageManagementService():
         new_storage = self.storage_access.get_storage(new_storage_id)
 
         #Update compartments attributes
-        current_compartment.placement = new_placement
-        current_compartment.storage = new_storage
+        self.storage_access.set_placement(current_compartment, new_placement)
+        self.storage_access.set_storage(current_compartment, new_storage)
         self.storage_access.set_amount(current_compartment, new_amount)
         self.storage_access.set_standard_order_amount(current_compartment, new_std_order_amount)
         self.storage_access.set_order_point(current_compartment, new_order_point)
-
-        self.storage_access.set_article(current_compartment, new_article)
 
     # 25.2.1
     def get_nearby_storages(self, qr_code: str) -> Compartment:

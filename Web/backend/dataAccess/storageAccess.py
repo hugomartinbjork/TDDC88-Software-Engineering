@@ -171,6 +171,11 @@ class StorageAccess():
         except Exception:
             return None
 
+    def set_storage(self, current_compartment: Compartment, new_storage: Storage):
+        '''Sets article in compartment.'''
+        current_compartment.storage = new_storage
+        current_compartment.save()
+
     def set_article(self, current_compartment: Compartment, new_article: Article):
         '''Sets article in compartment.'''
         current_compartment.article = new_article
@@ -189,4 +194,9 @@ class StorageAccess():
     def set_order_point(self, current_compartment: Compartment, new_order_point: int):
         '''Sets order_point in compartment.'''
         current_compartment.order_point = new_order_point
+        current_compartment.save()
+
+    def set_placement(self, current_compartment: Compartment, new_placement: int):
+        '''Sets placement in compartment.'''
+        current_compartment.placement = new_placement
         current_compartment.save()
