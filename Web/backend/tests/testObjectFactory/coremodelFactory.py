@@ -83,7 +83,7 @@ def create_costcenter(name="testCostCenter", id="1337"):
 def create_article(lio_id="1337", description="testdescription",
                    price=0, name="testarticle", Z41=False, image=None,
                    article_group=[], alternative_articles=[],
-                   input=1, output=1, output_per_intput=1):
+                   input=1, output=1):
     '''Creating new article.'''
 
     article = Article(lio_id=lio_id, description=description,
