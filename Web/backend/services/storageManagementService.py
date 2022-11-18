@@ -107,15 +107,12 @@ class StorageManagementService():
         for transaction in transactions:
             transaction_date = transaction.time_of_transaction
             transaction_date_date = transaction_date  # .date()
-            user_cost_center = self.user_access.get_user_cost_center(
-                transaction.by_user)
-            if (user_cost_center == transaction.storage.cost_center):
-                if (start_date_date <= transaction_date_date
-                        and end_date_date >= transaction_date_date):
-                    if transaction.operation == 1:
-                        takeout_value = transaction.get_value() + takeout_value
-                    if transaction.operation == 2:
-                        return_value = transaction.get_value() + return_value
+            if (start_date_date <= transaction_date_date
+                    and end_date_date >= transaction_date_date):
+                if transaction.operation == 1:
+                    takeout_value = transaction.get_value() + takeout_value
+                if transaction.operation == 2:
+                    return_value = transaction.get_value() + return_value
         sum_value = takeout_value - return_value
         return sum_value
 

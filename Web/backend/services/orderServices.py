@@ -153,3 +153,6 @@ class OrderService():
     def get_ordered_articles(self, order_id):
         '''returns article in the specified order'''
         return OrderAccess.get_ordered_articles(order_id)
+
+    def get_all_ordered_articles(self):
+        return OrderAccess.get_all_ordered_articles()

@@ -13,6 +13,7 @@ import os
 import sys
 from pathlib import Path
 from datetime import timedelta
+from django.conf import settings
 from rest_framework.settings import api_settings
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -47,7 +48,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'backend',
-    'knox',
 
 ]
 
@@ -55,8 +55,8 @@ INSTALLED_APPS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'knox.auth.TokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
     ],
     'DEFAULT_PARSER_CLASSES': [
@@ -67,13 +67,8 @@ REST_FRAMEWORK = {
 ]
 }
 
-REST_KNOX = {
-    'TOKEN_TTL': timedelta(minutes=600),
-    'USER_SERIALIZER': 'knox.serializers.UserSerializer',
-    'TOKEN_LIMIT_PER_USER': None,
-    'AUTO_REFRESH': False,
-    'EXPIRY_DATETIME_FORMAT': api_settings.DATETIME_FORMAT,
-}
+AUTH_TOKEN_VALIDITY = getattr(
+    settings, 'AUTH_TOKEN_VALIDITY', timedelta(hours=10))
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

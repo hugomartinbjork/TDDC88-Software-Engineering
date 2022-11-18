@@ -2,6 +2,7 @@ from dataclasses import field
 from unittest import mock
 from rest_framework import serializers
 
+from django.contrib.auth.models import User
 from backend.coremodels.alternative_article_name import AlternativeArticleName
 from backend.coremodels.article_has_supplier import ArticleHasSupplier
 from backend.coremodels.cost_center import CostCenter
@@ -26,13 +27,17 @@ class ArticleSerializer(serializers.ModelSerializer):
 class CostCenterSerializer(serializers.ModelSerializer):
     class Meta:
         model = CostCenter
-        fields = ('id', 'name', 'users')
-
+        fields = ('id', 'name')
 
 class UserInfoSerializer(serializers.ModelSerializer):
+    userId = serializers.CharField(source='user_id')
+    username = serializers.CharField(source='user')
+    role = serializers.CharField(source='group')
+    # For some reason this works.
+    costCenters = cost_center = CostCenterSerializer(many=True)
     class Meta:
         model = UserInfo
-        fields = ('user', 'cost_center')
+        fields = ('userId', 'username', 'cost_center', 'costCenters', 'role')
 
 
 class CompartmentSerializer(serializers.ModelSerializer):

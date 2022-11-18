@@ -85,10 +85,9 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='UserInfo',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('cost_center', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='backend.costcenter')),
+                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, primary_key=True, serialize=False, to=settings.AUTH_USER_MODEL)),
+                ('cost_center', models.ManyToManyField(to='backend.costcenter')),
                 ('group', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='auth.group')),
-                ('user', models.OneToOneField(default='test', on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(

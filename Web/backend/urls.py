@@ -6,9 +6,9 @@ from django.views.decorators.csrf import csrf_exempt
 
 urlPatterns = [
     # Authentication
-    path('loginWithCredentials/', views.Login.as_view()),
-    path('loginWithBarcode/', views.LoginWithId.as_view()),
-    #   path('loginWithNFC/', views.LoginWithId.as_view()), part of API, not yet implemented
+    path('loginWithCredentials/', views.LoginWithCredentials.as_view()),
+    path('loginWithBarcode/', views.LoginWithBarcodeOrNfc.as_view()),
+    path('loginWithNFC/', views.LoginWithBarcodeOrNfc.as_view()),
 
     # User
     #    path('/users') part of API, not yet implemented
