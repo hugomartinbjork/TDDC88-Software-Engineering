@@ -161,3 +161,32 @@ class StorageAccess():
             return None
 
 # #  FR 9.4.1 och FR 9.4.2
+
+ # TODO: This does not seem to do what it is supposed to do. Please review
+    def set_storage_amount(self, compartment_id: str, amount: int) -> int:
+        '''Sets amount in compartment.'''
+        try:
+            new_amount = amount
+            return Compartment.objects.update(**{amount: new_amount})
+        except Exception:
+            return None
+
+    def set_article(self, current_compartment: Compartment, new_article: Article):
+        '''Sets article in compartment.'''
+        current_compartment.article = new_article
+        current_compartment.save()
+
+    def set_amount(self, current_compartment: Compartment, new_amount: int):
+        '''Sets amount in compartment.'''
+        current_compartment.amount = new_amount
+        current_compartment.save()
+    
+    def set_standard_order_amount(self, current_compartment: Compartment, new_std_order_amount: int):
+        '''Sets standard_order_amount in compartment.'''
+        current_compartment.standard_order_amount = new_std_order_amount
+        current_compartment.save()
+    
+    def set_order_point(self, current_compartment: Compartment, new_order_point: int):
+        '''Sets order_point in compartment.'''
+        current_compartment.order_point = new_order_point
+        current_compartment.save()
