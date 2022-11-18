@@ -45,7 +45,7 @@ urlPatterns = [
     path('storage/<str:storage_id>/cost', views.GetStorageCost.as_view()),
 
     # Compartments
-    # path('compartments/', views.Compartment.as_view()),
+    path('compartments/', views.Compartments.as_view()),
     path('compartments/<str:qr_code>', views.Compartments.as_view()),
     path('connectArticleToCompartment/<str:qr_code>', (
      views.ArticleToCompartmentByQRcode.as_view())),

@@ -189,7 +189,7 @@ class NearbyStorages(View):
             return HttpResponseBadRequest
 
 
-class Compartments(View):
+class Compartments(APIView):
     '''Compartment view.'''
     # Dependencies are injected, I hope that we will be able to mock
     # (i.e. make stubs of) these for testing
@@ -219,12 +219,12 @@ class Compartments(View):
         '''Post compartment.'''
         if request.method == 'POST':
             # A user can add a compartment if they have permission
-            if not request.user.has_perm('backend.add_compartment'):
-                raise PermissionDenied
-            json_body = request.POST
-            storage_id = json_body['storage_id']
+  #          if not request.user.has_perm('backend.add_compartment'):
+   #             raise PermissionDenied
+            json_body = request.data
+            storage_id = json_body['storageId']
             placement = json_body['placement']
-            qr_code = json_body['qr_code']
+            qr_code = json_body['qrCode']
             compartment = self.storage_management_service.create_compartment(
                 storage_id, placement, qr_code
             )
@@ -246,9 +246,14 @@ class Order(APIView):
     def get(self, request):
         '''Returns all orders)'''
         # A user can view orders if they have permission
+<<<<<<< HEAD
         if not request.user.has_perm('backend.view_order'):
             raise PermissionDenied
 
+=======
+ #       if not request.user.has_perm('backend.view_order'):
+  #          raise PermissionDenied
+>>>>>>> 32f59625038aa44cd0adc13aa0b873be6ddffda1
         orders = self.order_service.get_orders()
         ordered_articles = self.order_service.get_all_ordered_articles()
 
@@ -279,8 +284,8 @@ class Order(APIView):
         '''Places an order'''
         if request.method == 'POST':
             # A user can add an order if they have permission for it
-            if not request.user.has_perm('backend.add_order'):
-                raise PermissionDenied
+#            if not request.user.has_perm('backend.add_order'):
+ #               raise PermissionDenied
             json_body = request.data
             storage_id = json_body['storageId']
             ordered_articles = json_body['articles']
@@ -301,26 +306,12 @@ class Order(APIView):
             if order is None:
                 return HttpResponseBadRequest
 
-            serialized_articles = []
             for ordered_article in ordered_articles:
-                article_in_order = OrderService.create_ordered_article(
+                OrderService.create_ordered_article(
                     ordered_article['lioNr'], ordered_article['quantity'], ordered_article['unit'], order)
-                real_article = self.article_management_service.get_article_by_lio_id(
-                    ordered_article['lioNr'])
-                serialized_article = ArticleSerializer(real_article)
-                serialized_order_article = OrderedArticleSerializer(
-                    article_in_order)
-                serialized_articles.append(serialized_article.data)
-                serialized_articles.append(serialized_order_article.data)
-                if article_in_order is None:
-                    return HttpResponseBadRequest
-
             serialized_order = OrderSerializer(order)
             if serialized_order.is_valid:
-                data = {}
-                data.update(serialized_order.data)
-                data['articles'] = serialized_articles
-                return Response(data, status=200)
+                return Response(serialized_order.data, status=200)
             return HttpResponseBadRequest
 
 
@@ -334,58 +325,39 @@ class OrderId(APIView):
 
     def get(self, request, id):
         order = self.order_service.get_order_by_id(id)
-        ordered_articles = self.order_service.get_ordered_articles(order.id)
+        print(order)
+        if order is None:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        if ordered_articles is None:
-            return HttpResponseBadRequest
-
-        serialized_articles = []
-        for ordered_article in ordered_articles:
-            real_article = self.article_management_service.get_article_by_lio_id(
-                ordered_article.article.lio_id)
-            serialized_article = ArticleSerializer(real_article)
-            serialized_order_article = OrderedArticleSerializer(
-                ordered_article)
-            serialized_articles.append(serialized_article.data)
-            serialized_articles.append(serialized_order_article.data)
         serialized_order = OrderSerializer(order)
         if serialized_order.is_valid:
-            data = {}
-            data.update(serialized_order.data)
-            data['articles'] = serialized_articles
-            return Response(data, status=200)
+            return Response(serialized_order.data, status=200)
         return HttpResponseBadRequest
+        
 
     def put(self, request, id):
         '''OBS! Not yet finished! Only used for testing. Written by Hugo and Jakob. 
         Alters the state of an order to delivered and updates the amount in the correct compartments.'''
         json_body = request.data
         order_state = json_body['state']
-        ordered_articles = self.order_service.get_ordered_articles(id)
 
         if order_state == "delivered":
             updated_order = self.order_service.order_arrived(id)
 
-        if updated_order == None:
+        if updated_order is None:
             return HttpResponseBadRequest
 
-        # ugly
-        serialized_articles = []
-        for ordered_article in ordered_articles:
-            real_article = self.article_management_service.get_article_by_lio_id(
-                ordered_article.article.lio_id)
-            serialized_article = ArticleSerializer(real_article)
-            serialized_order_article = OrderedArticleSerializer(
-                ordered_article)
-            serialized_articles.append(serialized_article.data)
-            serialized_articles.append(serialized_order_article.data)
         serialized_order = OrderSerializer(updated_order)
         if serialized_order.is_valid:
-            data = {}
-            data.update(serialized_order.data)
-            data['articles'] = serialized_articles
-            return Response(data, status=200)
+            return Response(serialized_order.data, status=200)
         return HttpResponseBadRequest
+
+    def delete(self, request, id):
+        '''Delete order func'''
+        deleted_order=self.order_service.delete_order(id)
+        if deleted_order is None:
+            return HttpResponseBadRequest
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class LoginWithCredentials(APIView):
