@@ -1,7 +1,7 @@
 FROM python:3.8.10
 
 
-EXPOSE 8000
+# EXPOSE 8000
 
 COPY . /app
 WORKDIR /app
