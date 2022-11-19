@@ -38,7 +38,6 @@ image-rdx-backend:
   only:
      - main
      - dev
-     - djangoProbes
   needs:
      - test-backend
      - yamllint
@@ -63,7 +62,6 @@ deploy-test-k8s-connection:
   only:
     - main
     - dev
-    - djangoProbes
   script:
     - kubectl get all
 deploy-k8s-regcred:
@@ -73,7 +71,6 @@ deploy-k8s-regcred:
   only:
     - main
     - dev
-    - djangoProbes
   script:
     - kubectl get secrets | grep liu-gitlab-regcred && exit 0
     - kubectl create secret docker-registry liu-gitlab-regcred --docker-server=https://gitlab.liu.se:5000 --docker-username=k8s --docker-password=${REGISTRY_PASSWORD}
@@ -86,7 +83,6 @@ deploy-rdx-backend:
   only:
     - main
     - dev
-    - djangoProbes
 
   needs:
     - deploy-test-k8s-connection
@@ -105,7 +101,6 @@ deploy-postgres:
   only:
   - main
   - dev
-  - djangoProbes
   needs:
     - deploy-test-k8s-connection
     - deploy-k8s-regcred
