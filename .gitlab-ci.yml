@@ -22,7 +22,8 @@ yamllint:
 
 test-backend:
    stage: test
-   needs: []
+   needs: 
+     - yamllint
    image: python:3.8.10
    script:
      - pip install -r Web/requirements.txt
@@ -37,8 +38,10 @@ image-rdx-backend:
   only:
      - main
      - dev
+     - djangoProbes
   needs:
      - test-backend
+     - yamllint
 
 
   script:
@@ -56,21 +59,21 @@ image-rdx-backend:
 deploy-test-k8s-connection:
   stage: deploy
   image: bitnami/kubectl
-  needs:
-    - test-backend
+  needs: []
   only:
     - main
     - dev
+    - djangoProbes
   script:
     - kubectl get all
 deploy-k8s-regcred:
   stage: deploy
   image: bitnami/kubectl
-  needs:
-    - deploy-test-k8s-connection
+  needs: []
   only:
     - main
     - dev
+    - djangoProbes
   script:
     - kubectl get secrets | grep liu-gitlab-regcred && exit 0
     - kubectl create secret docker-registry liu-gitlab-regcred --docker-server=https://gitlab.liu.se:5000 --docker-username=k8s --docker-password=${REGISTRY_PASSWORD}
@@ -83,6 +86,7 @@ deploy-rdx-backend:
   only:
     - main
     - dev
+    - djangoProbes
 
   needs:
     - deploy-test-k8s-connection
@@ -101,8 +105,13 @@ deploy-postgres:
   only:
   - main
   - dev
+  - djangoProbes
   needs:
-   - test-backend
+    - deploy-test-k8s-connection
+    - deploy-k8s-regcred
+    - image-rdx-backend
+    - yamllint
+    - test-backend
   script:
    - kubectl get all
    - kubectl apply -f k8/postgres.yaml
