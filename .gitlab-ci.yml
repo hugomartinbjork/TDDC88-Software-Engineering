@@ -2,9 +2,8 @@
 ---
 stages:
   - lint
-  - build
-  - image
   - test
+  - build
   - deploy
 
 variables:
@@ -33,12 +32,13 @@ test-backend:
 
 image-rdx-backend:
 
-  stage: image
+  stage: build
   image: docker.io/buildah/buildah
   only:
      - main
      - dev
-  needs: []
+  needs:
+     - test-backend
 
 
   script:
@@ -56,7 +56,8 @@ image-rdx-backend:
 deploy-test-k8s-connection:
   stage: deploy
   image: bitnami/kubectl
-  needs: []
+  needs:
+    - test-backend
   only:
     - main
     - dev
@@ -88,6 +89,7 @@ deploy-rdx-backend:
     - deploy-k8s-regcred
     - image-rdx-backend
     - yamllint
+    - test-backend
   script:
     - kubectl apply -f k8/backend.yaml
     - kubectl rollout restart deployment rdx-backend-app-deployment
@@ -99,6 +101,8 @@ deploy-postgres:
   only:
   - main
   - dev
+  needs:
+   - test-backend
   script:
    - kubectl get all
    - kubectl apply -f k8/postgres.yaml
