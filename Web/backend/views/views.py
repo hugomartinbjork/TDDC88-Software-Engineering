@@ -1,4 +1,3 @@
-from logging.config import valid_ident
 from ..serializers import AlternativeNameSerializer, StorageSerializer, ApiCompartmentSerializer, UserInfoSerializer, ApiArticleSerializer
 from ..serializers import ArticleSerializer, OrderSerializer, OrderedArticleSerializer
 from ..serializers import CompartmentSerializer, TransactionSerializer
@@ -18,13 +17,16 @@ from django.core.exceptions import PermissionDenied
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.permissions import AllowAny
+
+from knox.models import AuthToken
+from knox.auth import TokenAuthentication
+from rdxSolutionsBackendProject.settings import SALT
 
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
-from django.contrib.auth.decorators import permission_required
-from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.contrib.auth.models import Permission
-# from rest_framework.decorators import renderer_classes, api_view
 from django.http import HttpResponse
 from itertools import chain
 from operator import itemgetter
@@ -35,25 +37,27 @@ from datetime import datetime
 import datetime
 from django.utils.timezone import now
 
+
 # from Web.backend import serializers
 
 
-class Article(View):
+class Article(APIView):
     '''Article view.'''
-
+    authentication_classes = (TokenAuthentication,)
     # Dependencies are injected, I hope that we will be able to mock
     # (i.e. make stubs of) these for testing
+
     @si.inject
     def __init__(self, _deps, *args):
         self.article_management_service: ArticleManagementService = (
             _deps['ArticleManagementService']())
         self.storage_management_service: StorageManagementService = (
             _deps['StorageManagementService']())
-    
+
     def get(self, request, article_id=None, qr_code=None, name=None, storage_id=None):
         '''Get.'''
         if request.method == 'GET':
-            # A user can get articles if they have permission
+           # A user can get articles if they have permission
             if not request.user.has_perm('backend.view_article'):
                 raise PermissionDenied
 
@@ -61,10 +65,11 @@ class Article(View):
                 article = self.article_management_service.get_article_by_lio_id(
                     article_id)
             elif qr_code != None:
-                article = self.storage_management_service.get_article_in_compartment(qr_code)
+                article = self.storage_management_service.get_article_in_compartment(
+                    qr_code)
             elif name != None:
-                article = self.article_management_service.get_article_by_name(name)
-
+                article = self.article_management_service.get_article_by_name(
+                    name)
 
             if article is None:
                 raise Http404("Could not find article")
@@ -76,10 +81,12 @@ class Article(View):
             return HttpResponseBadRequest
 
 
-class Group(View):
+class Group(APIView):
     '''Group.'''
+    authentication_classes = (TokenAuthentication,)
     # Dependencies are injected, I hope that we will be able to mock
     # (i.e. make stubs of) these for testing
+
     @si.inject
     def __init__(self, _deps, *args):
         self.group_management_service: GroupManagementService = (
@@ -100,8 +107,10 @@ class Group(View):
 
 class Storage(View):
     '''Storage view.'''
+    authentication_classes = (TokenAuthentication,)
     # Dependencies are injected, I hope that we will be able to mock
     # (i.e. make stubs of) these for testing
+
     @si.inject
     def __init__(self, _deps, *args):
         self.storage_management_service: StorageManagementService = (
@@ -136,8 +145,10 @@ class Storage(View):
             return HttpResponseBadRequest
 
 
-class NearbyStorages(View):
+class NearbyStorages(APIView):
     '''Get nearby storages.'''
+    authentication_classes = (TokenAuthentication,)
+
     @si.inject
     def __init__(self, _deps, *args):
         self.storage_management_service: StorageManagementService = (
@@ -166,8 +177,10 @@ class NearbyStorages(View):
 
 class Compartments(APIView):
     '''Compartment view.'''
+    authentication_classes = (TokenAuthentication,)
     # Dependencies are injected, I hope that we will be able to mock
     # (i.e. make stubs of) these for testing
+
     @si.inject
     def __init__(self, _deps, *args):
         self.storage_management_service: StorageManagementService = (
@@ -212,6 +225,8 @@ class Compartments(APIView):
 
 class Order(APIView):
     '''Order endpoint handling all request from /orders'''
+    authentication_classes = (TokenAuthentication,)
+
     @si.inject
     def __init__(self, _deps, *args):
         self.order_service: OrderService = _deps['OrderService']()
@@ -254,8 +269,8 @@ class Order(APIView):
         '''Places an order'''
         if request.method == 'POST':
             # A user can add an order if they have permission for it
-            #            if not request.user.has_perm('backend.add_order'):
-         #               raise PermissionDenied
+            if not request.user.has_perm('backend.add_order'):
+                raise PermissionDenied
             json_body = request.data
             storage_id = json_body['storageId']
             ordered_articles = json_body['articles']
@@ -287,6 +302,8 @@ class Order(APIView):
 
 class OrderId(APIView):
     '''Order Endpoint which handles all request coming from /orders/id'''
+    authentication_classes = (TokenAuthentication,)
+
     @si.inject
     def __init__(self, _deps, *args):
         self.order_service: OrderService = _deps['OrderService']()
@@ -332,6 +349,8 @@ class OrderId(APIView):
 class LoginWithCredentials(APIView):
     '''Login a user using credentials username and password and returns
     the user along with bearer auth token'''
+    permission_classes = [AllowAny]
+
     @si.inject
     def __init__(self, _deps, *args):
         self.user_service: UserService = _deps['UserService']()
@@ -343,23 +362,21 @@ class LoginWithCredentials(APIView):
         password = request.data.get('password')
 
         if not username or not password:
-            return Response({'error': 'Authorization information is missing or invalid'},
-                            status=status.HTTP_401_UNAUTHORIZED)
+            # return Response({'error': 'Authorization information is missing or invalid'},
+            #                 status=status.HTTP_401_UNAUTHORIZED)
+            raise AuthenticationFailed
 
         auth = authenticate(username=username, password=password)
         if auth is None:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        login(request, auth)
+            raise AuthenticationFailed
 
-        token = self.user_service.create_auth_token(request)
-        if token is None:
-            return HttpResponseBadRequest
+        login(request, auth)
 
         user = self.user_service.get_user_info(request.user)
         serialized_user = UserInfoSerializer(user)
         data = {
             "user:": serialized_user.data,
-            "token:": token
+            "token:": AuthToken.objects.get_or_create(auth)[1]
         }
         return JsonResponse(data, status=status.HTTP_200_OK)
 
@@ -367,6 +384,8 @@ class LoginWithCredentials(APIView):
 class LoginWithBarcodeOrNfc(APIView):
     '''Login a user using either barcode or NFC to authenticate user.
     Returns the user along with bearer auth token'''
+    permission_classes = [AllowAny]
+
     @si.inject
     def __init__(self, _deps, *args):
         self.user_service: UserService = _deps['UserService']()
@@ -378,36 +397,34 @@ class LoginWithBarcodeOrNfc(APIView):
         barcode_id = request.data.get('barcodeId')
         nfc_id = request.data.get('nfcId')
         if barcode_id is None and nfc_id is None:
-            return Response({'error': 'Authorization information is missing or invalid'},
-                            status=status.HTTP_401_UNAUTHORIZED)
+            raise AuthenticationFailed
 
         if barcode_id is not None:
+            check_barcode = make_password(barcode_id, SALT)
             user = self.user_service.get_user_with_barcode(
-                barcode_id=barcode_id)
+                barcode_id=check_barcode)
         elif nfc_id is not None:
-            user = self.user_service.get_user_with_nfc(nfc_id=nfc_id)
+            check_nfc = make_password(nfc_id, SALT)
+            user = self.user_service.get_user_with_nfc(nfc_id=check_nfc)
 
         if user is None:
-            return Response({'error': 'Authorization information is missing or invalid'},
-                            status=status.HTTP_401_UNAUTHORIZED)
+            raise AuthenticationFailed
 
         auth = user.user
 
         login(request, auth)
-        token = self.user_service.create_auth_token(request)
-        if token is None:
-            return HttpResponseBadRequest
-
         serialized_user = UserInfoSerializer(user)
         data = {
             "user:": serialized_user.data,
-            "token:": token
+            "token:": AuthToken.objects.create(auth)[1]
         }
         return JsonResponse(data, status=status.HTTP_200_OK)
 
 
 class SeeAllStorages(View):
     '''See all storages view.'''
+    authentication_classes = (TokenAuthentication,)
+
     @si.inject
     def __init__(self, _deps, *args):
         storage_management_service = _deps['StorageManagementService']
@@ -448,6 +465,8 @@ class SeeAllStorages(View):
 
 class AddInputUnit(View):
     '''Add input unit view.'''
+    authentication_classes = (TokenAuthentication,)
+
     @si.inject
     def __init__(self, _deps):
         self.storage_management_service = _deps['StorageManagementService']
@@ -482,6 +501,8 @@ class AddInputUnit(View):
 
 class GetUserTransactions(View):
     '''Get user transactions view.'''
+    authentication_classes = (TokenAuthentication,)
+
     @si.inject
     def __init__(self, _deps):
         self.user_service: UserService = _deps['UserService']()
@@ -511,6 +532,8 @@ class GetUserTransactions(View):
 
 class ReturnUnit(View):
     '''Return unit view.'''
+    authentication_classes = (TokenAuthentication,)
+
     @si.inject
     def __init__(self, _deps):
         self.storage_management_service = _deps['StorageManagementService']
@@ -540,6 +563,8 @@ class ReturnUnit(View):
 
 class Transactions(APIView):
     '''Transactions API view.'''
+    authentication_classes = (TokenAuthentication,)
+
     @si.inject
     def __init__(self, _deps):
         self.user_service: UserService = _deps['UserService']()
@@ -623,6 +648,8 @@ class Transactions(APIView):
 
 class TransactionsById(APIView):
     '''Get transaction by ID view.'''
+    authentication_classes = (TokenAuthentication,)
+
     @si.inject
     def __init__(self, _deps):
         StorageManagementService = _deps['StorageManagementService']
@@ -660,6 +687,8 @@ class TransactionsById(APIView):
 
 class GetStorageValue(View):
     '''Get storage value view.'''
+    authentication_classes = (TokenAuthentication,)
+
     @si.inject
     def __init__(self, _deps):
         storage_management_service = _deps['StorageManagementService']
@@ -684,6 +713,8 @@ class GetStorageValue(View):
 
 class GetStorageCost(APIView):
     '''Get storage cost API view.'''
+    authentication_classes = (TokenAuthentication,)
+
     @si.inject
     def __init__(self, _deps, *args):
         storage_management_service = _deps['StorageManagementService']
@@ -721,6 +752,8 @@ class GetArticleAlternatives(View):
        their attributes. If an article id and a storage id is entered, the
        method returns the id for alternative articles and the amount of
        the alternative articles in that storage'''
+    authentication_classes = (TokenAuthentication,)
+
     @si.inject
     def __init__(self, _deps):
         article_management_service = _deps['ArticleManagementService']
@@ -765,6 +798,8 @@ class GetArticleAlternatives(View):
 # FR 8.1 start #
 class SearchForArticleInStorages(View):
     '''Search for article in storages view.'''
+    authentication_classes = (TokenAuthentication,)
+
     @si.inject
     def __init__(self, _deps):
         OrderService = _deps['OrderService']
@@ -836,6 +871,8 @@ class SearchForArticleInStorages(View):
 
 class ArticleToCompartmentByQRcode(APIView):
     '''Change Article linked to Compartment by using QR code.'''
+    authentication_classes = (TokenAuthentication,)
+
     @si.inject
     def __init__(self, _deps):
         self.storage_management_service: StorageManagementService = (
@@ -879,6 +916,8 @@ class ArticleToCompartmentByQRcode(APIView):
 
 class getEconomy(APIView):
     '''Returns the total value in storage, and the average turnover rate'''
+    authentication_classes = (TokenAuthentication,)
+
     @si.inject
     def __init__(self, _deps, *args):
         storage_management_service = _deps['StorageManagementService']
@@ -909,6 +948,8 @@ class getEconomy(APIView):
 class MoveArticle(APIView):
     '''Move an amount of a specific article from one compartment to another one.
         This will create two transactions, one for the withdrawal and one for the deposit.'''
+    authentication_classes = (TokenAuthentication,)
+
     @si.inject
     def __init__(self, _deps, *args):
         storage_management_service = _deps['StorageManagementService']

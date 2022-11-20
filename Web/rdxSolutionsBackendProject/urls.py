@@ -25,5 +25,7 @@ urlpatterns = [
     path("api/accounts/", include("django.contrib.auth.urls")),
     path('api/admin/', admin.site.urls),
     path('api/', include('backend.urls')),
+    # Needed for automatic deletion of tokens after expiry.
+    path(r'api/auth/', include('knox.urls'))
 
 ]

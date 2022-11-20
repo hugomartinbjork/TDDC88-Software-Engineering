@@ -34,6 +34,7 @@ class UserAccess():
         except Exception:
             return None
 
+    # Not needed anymore but kept if we want to move knox token creation down to this layer.
     def create_auth_token(request):
         '''Creates and returns authentication token for user in request.'''
         try:
