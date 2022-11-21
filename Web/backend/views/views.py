@@ -376,7 +376,7 @@ class LoginWithCredentials(APIView):
         serialized_user = UserInfoSerializer(user)
         data = {
             "user:": serialized_user.data,
-            "token:": AuthToken.objects.get_or_create(auth)[1]
+            "token:": AuthToken.objects.create(auth)[1]
         }
         return JsonResponse(data, status=status.HTTP_200_OK)
 
