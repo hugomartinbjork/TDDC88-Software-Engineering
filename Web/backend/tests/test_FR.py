@@ -143,16 +143,6 @@ class FR6_2_test(TestCase):
         self.assertNotEqual(test_search_compartment.amount, 3) 
 
 
-#Testing FR1.2
-
-
-# class FR1_2_test(TestCase):
-
-#     def setUp(self):
-
-#         UserInfo.objects.create(name)
-
-
 #Testing FR8.9
 # Desc: The system shall allow users to choose which storage unit to search within.
 # Sytemtest later instead??
@@ -360,29 +350,6 @@ class FR_5_7(TestCase):
         # When we don't have enough in the central
         # storage, the wait time is 14 days
         self.assertEqual(calculated_wait_time, 14)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 class FR1_2_Test(TestCase): 
     def setUp(self):
