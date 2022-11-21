@@ -3,6 +3,8 @@ from backend.services.userService import UserService
 from rest_framework.views import APIView
 from django.http import Http404, JsonResponse, HttpResponseBadRequest
 from ..serializers import UserInfoSerializer
+from rest_framework.response import Response
+from rest_framework import status
 
 
 class User(APIView):
@@ -18,10 +20,60 @@ class User(APIView):
 #            if not request.user.has_perm('backend.view_group'):
  #               raise PermissionDenied
             user = self.userService.get_user_info(user_id)
-            print(user)
             if user is None:
                 raise Http404("Could not find user")
             serializer = UserInfoSerializer(user)
             if serializer.is_valid:
-                return JsonResponse(serializer.data, safe=False, status=200)
-        return HttpResponseBadRequest
+                return Response(serializer.data, status=200)
+        return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+    def put(self, request, user_id):
+        '''Edit user'''
+        json_body = request.data
+        try:
+            barcode_id = json_body['barcodeId']
+        except: 
+            barcode_id = None
+        try:
+            nfc_id = json_body['nfcId']
+        except:
+            nfc_id = None
+        try:
+            username = json_body['username']
+        except:
+            username = None
+        try:
+            password = json_body['password']
+        except:
+            password = None
+        try:
+            cost_center = json_body['costCenters']
+        except:
+            cost_center = None
+        try:
+            group = json_body['role']
+        except:
+            group = None
+
+ #       user = self.userService.get_user_info(user_id)
+  #      if user is None:
+   #         raise Http404("Could not find user")
+        updated_user = self.userService.update_user(user_id=user_id,barcode_id=barcode_id,nfc_id=nfc_id, username=username, 
+        password=password, cost_center=cost_center, group=group  )
+        print(updated_user)
+        serialized_order = UserInfoSerializer(updated_user)
+        if serialized_order.is_valid:
+            return Response(serialized_order.data, status=200)
+        return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+
+    def delete(self, request, user_id):
+        '''Delete order func'''
+        deleted = self.userService.delete_user(user_id=user_id)
+        if deleted is None:
+            return HttpResponseBadRequest
+        return Response(status=status.HTTP_204_NO_CONTENT)
