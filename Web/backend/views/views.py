@@ -986,7 +986,7 @@ class MoveArticle(APIView):
             else:
                 if unit == "output":
                     add_output_unit = False
-                else:
+                elif unit == "input":
                     add_output_unit = True
 
                 time_of_transaction = date.today()
@@ -1006,8 +1006,6 @@ class MoveArticle(APIView):
                         time_of_transaction=time_of_transaction))
                 '''Prints JsonResponse directly instead of using Serializer'''
                 data = {}
-                '''Id of the transaction created when takeout'''
-                data['id'] = str(from_transaction.id)
                 data['userId'] = str(user.id)
                 data['timeStamp'] = time_of_transaction
                 data['fromCompartmentQrCode'] = from_compartment_qr_code
