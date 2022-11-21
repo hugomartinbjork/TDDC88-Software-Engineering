@@ -362,8 +362,6 @@ class LoginWithCredentials(APIView):
         password = request.data.get('password')
 
         if not username or not password:
-            # return Response({'error': 'Authorization information is missing or invalid'},
-            #                 status=status.HTTP_401_UNAUTHORIZED)
             raise AuthenticationFailed
 
         auth = authenticate(username=username, password=password)
@@ -376,7 +374,7 @@ class LoginWithCredentials(APIView):
         serialized_user = UserInfoSerializer(user)
         data = {
             "user:": serialized_user.data,
-            "token:": AuthToken.objects.get_or_create(auth)[1]
+            "token:": AuthToken.objects.create(auth)[1]
         }
         return JsonResponse(data, status=status.HTTP_200_OK)
 
