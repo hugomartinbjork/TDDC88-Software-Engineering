@@ -4,17 +4,17 @@ from backend.services.userService import UserService
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.authentication import TokenAuthentication
 
 from django.http import Http404, HttpResponseBadRequest
 from ..serializers import UserInfoSerializer
-from rest_framework.response import Response
-from rest_framework import status
 
 
 class User(APIView):
     '''View for getting all users and posting a user to the DB. 
     Should only be accessable by admins'''
 
+    authentication_classes = (TokenAuthentication,)
     @si.inject
     def __init__(self, _deps, *args):
         self.userService: UserService = _deps['UserService']()
@@ -59,6 +59,8 @@ class User(APIView):
 
 class UserId(APIView):
     '''User'''
+
+    authentication_classes = (TokenAuthentication,)
     @si.inject
     def __init__(self, _deps, *args):
         self.userService: UserService = _deps['UserService']()
