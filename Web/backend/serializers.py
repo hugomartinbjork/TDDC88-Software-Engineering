@@ -19,6 +19,7 @@ from backend.coremodels.ordered_article import OrderedArticle
 from backend.coremodels.inputOutput import InputOutput
 
 
+
 class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
@@ -70,18 +71,25 @@ class GroupSerializer(serializers.ModelSerializer):
 
 
 class TransactionSerializer(serializers.ModelSerializer):
-    userId = serializers.PrimaryKeyRelatedField(source='by_user.id', read_only=True)
+    id = serializers.CharField(read_only=True)
+    userId = serializers.CharField(source='by_user.id', read_only=True)
     timeStamp = serializers.CharField(source='time_of_transaction', read_only=True)
-    lioNr = serializers.PrimaryKeyRelatedField(source='article.lio:id', read_only=True)
+    lioNr = serializers.PrimaryKeyRelatedField(source='article.lio_id', read_only=True)
     storageId = serializers.PrimaryKeyRelatedField(source='storage.id', read_only=True)
-    quantity = serializers.CharField(source='amount', read_only=True)
-   #operation = serializers.CharField(source='operation', read_only=True)
+    quantity = serializers.IntegerField(source='amount', read_only=True)
+
 
     class Meta:
         model = Transaction
         fields = ('id', 'userId', 'timeStamp', 'lioNr',
                   'storageId', 'quantity', 'unit', 'operation')
 
+    # def create(self, validated_data):
+    #     displayed = validated_data.pop('operation')
+    #     back_dict = {k:v for v, k in models.Experiment.RESULTS}
+    #     res = back_dict[displayed]
+    #     validated_data.update({'inferred_result': res})
+    #     return super(ResultsSeializer, self).create(validated_data)
 
 class AlternativeNameSerializer(serializers.ModelSerializer):
     class Meta:
