@@ -40,11 +40,15 @@ class SupportDifferentUsers(TestCase):
         self.user_service : UserService = UserService()
         cost_center1 = CostCenter.objects.create(id="123")
         self.user1 = User.objects.create(username="MIV-Employee", password="TDDC88")
-        self.user_info1 = UserInfo.objects.create(user = self.user1, cost_center = cost_center1)
+        self.user_info1 = UserInfo.objects.create(user = self.user1)
         self.user2 = User.objects.create(username="Medical Employee", password="TDDC88")
-        self.user_info2 = UserInfo.objects.create(user = self.user2, cost_center = cost_center1)
+        self.user_info2 = UserInfo.objects.create(user = self.user2)
         self.user3 = User.objects.create(username="Inventory Employee", password="TDDC88")
-        self.user_info3 = UserInfo.objects.create(user = self.user3, cost_center = cost_center1)
+        self.user_info3 = UserInfo.objects.create(user = self.user3)
+        self.user_info1.cost_center.add(cost_center1)
+        self.user_info2.cost_center.add(cost_center1)
+        self.user_info3.cost_center.add(cost_center1)
+
     def test_setup_users(self):
         #By getting info from database we can verify that we it was created.
         test_user_creation1 = self.user_service.get_user_info(self.user1)
@@ -354,39 +358,42 @@ class FR_5_7(TestCase):
         # storage, the wait time is 14 days
         self.assertEqual(calculated_wait_time, 14)
 
-class FR1_2_Test(TestCase): 
-    def setUp(self):
+# class FR1_2_Test(TestCase): 
+#     def setUp(self):
 
-        #create User service instance & a cost center
-        self.order_service : UserService = UserService()
-        self.cost_center1 = CostCenter.objects.create(id="1234")
-        self.cost_center2 = CostCenter.objects.create(id="12345")
+#         #create User service instance & a cost center
+#         self.order_service : UserService = UserService()
+#         cost_center1 = CostCenter.objects.create(id="1234")
+#         cost_center2 = CostCenter.objects.create(id="12345")
        
         
-        #create 2 mock users with 2 different roles
+#         #create 2 mock users with 2 different roles
 
-        #2 roles one "manager-role" & one "nurse-role"
-        self.role1 = Group.objects.create(name = "manager")
-        self.role2 = Group.objects.create(name = "nurse")
+#         #2 roles one "manager-role" & one "nurse-role"
+#         self.role1 = Group.objects.create(name = "manager")
+#         self.role2 = Group.objects.create(name = "nurse")
 
-        #create one user with cost-center with id "1234" and the role as "manager"
-        self.user1 = User.objects.create(username="userOne", password="TDDC88")
-        self.use_info1 = UserInfo.objects.create(user = self.user1, cost_center = self.cost_center1, group = self.role1)
+#         #create one user with cost-center with id "1234" and the role as "manager"
+#         self.user1 = User.objects.create(username="userOne", password="TDDC88")
+#         self.use_info1 = UserInfo.objects.create(user = self.user1, group = self.role1)
+#         self.use_info1.cost_center.add(cost_center1)
 
-        #create one user with cost-center with id "12345" and the role as "nurse"
-        self.user2 = User.objects.create(username="userTwo", password="TDDC88")
-        self.use_info2 = UserInfo.objects.create(user = self.user2, cost_center = self.cost_center2, group = self.role2)
+#         #create one user with cost-center with id "12345" and the role as "nurse"
+#         self.user2 = User.objects.create(username="userTwo", password="TDDC88")
+#         self.use_info2 = UserInfo.objects.create(user = self.user2, group = self.role2)
+#         self.use_info2.cost_center.add(cost_center2)
           
-    def test_FR1_2(self):
-
-        #test that a user have a  a role, username, password, cost-center
-        self.assertEqual(self.use_info1.group, self.role1)
-        self.assertEqual(self.use_info1.user.username, "userOne")
-        self.assertNotEqual(self.use_info1.user.username, "userTwo")
-        self.assertEqual(self.use_info1.user.password, "TDDC88")
-        self.assertNotEqual(self.use_info1.user.password, "TDDC888")
-        self.assertEqual(self.use_info1.cost_center, self.cost_center1)
-        self.assertNotEqual(self.use_info1.cost_center, self.cost_center2)
+#     def test_FR1_2(self):
+#         test_user1 = self.use_info1
+#         test_user2 = self.use_info2
+#         #test that a user have a  a role, username, password, cost-center
+#         self.assertEqual(self.use_info1.group, self.role1)
+#         self.assertEqual(self.use_info1.user.username, "userOne")
+#         self.assertNotEqual(self.use_info1.user.username, "userTwo")
+#         self.assertEqual(self.use_info1.user.password, "TDDC88")
+#         self.assertNotEqual(self.use_info1.user.password, "TDDC888")
+#         self.assertEqual(self.use_info1.cost_center, test_user1)
+#         self.assertNotEqual(self.use_info1.cost_center, test_user2)
 
 
 #Testing API endpoint requirement: Get order by ID (Task 15.3.1.)
