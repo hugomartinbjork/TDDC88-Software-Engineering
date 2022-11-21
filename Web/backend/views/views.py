@@ -436,7 +436,7 @@ class SeeAllStorages(View):
                     serialized_compartments = []
                     for compartment in compartments:
                         serialized_compartments.append(
-                            CompartmentCompartmentSerializer(compartment).data)
+                            CompartmentSerializer(compartment).data)
                     data['compartments'] = serialized_compartments
                     serialized_storages.append(data)
 

@@ -22,7 +22,8 @@ yamllint:
 
 test-backend:
    stage: test
-   needs: []
+   needs: 
+     - yamllint
    image: python:3.8.10
    script:
      - pip install -r Web/requirements.txt
@@ -39,6 +40,7 @@ image-rdx-backend:
      - dev
   needs:
      - test-backend
+     - yamllint
 
 
   script:
@@ -56,8 +58,7 @@ image-rdx-backend:
 deploy-test-k8s-connection:
   stage: deploy
   image: bitnami/kubectl
-  needs:
-    - test-backend
+  needs: []
   only:
     - main
     - dev
@@ -66,8 +67,7 @@ deploy-test-k8s-connection:
 deploy-k8s-regcred:
   stage: deploy
   image: bitnami/kubectl
-  needs:
-    - deploy-test-k8s-connection
+  needs: []
   only:
     - main
     - dev
@@ -102,7 +102,11 @@ deploy-postgres:
   - main
   - dev
   needs:
-   - test-backend
+    - deploy-test-k8s-connection
+    - deploy-k8s-regcred
+    - image-rdx-backend
+    - yamllint
+    - test-backend
   script:
    - kubectl get all
    - kubectl apply -f k8/postgres.yaml
