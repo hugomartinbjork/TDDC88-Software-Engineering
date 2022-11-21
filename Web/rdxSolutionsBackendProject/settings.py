@@ -46,30 +46,39 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'rest_framework.authtoken',
+    'knox',
     'backend',
     'django_probes',
 
 ]
 
-
+SALT = 'k7*rsf2B*QFOc+!#nJZGPKs@6z02+h'
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
+    'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.BasicAuthentication',
-        # 'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'knox.auth.TokenAuthentication'
+    ),
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated'
     ],
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
     ],
-    'AUTHENTICATION_BACKENDS' : [
-    'django.contrib.auth.backends.ModelBackend',
-]
+    'AUTHENTICATION_BACKENDS': [
+        'django.contrib.auth.backends.ModelBackend',
+    ]
 }
 
-AUTH_TOKEN_VALIDITY = getattr(
-    settings, 'AUTH_TOKEN_VALIDITY', timedelta(hours=10))
+REST_KNOX = {
+    'SECURE_HASH_ALGORITHM': 'cryptography.hazmat.primitives.hashes.SHA512',
+    'AUTH_TOKEN_CHARACTER_LENGTH': 64,
+    'TOKEN_TTL': timedelta(hours=10),
+    'TOKEN_LIMIT_PER_USER': None,
+    'AUTO_REFRESH': False,
+    'AUTH_HEADER_PREFIX': 'Bearer',
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -80,7 +89,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
 ]
 
 ROOT_URLCONF = 'rdxSolutionsBackendProject.urls'
@@ -118,11 +126,11 @@ DATABASES = {
 }
 
 if DEBUG == True or 'test' in sys.argv:
-        DATABASES['default'] = {
-            'ENGINE' : 'django.db.backends.sqlite3',
-            'NAME' : 'mydatabase'
-        }
- 
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'mydatabase'
+    }
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
