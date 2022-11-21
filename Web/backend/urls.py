@@ -12,8 +12,8 @@ urlPatterns = [
     path('loginWithNFC/', views.LoginWithBarcodeOrNfc.as_view()),
 
     # User
-         path('users/', userView.User.as_view()),
-         path('users/<user_id>/', userView.User.as_view()), 
+    path('users/', userView.User.as_view()),
+    path('users/<user_id>/', userView.UserId.as_view()),
 
     # This is not a part of the API
     path('user/<int:user_id>/transactions/',

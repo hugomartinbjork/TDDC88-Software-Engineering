@@ -10,6 +10,12 @@ from rest_framework.authtoken.models import Token
 class UserAccess():
     '''User access.'''
 
+    def get_users() -> User:
+        try:
+            return UserInfo.objects.filter()
+        except Exception:
+            return None
+
     def get_user_with_barcode(barcode_id) -> User:
         '''Returns user corresponding to the sent in barcode id, 
         or None if user does not exist.'''

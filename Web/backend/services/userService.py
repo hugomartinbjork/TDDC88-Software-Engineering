@@ -13,6 +13,9 @@ from backend.dataAccess.userAccess import UserAccess
 class UserService(BaseBackend):
     '''User service.'''
 
+    def get_users(self):
+        return UserAccess.get_users()
+
     def get_user_with_barcode(self, barcode_id):
         '''Calls the access layer to get the user with the specified barcode id'''
         return UserAccess.get_user_with_barcode(barcode_id)
