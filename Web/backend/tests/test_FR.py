@@ -384,7 +384,43 @@ class FR1_2_Test(TestCase):
         self.assertNotEqual(self.use_info1.user.password, "TDDC888")
         self.assertEqual(self.use_info1.cost_center, self.cost_center1)
         self.assertNotEqual(self.use_info1.cost_center, self.cost_center2)
-       
+
+
+#Testing API endpoint requirement: Get order by ID (Task 15.3.1.)
+class API_GetOrderByID(TestCase):
+
+    def setUp(self):
+        self.storage_management_service : StorageManagementService = StorageManagementService()
+        self.article_management_service : ArticleManagementService = ArticleManagementService()
+        self.order_management_service : OrderManagementService = OrderManagementService()
+
+        #create instances of article to order
+        self.article1 = Article.objects.create(lio_id="1", name = "Plasthandskar", input = "ml", output = "ml", output_per_input = 1)
+        #create a storage
+        self.storage_in_compartment = Storage.objects.create(id="Forrad 1")
+
+        #create an order1
+        self.order1 = Order.objects.create(id="77", to_storage = self.storage_management_service.get_storage_by_id(id="Forrad 1"), estimated_delivery_date = "2022-11-19 23:16:31.285209+00:00", 
+        order_date ="2022-11-17 23:16:31.286527+00:00", order_state = "delivered")
+
+        #create an order2
+        self.order2 = Order.objects.create(id="88", to_storage = self.storage_management_service.get_storage_by_id(id="Forrad 1"), estimated_delivery_date = "2022-11-19 23:16:31.285209+00:00", 
+        order_date ="2022-08-17 23:16:31.286527+00:00", order_state = "delivered")
+
+        #create a order for "plaskhanskar" connected to our "order1"
+        self.ordered_article1 = OrderedArticle.objects.create(id="25", quantity = 3, article = self.article1, order = self.order1, unit = "input")
+
+        #create a order for "plaskhanskar" connected to our "order1"
+        self.ordered_article1 = OrderedArticle.objects.create(id="26", quantity = 3, article = self.article1, order = self.order2, unit = "input")
+
+    def test_get_order_by_ID(self):
+        order77 = self.order1
+        order88 = self.order2
+
+        #test we can get the order we want and not the wrong
+        self.assertEqual(order77, self.order_management_service.get_order_by_id("77"))
+        self.assertEqual(order88, self.order_management_service.get_order_by_id("88"))
+        self.assertNotEqual(order88, self.order_management_service.get_order_by_id("77"))
 
         
        
