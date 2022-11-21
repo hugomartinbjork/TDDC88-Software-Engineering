@@ -21,21 +21,11 @@ class UserAccess():
             new_user = User.objects.create_user(
                 username=username, email='email@email.com', password=password)
             new_user.save()
-        except:
-            return None
 
-        try:
             group = Group.objects.get(id=group_id)
-        except:
-            return None
-        try:
-            centers = []
-            for i in cost_centers:
-                print(i)
-                centers.append(CostCenter.objects.filter(id=i).first())
-        except:
-            return None
-        try:
+
+            centers = CostCenter.objects.filter(id__in=cost_centers)
+
             new_user_info = UserInfo.objects.create(
                 user=new_user, barcode_id=barcode_id, nfc_id=nfc_id, group=group)
             new_user_info.save()
@@ -84,47 +74,48 @@ class UserAccess():
         except Exception:
             return None
 
-    def update_user(self, user_id ,barcode_id ,nfc_id, username, 
-        password, cost_center, group ):
+    def update_user(self, user_id, barcode_id, nfc_id, username,
+                    password, cost_center, group):
         '''Updates the user info'''
         try:
-            updated_user=self.get_user_info(user_id=user_id)
+            updated_user = self.get_user_info(user_id=user_id)
             django_user_model = User.objects.get(username=updated_user.user)
             if username is not None:
                 django_user_model.username = username
             if password is not None:
                 django_user_model.password = password
             django_user_model.save()
-            updated_user=self.get_user_info(user_id=user_id)
+            updated_user = self.get_user_info(user_id=user_id)
             if barcode_id is not None:
                 updated_user.barcode_id = barcode_id,
             if nfc_id is not None:
                 updated_user.nfc_id = nfc_id
             if cost_center is not None:
                 try:
-                    new_cost_center= []
+                    new_cost_center = []
                     for cost_c in cost_center:
                         print(CostCenter.objects.filter(id=cost_c).first())
-                        new_cost_center.append(CostCenter.objects.filter(id=cost_c).first())
+                        new_cost_center.append(
+                            CostCenter.objects.filter(id=cost_c).first())
                     updated_user.cost_center.set(new_cost_center)
                 except:
                     Exception
             if group is not None:
                 try:
-                    new_group=Group.objects.filter(id=group).first()
-                    updated_user.group= new_group
+                    new_group = Group.objects.filter(id=group).first()
+                    updated_user.group = new_group
                 except:
                     Exception
             updated_user.save()
             return updated_user
         except Exception:
             return None
-    
+
     def delete_user(self, user_id):
         '''Deletes user'''
         try:
             user = self.get_user_info(user_id)
             User.objects.filter(user=user).delete()
-            return UserInfo.objects.filter(user=user_id).delete() 
+            return UserInfo.objects.filter(user=user_id).delete()
         except Exception:
             return None
