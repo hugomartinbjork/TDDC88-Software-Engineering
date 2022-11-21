@@ -565,9 +565,7 @@ class Transactions(APIView):
             if not request.user.has_perm('backend.get_all_transaction'):
                 raise PermissionDenied
             fromDate =request.query_params.get('fromDate', None)
-            print(fromDate)
             toDate = request.query_params.get('toDate', None)
-            print(toDate)
             limit = request.query_params.get('limit', None)
             all_transactions = (
                 self.storage_management_service.get_all_transactions(fromDate=fromDate,toDate=toDate,limit=limit))
@@ -709,8 +707,8 @@ class GetStorageCost(APIView):
 
     def get(self, request, storage_id):
         '''Get storage cost.'''
-        start_date = request.data.get('start_date')
-        end_date = request.data.get('end_date')
+        start_date = "2010-11-16T15:09:57.028Z"
+        end_date = "2023-11-16T15:09:57.028Z"
         if request.method == 'GET':
             # Custom permission to be able to see storage cost. Can be found in the coremodel storage.py
             if not request.user.has_perm('backend.get_storage_cost'):
@@ -866,8 +864,8 @@ class getEconomy(APIView):
         if storage is None:
             raise Http404("Could not find storage")
         else:
-            start_date = '2022-01-01T00:00:00.000000Z'
-            end_date = '2022-12-31T23:59:59.999999Z'
+            start_date = "2000-01-07"
+            end_date = "2020-01-07"
             '''Below is not an average value, but the current value right now since 
             get_storage_value doesn't take transactions into account'''
             value = self.storage_management_service.get_storage_value(

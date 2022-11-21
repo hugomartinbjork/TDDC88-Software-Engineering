@@ -100,7 +100,7 @@ class StorageAccess():
         '''Return every transaction. If optional querying parameters are passed, filter by these'''
         try:
             if fromDate and toDate and limit:
-                all_transactions = Transaction.objects.filter(time_of_transaction__range=(fromDate,toDate)).values()
+                all_transactions = Transaction.objects.filter(time_of_transaction__range=(fromDate,toDate)).order_by('-time_of_transaction').values()[:int(limit)]
             else:
                 all_transactions = Transaction.objects.all().values()
             return all_transactions
@@ -135,6 +135,8 @@ class StorageAccess():
         '''Return transaction from storage id.'''
         try:
             return Transaction.objects.filter(storage=storage_id, time_of_transaction__range=(start,end))
+   
+            
         except Exception:
             return None
 
