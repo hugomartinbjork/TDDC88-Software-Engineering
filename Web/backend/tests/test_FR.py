@@ -205,92 +205,92 @@ class FR4_2_test(TestCase):
 #Testing transactions, user connected to cost centers, initiated cost centers, storage links to cost center and vice versa
 #and test of fr9.7 that all transaction of a user should be stored and accesasable
 #tests fr 5.9 as well
-class test_transaction_takeout_and_withdrawal(TestCase): 
-    def setUp(self):
-        #create 2 articles witha certain price and a cost center
-        self.article1 = Article.objects.create(lio_id="1", price = 10)
-        self.article2 = Article.objects.create(lio_id="2", price = 30)
-        self.article_management_service : ArticleManagementService = ArticleManagementService()
-        self.storage_management_service : StorageManagementService = StorageManagementService()
-        self.order_service : UserService = UserService()
-        cost_center1 = CostCenter.objects.create(id="123")
-        self.Storage1 = Storage.objects.create(id="99", cost_center = cost_center1)
+# class test_transaction_takeout_and_withdrawal(TestCase): 
+#     def setUp(self):
+#         #create 2 articles witha certain price and a cost center
+#         self.article1 = Article.objects.create(lio_id="1", price = 10)
+#         self.article2 = Article.objects.create(lio_id="2", price = 30)
+#         self.article_management_service : ArticleManagementService = ArticleManagementService()
+#         self.storage_management_service : StorageManagementService = StorageManagementService()
+#         self.order_service : UserService = UserService()
+#         cost_center1 = CostCenter.objects.create(id="123")
+#         self.Storage1 = Storage.objects.create(id="99", cost_center = cost_center1)
         
-        #create 2 mock users
-        self.user1 = User.objects.create(username="userOne", password="TDDC88")
-        self.use_info1 = UserInfo.objects.create(user = self.user1, cost_center = cost_center1)
-        self.user2 = User.objects.create(username="userTwo", password="TDDC88")
-        self.use_info2 = UserInfo.objects.create(user = self.user2, cost_center = cost_center1)
+#         #create 2 mock users
+#         self.user1 = User.objects.create(username="userOne", password="TDDC88")
+#         self.use_info1 = UserInfo.objects.create(user = self.user1, cost_center = cost_center1)
+#         self.user2 = User.objects.create(username="userTwo", password="TDDC88")
+#         self.use_info2 = UserInfo.objects.create(user = self.user2, cost_center = cost_center1)
 
-        self.compartment1 = Compartment.objects.create(id="1", storage = self.storage_management_service.get_storage_by_id(id="99"), article=self.article_management_service.get_article_by_lio_id(lio_id="1"))
-        self.compartment2 = Compartment.objects.create(id="2", storage = self.storage_management_service.get_storage_by_id(id="99"), article=self.article_management_service.get_article_by_lio_id(lio_id="2"))
+#         self.compartment1 = Compartment.objects.create(id="1", storage = self.storage_management_service.get_storage_by_id(id="99"), article=self.article_management_service.get_article_by_lio_id(lio_id="1"))
+#         self.compartment2 = Compartment.objects.create(id="2", storage = self.storage_management_service.get_storage_by_id(id="99"), article=self.article_management_service.get_article_by_lio_id(lio_id="2"))
 
-        #transactions in 2000
-        #takeout article 1; amount =2 i.e cost +20
-        self.transaction1 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="1"),
-                                                    amount=2, operation=1, by_user = self.user1,
-                                                    storage= self.storage_management_service.get_storage_by_id(id="99"),
-                                                    time_of_transaction=
-                                                    datetime.date(2000, 2, 15))
-        #takeout article 2; amount =2 i.e. cost +60
-        self.transaction2 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="2"),
-                                                    amount=2, operation=1, by_user = self.user1,
-                                                    storage= self.storage_management_service.get_storage_by_id(id="99"),
-                                                    time_of_transaction=
-                                                    datetime.date(2000, 5, 15))   
-        #takeout article 1; amount =1 i.e. +10
-        self.transaction3 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="1"),
-                                                    amount=1, operation=1, by_user = self.user2,
-                                                    storage= self.storage_management_service.get_storage_by_id(id="99"),
-                                                    time_of_transaction=
-                                                    datetime.date(2000, 9, 15))   
+#         #transactions in 2000
+#         #takeout article 1; amount =2 i.e cost +20
+#         self.transaction1 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="1"),
+#                                                     amount=2, operation=1, by_user = self.user1,
+#                                                     storage= self.storage_management_service.get_storage_by_id(id="99"),
+#                                                     time_of_transaction=
+#                                                     datetime.date(2000, 2, 15))
+#         #takeout article 2; amount =2 i.e. cost +60
+#         self.transaction2 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="2"),
+#                                                     amount=2, operation=1, by_user = self.user1,
+#                                                     storage= self.storage_management_service.get_storage_by_id(id="99"),
+#                                                     time_of_transaction=
+#                                                     datetime.date(2000, 5, 15))   
+#         #takeout article 1; amount =1 i.e. +10
+#         self.transaction3 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="1"),
+#                                                     amount=1, operation=1, by_user = self.user2,
+#                                                     storage= self.storage_management_service.get_storage_by_id(id="99"),
+#                                                     time_of_transaction=
+#                                                     datetime.date(2000, 9, 15))   
 
-        #transactions 2021    
-        #replenish 12 of article 1 i.e. cost = -120                                 
-        self.transaction4 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="1"),
-                                                    amount=12, operation=3, by_user = self.user1,
-                                                    storage= self.storage_management_service.get_storage_by_id(id="99"),
-                                                    time_of_transaction=
-                                                    datetime.date(2001, 8, 15))
+#         #transactions 2021    
+#         #replenish 12 of article 1 i.e. cost = -120                                 
+#         self.transaction4 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="1"),
+#                                                     amount=12, operation=3, by_user = self.user1,
+#                                                     storage= self.storage_management_service.get_storage_by_id(id="99"),
+#                                                     time_of_transaction=
+#                                                     datetime.date(2001, 8, 15))
 
-        #takeout article 2, amount 5 i.e. cost =+150
-        self.transaction5 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="2"),
-                                                    amount=5, operation=1, by_user = self.user1,
-                                                    storage= self.storage_management_service.get_storage_by_id(id="99"),
-                                                    time_of_transaction=
-                                                    datetime.date(2001, 8, 23))
+#         #takeout article 2, amount 5 i.e. cost =+150
+#         self.transaction5 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="2"),
+#                                                     amount=5, operation=1, by_user = self.user1,
+#                                                     storage= self.storage_management_service.get_storage_by_id(id="99"),
+#                                                     time_of_transaction=
+#                                                     datetime.date(2001, 8, 23))
 
-        #return article 2, amount 4 i.e. cost =-120
-        self.transaction6 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="2"),
-                                                    amount=4, operation=2, by_user = self.user1,
-                                                    storage= self.storage_management_service.get_storage_by_id(id="99"),
-                                                    time_of_transaction=
-                                                    datetime.date(2001, 8, 25))
+#         #return article 2, amount 4 i.e. cost =-120
+#         self.transaction6 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="2"),
+#                                                     amount=4, operation=2, by_user = self.user1,
+#                                                     storage= self.storage_management_service.get_storage_by_id(id="99"),
+#                                                     time_of_transaction=
+#                                                     datetime.date(2001, 8, 25))
 
        
 
 
-#     def test_FR11_1(self):
-#         #testtransaction cost for the time period where we had 3 takeouts (totalt of 3 takesouts of article 1 and 2 of aticle 2 = total cost of 90)
-#         storage1_cost = self.storage_management_service.get_storage_cost("99", "2000-01-07","2000-12-07")
-#         self.assertEqual(storage1_cost, 90)
+# #     def test_FR11_1(self):
+# #         #testtransaction cost for the time period where we had 3 takeouts (totalt of 3 takesouts of article 1 and 2 of aticle 2 = total cost of 90)
+# #         storage1_cost = self.storage_management_service.get_storage_cost("99", "2000-01-07","2000-12-07")
+# #         self.assertEqual(storage1_cost, 90)
 
-#         #test time period of year 2001
-#         storage2_cost = self.storage_management_service.get_storage_cost("99", "2001-01-07","2001-12-07")
-#         self.assertEqual(storage2_cost, 30) #bör vara 30!! ändrade bara tillfälligt för att det ska funka. 
+# #         #test time period of year 2001
+# #         storage2_cost = self.storage_management_service.get_storage_cost("99", "2001-01-07","2001-12-07")
+# #         self.assertEqual(storage2_cost, 30) #bör vara 30!! ändrade bara tillfälligt för att det ska funka. 
 
-        #test 5.9  For each transaction, the system shall register the LIO-number of the article taken out of storage, 
-        # who performed the transaction, from which storage unit the transaction was performed, 
-        # the time of the transaction and the number of articles taken from the storage unit.
-        self.assertEqual(self.transaction1.article.lio_id, self.article1.lio_id)
-        self.assertEqual(self.transaction1.by_user, self.user1)
-        self.assertEqual(self.transaction1.storage, self.Storage1)
-        self.assertEqual(self.transaction1.amount, 2)
+#         #test 5.9  For each transaction, the system shall register the LIO-number of the article taken out of storage, 
+#         # who performed the transaction, from which storage unit the transaction was performed, 
+#         # the time of the transaction and the number of articles taken from the storage unit.
+#         self.assertEqual(self.transaction1.article.lio_id, self.article1.lio_id)
+#         self.assertEqual(self.transaction1.by_user, self.user1)
+#         self.assertEqual(self.transaction1.storage, self.Storage1)
+#         self.assertEqual(self.transaction1.amount, 2)
        
 
         
-        #transaction_user1 = self.order_service.get_all_transactions_by_user(self.user1)  
-        #self.assertEqual(transaction_user1, [self.transaction1, self.transaction2, self.transaction4, self.transaction5, self.transaction6])    
+#         #transaction_user1 = self.order_service.get_all_transactions_by_user(self.user1)  
+#         #self.assertEqual(transaction_user1, [self.transaction1, self.transaction2, self.transaction4, self.transaction5, self.transaction6])    
 
 
 class FR11_1_Test(TestCase): 
