@@ -56,6 +56,7 @@ class User(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 class UserId(APIView):
     '''User'''
     @si.inject
@@ -76,13 +77,12 @@ class UserId(APIView):
                 return Response(serializer.data, status=200)
         return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
     def put(self, request, user_id):
         '''Edit user'''
         json_body = request.data
         try:
             barcode_id = json_body['barcodeId']
-        except: 
+        except:
             barcode_id = None
         try:
             nfc_id = json_body['nfcId']
@@ -108,17 +108,13 @@ class UserId(APIView):
  #       user = self.userService.get_user_info(user_id)
   #      if user is None:
    #         raise Http404("Could not find user")
-        updated_user = self.userService.update_user(user_id=user_id,barcode_id=barcode_id,nfc_id=nfc_id, username=username, 
-        password=password, cost_center=cost_center, group=group  )
+        updated_user = self.userService.update_user(user_id=user_id, barcode_id=barcode_id, nfc_id=nfc_id, username=username,
+                                                    password=password, cost_center=cost_center, group=group)
         print(updated_user)
         serialized_order = UserInfoSerializer(updated_user)
         if serialized_order.is_valid:
             return Response(serialized_order.data, status=200)
         return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-
-
 
     def delete(self, request, user_id):
         '''Delete order func'''
