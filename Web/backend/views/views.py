@@ -588,12 +588,15 @@ class Transactions(APIView):
             raise PermissionDenied
         compartment = self.storage_management_service.get_compartment_by_qr(
             qr_code=request.data.get("qrCode"))
+        storage = self.storage_management_service.get_storage_by_id(request.data.get('storageId'))
         if compartment is None:
             return Response({'error': 'Could not find compartment'},
                             status=status.HTTP_400_BAD_REQUEST)
+        if compartment.storage.id != storage.id:
+            return Response({'error': 'Could not find compartment in storage'},
+                            status=status.HTTP_400_BAD_REQUEST)
         else:
-            storage = self.storage_management_service.get_storage_by_id(
-                id=compartment.id)
+        
             amount = request.data.get("quantity")
             unit = request.data.get("unit")
             user = request.user
@@ -603,7 +606,7 @@ class Transactions(APIView):
             if time_of_transaction == "" or time_of_transaction is None:
                 time_of_transaction = date.today()
 
-            if unit == "output":
+            if unit == "input":
                 add_output_unit = False
             else:
                 add_output_unit = True
@@ -642,7 +645,6 @@ class Transactions(APIView):
                         time_of_transaction=time_of_transaction))
                 return JsonResponse(TransactionSerializer(transaction).data,
                                     status=200)
-
 
 class TransactionsById(APIView):
     '''Get transaction by ID view.'''
