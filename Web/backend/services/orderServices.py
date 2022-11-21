@@ -1,8 +1,9 @@
 from backend.__init__ import serviceInjector as si
 from ..__init__ import dataAccessInjector as di
 
-from backend.dataAccess.centralStorageAccess import CentralStorageAccess
+from ..dataAccess.centralStorageAccess import CentralStorageAccess
 from ..dataAccess.orderAccess import OrderAccess
+from ..dataAccess.storageAccess import StorageAccess
 
 from backend.coremodels.order import Order
 from backend.coremodels.storage import Storage
@@ -21,6 +22,14 @@ class OrderService():
         self.order_access: OrderAccess = _deps["OrderAccess"]()
         self.central_storage_access: CentralStorageAccess = _deps[
             "CentralStorageAccess"]()
+        self.storage_access: StorageAccess = _deps[
+            "StorageAccess"]()
+
+    def get_orders(self) -> Order:
+        return self.order_access.get_orders()
+
+    def delete_order(self, id):
+        return self.order_access.delete_order(id=id)
 
 # Returns None if the order does not exist. Otherwise returns the order.
     def has_order(self, storage_id, article_id) -> Order:
@@ -28,8 +37,6 @@ class OrderService():
         return self.order_access.get_order_by_article_and_storage(
             storage_id=storage_id, article_id=article_id)
 
-    # Updates the storage space amount with the amount in the order.
-    # If order_arrived returns None, return error 404 in view.
     def order_arrived(self, order_id) -> Order:
         '''Order arrived.'''
         order = self.order_access.get_order_by_id(order_id)
@@ -37,19 +44,34 @@ class OrderService():
         if order is None:
             return None
 
-        # Checks if the order is already processesed so we dont process
-        #  the same order twice.
-        if order.has_arrived:
+        ordered_articles = OrderAccess.get_ordered_articles(order_id)
+
+        if ordered_articles is None:
             return None
 
-        # TODO: this should use StorageAccess
-        storage = Storage.objects.get(id=order.to_storage)
-        compartment = Compartment.objects.get(storage=storage)
+        # So we do not handle same order twice.
+        if order.order_state == "delivered":
+            return None
 
-        compartment.amount = + order.amount
-        compartment.save()
+        # storage = Storage.objects.get(id=order.to_storage)
+        storage = self.storage_access.get_storage(order.to_storage.id)
+        for ordered_article in ordered_articles:
+            compartment = Compartment.objects.get(
+                storage=storage, article=ordered_article.article)
 
-        order.has_arrived = True
+            if compartment == None:
+                return None
+
+            if ordered_article.unit == "output":
+                compartment.amount += ordered_article.quantity
+                compartment.save()
+            elif ordered_article.unit == "input":
+                article = Article.objects.filter(
+                    lio_id=ordered_article.article.lio_id).first()
+                compartment.amount += ordered_article.quantity * article.output_per_input
+                compartment.save()
+
+        order.order_state = "delivered"
         order.save()
         return order
 
@@ -59,7 +81,7 @@ class OrderService():
         '''Calculate expected wait.'''
         central_storage_stock = (
             CentralStorageAccess.get_stock_by_article_id(self,
-                article_id=article_id))
+                                                         article_id=article_id))
         if central_storage_stock is None:
             central_storage_stock = 0
         if central_storage_stock > amount:
@@ -74,8 +96,6 @@ class OrderService():
     def place_order(self, storage_id, estimated_delivery_date, ordered_articles):
         '''Creates an order, saves in in the database and then returns said order.
         If order can't be created, None is returned'''
-        print("pooperscooper")
-        print(ordered_articles)
         order = OrderAccess.create_order(
             storage_id=storage_id, estimated_delivery_date=estimated_delivery_date)
         if order is not None:
@@ -129,3 +149,10 @@ class OrderService():
     def create_ordered_article(lio_id, quantity, unit, order):
         '''Creates an ordered_article model'''
         return OrderAccess.create_ordered_article(lio_id, quantity, unit, order)
+
+    def get_ordered_articles(self, order_id):
+        '''returns article in the specified order'''
+        return OrderAccess.get_ordered_articles(order_id)
+
+    def get_all_ordered_articles(self):
+        return OrderAccess.get_all_ordered_articles()

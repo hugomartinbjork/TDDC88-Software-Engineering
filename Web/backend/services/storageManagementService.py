@@ -1,5 +1,6 @@
 # from requests import request
 # from Web.backend.views.views import Compartment
+from math import floor
 from backend.dataAccess.orderAccess import OrderAccess
 from backend.dataAccess.storageAccess import StorageAccess
 from backend.dataAccess.userAccess import UserAccess
@@ -37,10 +38,10 @@ class StorageManagementService():
         '''Returns storage space using article.'''
         return self.storage_access.get_compartment_by_id(id)
 
-    def set_storage(self, id: str, amount: int) -> int:
-        '''Set storage value. Returns amount.'''
-        return self.storage_access.set_storage_amount(compartment_id=id,
-                                                      amount=amount)
+    def get_compartment_by_storage_id(self, id: str) -> int:
+        '''Returns compartments with storage_id.'''
+        return self.storage_access.get_compartments_by_storage(
+            storage_id=id)
 
     def get_stock(self, id: str, article_id: str) -> int:
         '''Return stock.'''
@@ -75,17 +76,19 @@ class StorageManagementService():
     def edit_transaction_by_id(self, transaction_id: str, new_time_of_transaction: str) -> Transaction:
         '''Edit time of a transaction'''
         return self.storage_access.edit_transaction_by_id(transaction_id, new_time_of_transaction)
-    
+
     def set_compartment_amount(self, compartment_id: int, amount: int, username: str, add_output_unit: bool, time_of_transaction: str) -> Transaction:
         '''Set a storage to a specified level. Return a transaction.'''
-        compartment = self.storage_access.set_compartment_amount(compartment_id, amount)
+        compartment = self.storage_access.set_compartment_amount(
+            compartment_id, amount)
         storage = self.storage_access.get_storage(id=compartment.storage.id)
-        article = self.storage_access.get_article_in_compartment(compartment_id=compartment_id)
+        article = self.storage_access.get_article_in_compartment(
+            compartment_id=compartment_id)
         user = User.objects.get(username=username)
         transaction = Transaction.objects.create(
-                storage=storage, article=article, operation=4,
-                by_user=user, amount=amount,
-                time_of_transaction=time_of_transaction)
+            storage=storage, article=article, operation=4,
+            by_user=user, amount=amount,
+            time_of_transaction=time_of_transaction)
         return transaction
 
     # Storage is not connected to a costcenter atm
@@ -104,15 +107,12 @@ class StorageManagementService():
         for transaction in transactions:
             transaction_date = transaction.time_of_transaction
             transaction_date_date = transaction_date  # .date()
-            user_cost_center = self.user_access.get_user_cost_center(
-                transaction.by_user)
-            if (user_cost_center == transaction.storage.cost_center):
-                if (start_date_date <= transaction_date_date
-                        and end_date_date >= transaction_date_date):
-                    if transaction.operation == 1:
-                        takeout_value = transaction.get_value() + takeout_value
-                    if transaction.operation == 2:
-                        return_value = transaction.get_value() + return_value
+            if (start_date_date <= transaction_date_date
+                    and end_date_date >= transaction_date_date):
+                if transaction.operation == 1:
+                    takeout_value = transaction.get_value() + takeout_value
+                if transaction.operation == 2:
+                    return_value = transaction.get_value() + return_value
         sum_value = takeout_value - return_value
         return sum_value
 
@@ -189,20 +189,20 @@ class StorageManagementService():
         if (add_output_unit):
             amount_in_storage = Compartment.objects.get(
                 id=id).amount + amount
-            new_amount = amount
+            new_return_amount = amount
         else:
             amount_in_storage = Compartment.objects.get(
                 id=id).amount + amount*converter
-            new_amount = amount*converter
+            new_return_amount = amount*converter
         if (amount_in_storage < 0):
             return None
         else:
             print(amount)
-            print(new_amount)
-            Compartment.objects.update(amount=amount_in_storage)
+            print(new_return_amount)
+            Compartment.objects.filter(id=id).update(amount=amount_in_storage)
             new_transaction = Transaction.objects.create(
                 storage=storage_id, article=article, operation=2,
-                by_user=user, amount=new_amount,
+                by_user=user, amount=new_return_amount,
                 time_of_transaction=time_of_transaction)
             new_transaction.save()
             return new_transaction
@@ -231,7 +231,7 @@ class StorageManagementService():
         if (amount_in_storage < 0):
             return None
         else:
-            Compartment.objects.update(amount=amount_in_storage)
+            Compartment.objects.filter(id=id).update(amount=amount_in_storage)
             new_transaction = Transaction.objects.create(
                 storage=compartment.storage, article=article,
                 operation=1, by_user=user, amount=new_amount,
@@ -294,3 +294,56 @@ class StorageManagementService():
         return compartment
 
     # FR 9.4.1 och FR 9.4.2 ##
+
+    # 25.2.1
+    def get_nearby_storages(self, qr_code: str) -> Compartment:
+        '''Returns nearby storages containing the
+        article which is contained in the compartment which 
+        the qr_code points to. If there are no nearby storages on
+        the same floor, nearby storages in the building is
+        returned. If there are none in the building, other 
+        storages are returned. If there are no other storages
+        containing the article, None is returned.'''
+        subject_compartment = self.get_compartment_by_qr(qr_code)
+        if subject_compartment is None:
+            return None
+        subject_storage = subject_compartment.storage
+        subject_article_id = subject_compartment.article.lio_id
+
+        subject_floor = subject_storage.floor
+        subject_building = subject_storage.building
+
+        compartments = (
+            self.storage_access.get_compartments_containing_article(
+                subject_article_id))
+        if compartments is None:
+            return None
+        else:
+            floor_neigh = False
+            building_neigh = False
+            storages_on_floor = {}
+            storages_in_building = {}
+            storages_elsewhere = {}
+            for compartment in compartments:
+                if (compartment.storage.floor == subject_floor):
+                    storages_on_floor[compartment.storage] = compartment
+                    floor_neigh = True
+                elif (compartment.storage.building == subject_building):
+                    storages_in_building[compartment.storage] = compartment
+                    building_neigh = True
+                else:
+                    storages_elsewhere[compartment.storage] = compartment
+            if floor_neigh:
+                return storages_on_floor
+            elif building_neigh:
+                return storages_in_building
+            else:
+                return storages_elsewhere
+
+    def update_compartment(self, current_compartment: Compartment, new_article: Article, new_amount: int, new_std_order_amount: int, new_order_point: int):
+        '''Updates attributes in compartment.'''
+
+        self.storage_access.set_article(current_compartment, new_article)
+        self.storage_access.set_amount(current_compartment, new_amount)
+        self.storage_access.set_standard_order_amount(current_compartment, new_std_order_amount)
+        self.storage_access.set_order_point(current_compartment, new_order_point)

@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 class TransactionOperator(models.IntegerChoices):
@@ -8,25 +9,29 @@ class TransactionOperator(models.IntegerChoices):
     REPLENISH = 3
     ADJUST = 4
 
-class OrderOperator(models.IntegerChoices):
+
+class OrderOperator(models.TextChoices):
     '''Order operator that keeps track of our current state'''
-    ORDER_PLACED = 1
-    HANDLED_AT_THE_CENTRAL_DEPOT = 2
-    IN_TRANSIT = 3
-    DELIVERED = 4
-    IN_STORAGE = 5
+    ORDER_PLACED = "order placed",
+    PARTIALLY_DELIVERED = "partially delivered"
+    DELIVERED = "delivered",
 
 
+class UnitOperator(models.TextChoices):
+    '''Unit of different input and output units'''
+    MILLILITRES = "ml",
+    CENTILITRES = "cl",
+    DECILITRES = "dl",
+    LITRES = "l",
+    MILLIMETRES = "mm",
+    CENTIMETRES = "cm",
+    METRES = "m",
+    PIECES = "pieces",
+    CRATES = "crates",
+    BOTTLES = "bottles"
 
-class UnitOperator(models.IntegerChoices):
+
+class OrderedUnitOperator(models.TextChoices):
     '''Unit operator.'''
-    MILLILITRES = 1
-    CENTILITRES = 2
-    DECILITRES = 3
-    LITRES = 4
-    MILLIMETRES = 5
-    CENTIMETRES = 6
-    METRES = 7
-    PIECES = 8
-    CRATES = 9
-    BOTTLES = 10
+    INPUT = "input"
+    OUTPUT = "output"

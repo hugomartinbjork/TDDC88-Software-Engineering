@@ -6,9 +6,9 @@ from django.views.decorators.csrf import csrf_exempt
 
 urlPatterns = [
     # Authentication
-    path('loginWithCredentials/', views.Login.as_view()),
-    path('loginWithBarcode/', views.LoginWithId.as_view()),
-    #   path('loginWithNFC/', views.LoginWithId.as_view()), part of API, not yet implemented
+    path('loginWithCredentials/', views.LoginWithCredentials.as_view()),
+    path('loginWithBarcode/', views.LoginWithBarcodeOrNfc.as_view()),
+    path('loginWithNFC/', views.LoginWithBarcodeOrNfc.as_view()),
 
     # User
     #    path('/users') part of API, not yet implemented
@@ -27,8 +27,10 @@ urlPatterns = [
     #     path('articles/name/<str:name>') part of API, not yet implemented
     #     path('articles/name/<str:name>') part of API, not yet implemented
     path('articles/lio/<str:article_id>/', views.Article.as_view()),
-
+    path('articles/qr/<str:qr_code>/', views.Article.as_view()),
+    path('articles/name/<str:name>/', views.Article.as_view()),
     # article URLs below not part of API
+
     path('alternativearticles/<str:article_id>/',
          views.GetArticleAlternatives.as_view()),
     path('alternativearticles/<str:article_id>/<str:storage_id>/',
@@ -37,19 +39,20 @@ urlPatterns = [
     # Storages
     path('storages/', views.SeeAllStorages.as_view()),
     path('storages/<int:storage_id>/', views.Storage.as_view()),
-    #     path('nearbyStorages/<str:qr_code>', views.Storage.as_view()), part of API, not yet implemented
+    path('nearbyStorages/<str:qr_code>', views.NearbyStorages.as_view()),
 
     # Below storage URLs not part of API
     path('storage/<str:storage_id>/value', views.GetStorageValue.as_view()),
     path('storage/<str:storage_id>/cost', views.GetStorageCost.as_view()),
 
     # Compartments
-    # path('compartments/', views.Compartment.as_view()),
+    path('compartments/', views.Compartments.as_view()),
     path('compartments/<str:qr_code>', views.Compartments.as_view()),
-    # path('connectArticleToCompartment/<str:qr_code>', views.Compartment.as_view()), part of API, not yet implemented
-    # path('moveArticle/', views.Compartment.as_view()), part of API, not yet implemented
+    path('connectArticleToCompartment/<str:qr_code>', (
+     views.ArticleToCompartmentByQRcode.as_view())),
+    path('moveArticle/', views.MoveArticle.as_view()),
 
-    #Transactions
+    # Transactions
     path('transactions/', views.Transactions.as_view()),
     # path('transactions/<id>', views.Transactions.as_view()), part of API, not yet implemented
 
@@ -63,10 +66,10 @@ urlPatterns = [
 
     # Orders
     path('orders/', views.Order.as_view()),
-    path('orders/<int:id>/', csrf_exempt(views.Order.as_view())),
+    path('orders/<int:id>/', views.OrderId.as_view()),
 
     # Economy (no URLS implemented yet)
-    # path('economy/<storage_id>') part of API, not yet implemented
+    path('economy/<storage_id>/', views.getEconomy.as_view()),
 
 
     # grup is not part if API? Delete?
