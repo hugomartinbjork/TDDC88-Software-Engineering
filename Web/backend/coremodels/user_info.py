@@ -26,7 +26,7 @@ class UserInfo(models.Model):
         self.nfc_id = make_password(self.nfc_id, SALT)
         super().save(**kwargs)
 
-# Verkar som denna kod inte gör någonting.
+    # Might not be needed but keep it.
     # Code below extends base user model.
     # @receiver(post_save, sender=User)
     # def create_user_info(sender, instance, created, **kwargs):
