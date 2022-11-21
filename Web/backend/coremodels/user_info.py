@@ -18,13 +18,3 @@ class UserInfo(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True)
     barcode_id = models.CharField(max_length=100, null=True)
     nfc_id = models.CharField(max_length=100, null=True)
-
-    # Code below extends base user model.
-    @receiver(post_save, sender=User)
-    def create_user_info(sender, instance, created, **kwargs):
-        if created:
-            UserInfo.objects.create(user=instance)
-
-    @receiver(post_save, sender=User)
-    def save_user_info(sender, instance, **kwargs):
-        instance.userinfo.save()

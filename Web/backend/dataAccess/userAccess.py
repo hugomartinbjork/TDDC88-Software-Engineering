@@ -1,6 +1,6 @@
 from backend.coremodels.user_info import UserInfo
 from backend.coremodels.cost_center import CostCenter
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from ..__init__ import dataAccessInjector as di
 from rest_framework.authtoken.models import Token
 
@@ -12,6 +12,36 @@ class UserAccess():
     def get_users() -> User:
         try:
             return UserInfo.objects.filter()
+        except Exception:
+            return None
+
+    def create_user(username, password, barcode_id, nfc_id, cost_centers, group_id):
+        try:
+            # Have to add an mock email since this is required in the User auth model.
+            new_user = User.objects.create_user(
+                username=username, email='email@email.com', password=password)
+            new_user.save()
+        except:
+            return None
+
+        try:
+            group = Group.objects.get(id=group_id)
+        except:
+            return None
+        try:
+            centers = []
+            for i in cost_centers:
+                print(i)
+                centers.append(CostCenter.objects.filter(id=i).first())
+        except:
+            return None
+        try:
+            new_user_info = UserInfo.objects.create(
+                user=new_user, barcode_id=barcode_id, nfc_id=nfc_id, group=group)
+            new_user_info.save()
+
+            new_user_info.cost_center.add(*centers)
+            return new_user_info
         except Exception:
             return None
 

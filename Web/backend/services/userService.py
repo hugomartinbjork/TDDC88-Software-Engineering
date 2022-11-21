@@ -16,6 +16,9 @@ class UserService(BaseBackend):
     def get_users(self):
         return UserAccess.get_users()
 
+    def create_user(self, username, password, barcode_id, nfcId, cost_centers, group):
+        return UserAccess.create_user(username, password, barcode_id, nfcId, cost_centers, group)
+
     def get_user_with_barcode(self, barcode_id):
         '''Calls the access layer to get the user with the specified barcode id'''
         return UserAccess.get_user_with_barcode(barcode_id)
