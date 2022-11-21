@@ -362,8 +362,6 @@ class LoginWithCredentials(APIView):
         password = request.data.get('password')
 
         if not username or not password:
-            # return Response({'error': 'Authorization information is missing or invalid'},
-            #                 status=status.HTTP_401_UNAUTHORIZED)
             raise AuthenticationFailed
 
         auth = authenticate(username=username, password=password)
