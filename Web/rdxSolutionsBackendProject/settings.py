@@ -33,8 +33,7 @@ DEBUG = str(os.environ.get('DEBUG')) == "1"
 
 ALLOWED_HOSTS = ['*']
 
-CSRF_TRUSTED_ORIGINS = ['https://tddc88-c24.kubernetes-public.it.liu.se',
-                        'https://tddc88-c14.kubernetes-public.it.liu.se', 'http://localhost:8000/']
+CSRF_TRUSTED_ORIGINS=['https://rdx.kubernetes-public.it.liu.se', 'https://tddc88-c24.kubernetes-public.it.liu.se', 'https://tddc88-c14.kubernetes-public.it.liu.se', 'http://localhost:8000/']
 
 # Application definition
 
@@ -49,6 +48,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'knox',
     'backend',
+    'django_probes',
+
 ]
 
 SALT = 'k7*rsf2B*QFOc+!#nJZGPKs@6z02+h'
