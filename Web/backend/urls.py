@@ -37,7 +37,7 @@ urlPatterns = [
          views.GetArticleAlternatives.as_view()),
 
     # Storages
-    path('storages/', views.SeeAllStorages.as_view()),
+    path('storages', views.SeeAllStorages.as_view()),
     path('storages/<int:storage_id>/', views.Storage.as_view()),
     path('nearbyStorages/<str:qr_code>', views.NearbyStorages.as_view()),
 
