@@ -28,3 +28,7 @@ class ArticleManagementService():
     def get_supplier_article_nr(self, article: Article) -> str:
         '''Returns supplier article nr.'''
         return self.article_operations.get_supplier_article_nr(article)
+
+    def get_article_by_name(self, name: str) -> Article:
+        '''Returns article using the name of the article'''
+        return self.article_operations.get_article_by_name(name)

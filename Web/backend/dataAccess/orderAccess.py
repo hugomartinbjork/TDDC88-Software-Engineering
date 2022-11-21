@@ -106,3 +106,9 @@ class OrderAccess():
             return ordered_articles
         except Exception:
             return None
+
+    def get_all_ordered_articles():
+        try:
+            return OrderedArticle.objects.filter()
+        except Exception:
+            return None

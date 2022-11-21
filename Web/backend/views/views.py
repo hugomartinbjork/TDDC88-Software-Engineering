@@ -1,8 +1,7 @@
-from logging.config import valid_ident
-from ..serializers import AlternativeNameSerializer, StorageSerializer
+from ..serializers import AlternativeNameSerializer, StorageSerializer, ApiCompartmentSerializer, UserInfoSerializer, ApiArticleSerializer
 from ..serializers import ArticleSerializer, OrderSerializer, OrderedArticleSerializer
 from ..serializers import CompartmentSerializer, TransactionSerializer
-from ..serializers import GroupSerializer
+from ..serializers import GroupSerializer, NearbyStoragesSerializer
 
 from backend.services.articleManagementService import ArticleManagementService
 from backend.services.userService import UserService
@@ -18,13 +17,16 @@ from django.core.exceptions import PermissionDenied
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.permissions import AllowAny
 
-from django.contrib.auth import authenticate
+from knox.models import AuthToken
+from knox.auth import TokenAuthentication
+from rdxSolutionsBackendProject.settings import SALT
+
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
-from django.contrib.auth.decorators import permission_required
-from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.contrib.auth.models import Permission
-# from rest_framework.decorators import renderer_classes, api_view
 from django.http import HttpResponse
 from itertools import chain
 from operator import itemgetter
@@ -35,71 +37,56 @@ from datetime import datetime
 import datetime
 from django.utils.timezone import now
 
+
 # from Web.backend import serializers
 
 
-class Article(View):
+class Article(APIView):
     '''Article view.'''
-
+    authentication_classes = (TokenAuthentication,)
     # Dependencies are injected, I hope that we will be able to mock
     # (i.e. make stubs of) these for testing
+
     @si.inject
     def __init__(self, _deps, *args):
         self.article_management_service: ArticleManagementService = (
             _deps['ArticleManagementService']())
+        self.storage_management_service: StorageManagementService = (
+            _deps['StorageManagementService']())
 
-    def get(self, request, article_id):
+    def get(self, request, article_id=None, qr_code=None, name=None, storage_id=None):
         '''Get.'''
         if request.method == 'GET':
-            # A user can get articles if they have permission
+           # A user can get articles if they have permission
             if not request.user.has_perm('backend.view_article'):
                 raise PermissionDenied
-            article = self.article_management_service.get_article_by_lio_id(
-                article_id)
-            supplier = self.article_management_service.get_supplier(article)
-            supplier_article_nr = (
-                self.article_management_service.get_supplier_article_nr(
-                    article))
-            compartments = list(article.compartment_set.all())
-            alternative_names = list(article.alternativearticlename_set.all())
+
+            if article_id != None:
+                article = self.article_management_service.get_article_by_lio_id(
+                    article_id)
+            elif qr_code != None:
+                article = self.storage_management_service.get_article_in_compartment(
+                    qr_code)
+            elif name != None:
+                article = self.article_management_service.get_article_by_name(
+                    name)
 
             if article is None:
                 raise Http404("Could not find article")
 
-            serializer = ArticleSerializer(article)
-
-            compartment_list = []
-            unit_list = []
-            for i in compartments:
-                compartment_serializer = CompartmentSerializer(i)
-                unit_serializer = StorageSerializer(i.storage)
-
-                compartment_list.append(compartment_serializer.data)
-                unit_list.append(unit_serializer.data.get('name'))
-
-            alt_names_list = []
-            for j in alternative_names:
-                alternative_names_serializer = AlternativeNameSerializer(j)
-                alt_names_list.append(
-                    alternative_names_serializer.data.get("name"))
+            serializer = ApiArticleSerializer(article)
 
             if serializer.is_valid:
-                serializer_data = {}
-                serializer_data.update(serializer.data)
-                serializer_data["supplier"] = supplier.name
-                serializer_data["supplierArticleNr"] = supplier_article_nr
-                serializer_data["compartments"] = compartment_list
-                serializer_data["units"] = unit_list
-                serializer_data["alternative names"] = alt_names_list
-
-                return JsonResponse(serializer_data, safe=False, status=200)
+                return JsonResponse(serializer.data, safe=False, status=200)
             return HttpResponseBadRequest
 
 
-class Group(View):
+class Group(APIView):
     '''Group.'''
+    authentication_classes = (TokenAuthentication,)
     # Dependencies are injected, I hope that we will be able to mock
     # (i.e. make stubs of) these for testing
+
     @si.inject
     def __init__(self, _deps, *args):
         self.group_management_service: GroupManagementService = (
@@ -120,8 +107,10 @@ class Group(View):
 
 class Storage(View):
     '''Storage view.'''
+    authentication_classes = (TokenAuthentication,)
     # Dependencies are injected, I hope that we will be able to mock
     # (i.e. make stubs of) these for testing
+
     @si.inject
     def __init__(self, _deps, *args):
         self.storage_management_service: StorageManagementService = (
@@ -156,8 +145,10 @@ class Storage(View):
             return HttpResponseBadRequest
 
 
-class NearbyStorages(View):
+class NearbyStorages(APIView):
     '''Get nearby storages.'''
+    authentication_classes = (TokenAuthentication,)
+
     @si.inject
     def __init__(self, _deps, *args):
         self.storage_management_service: StorageManagementService = (
@@ -168,31 +159,28 @@ class NearbyStorages(View):
         contains the qr_code with a
         specific qr_code'''
         if request.method == 'GET':
-            nearby_storages = (
-                self.storage_management_service.get_nearby_storages(qr_code))
-            if nearby_storages is None:
+            # A user can see nearby storages if they have permission
+            if not request.user.has_perm('backend.view_storage'):
+                raise PermissionDenied
+            nearby_compartments = list((
+                self.storage_management_service.get_nearby_storages(
+                    qr_code)).values())
+            if nearby_compartments is None:
                 raise Http404("Could not find any nearby storages")
-
-            serializer = []
-            for key_storage in nearby_storages:
-                possible_storage = {}
-                possible_storage['id'] = key_storage.id
-                possible_storage['location'] = {
-                    'building': key_storage.building,
-                    'floor': key_storage.floor}
-                possible_storage['compartment'] = (
-                    CompartmentSerializer(nearby_storages[key_storage]).data)
-                serializer.append(possible_storage)
-                valid = True
-            if valid:
-                return JsonResponse(list(serializer), status=200, safe=False)
+            serializer = NearbyStoragesSerializer(nearby_compartments,
+                                                  read_only=True,
+                                                  many=True)
+            if serializer.is_valid:
+                return JsonResponse(serializer.data, status=200, safe=False)
             return HttpResponseBadRequest
 
 
-class Compartments(View):
+class Compartments(APIView):
     '''Compartment view.'''
+    authentication_classes = (TokenAuthentication,)
     # Dependencies are injected, I hope that we will be able to mock
     # (i.e. make stubs of) these for testing
+
     @si.inject
     def __init__(self, _deps, *args):
         self.storage_management_service: StorageManagementService = (
@@ -219,12 +207,12 @@ class Compartments(View):
         '''Post compartment.'''
         if request.method == 'POST':
             # A user can add a compartment if they have permission
-            if not request.user.has_perm('backend.add_compartment'):
-                raise PermissionDenied
-            json_body = request.POST
-            storage_id = json_body['storage_id']
+          #          if not request.user.has_perm('backend.add_compartment'):
+           #             raise PermissionDenied
+            json_body = request.data
+            storage_id = json_body['storageId']
             placement = json_body['placement']
-            qr_code = json_body['qr_code']
+            qr_code = json_body['qrCode']
             compartment = self.storage_management_service.create_compartment(
                 storage_id, placement, qr_code
             )
@@ -237,6 +225,8 @@ class Compartments(View):
 
 class Order(APIView):
     '''Order endpoint handling all request from /orders'''
+    authentication_classes = (TokenAuthentication,)
+
     @si.inject
     def __init__(self, _deps, *args):
         self.order_service: OrderService = _deps['OrderService']()
@@ -248,11 +238,32 @@ class Order(APIView):
         # A user can view orders if they have permission
         if not request.user.has_perm('backend.view_order'):
             raise PermissionDenied
+
         orders = self.order_service.get_orders()
-        serializer = OrderSerializer(orders, many=True)
-        if serializer.is_valid:
-            return Response(serializer.data)
-        return HttpResponseBadRequest
+        ordered_articles = self.order_service.get_all_ordered_articles()
+
+        serialized_articles = []
+        for ordered_article in ordered_articles:
+            real_article = self.article_management_service.get_article_by_lio_id(
+                ordered_article.article.lio_id)
+            print(ordered_article)
+            serialized_article = ArticleSerializer(real_article)
+            serialized_order_article = OrderedArticleSerializer(
+                ordered_article)
+            serialized_articles.append(serialized_article.data)
+            serialized_articles.append(serialized_order_article.data)
+            if ordered_article is None:
+                return HttpResponseBadRequest
+
+        for order in orders:
+            serialized_order = OrderSerializer(order)
+
+            if serialized_order.is_valid:
+                data = {}
+                data.update(serialized_order.data)
+                data['articles'] = serialized_articles
+                return Response(data, status=200)
+            return HttpResponseBadRequest
 
     def post(self, request, format=None):
         '''Places an order'''
@@ -280,31 +291,19 @@ class Order(APIView):
             if order is None:
                 return HttpResponseBadRequest
 
-            serialized_articles = []
             for ordered_article in ordered_articles:
-                article_in_order = OrderService.create_ordered_article(
+                OrderService.create_ordered_article(
                     ordered_article['lioNr'], ordered_article['quantity'], ordered_article['unit'], order)
-                real_article = self.article_management_service.get_article_by_lio_id(
-                    ordered_article['lioNr'])
-                serialized_article = ArticleSerializer(real_article)
-                serialized_order_article = OrderedArticleSerializer(
-                    article_in_order)
-                serialized_articles.append(serialized_article.data)
-                serialized_articles.append(serialized_order_article.data)
-                if article_in_order is None:
-                    return HttpResponseBadRequest
-
             serialized_order = OrderSerializer(order)
             if serialized_order.is_valid:
-                data = {}
-                data.update(serialized_order.data)
-                data['articles'] = serialized_articles
-                return Response(data, status=200)
+                return Response(serialized_order.data, status=200)
             return HttpResponseBadRequest
 
 
 class OrderId(APIView):
     '''Order Endpoint which handles all request coming from /orders/id'''
+    authentication_classes = (TokenAuthentication,)
+
     @si.inject
     def __init__(self, _deps, *args):
         self.order_service: OrderService = _deps['OrderService']()
@@ -313,26 +312,13 @@ class OrderId(APIView):
 
     def get(self, request, id):
         order = self.order_service.get_order_by_id(id)
-        ordered_articles = self.order_service.get_ordered_articles(order.id)
+        print(order)
+        if order is None:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        if ordered_articles is None:
-            return HttpResponseBadRequest
-
-        serialized_articles = []
-        for ordered_article in ordered_articles:
-            real_article = self.article_management_service.get_article_by_lio_id(
-                ordered_article.article.lio_id)
-            serialized_article = ArticleSerializer(real_article)
-            serialized_order_article = OrderedArticleSerializer(
-                ordered_article)
-            serialized_articles.append(serialized_article.data)
-            serialized_articles.append(serialized_order_article.data)
         serialized_order = OrderSerializer(order)
         if serialized_order.is_valid:
-            data = {}
-            data.update(serialized_order.data)
-            data['articles'] = serialized_articles
-            return Response(data, status=200)
+            return Response(serialized_order.data, status=200)
         return HttpResponseBadRequest
 
     def put(self, request, id):
@@ -340,86 +326,103 @@ class OrderId(APIView):
         Alters the state of an order to delivered and updates the amount in the correct compartments.'''
         json_body = request.data
         order_state = json_body['state']
-        ordered_articles = self.order_service.get_ordered_articles(id)
 
         if order_state == "delivered":
             updated_order = self.order_service.order_arrived(id)
 
-        if updated_order == None:
+        if updated_order is None:
             return HttpResponseBadRequest
 
-        # ugly
-        serialized_articles = []
-        for ordered_article in ordered_articles:
-            real_article = self.article_management_service.get_article_by_lio_id(
-                ordered_article.article.lio_id)
-            serialized_article = ArticleSerializer(real_article)
-            serialized_order_article = OrderedArticleSerializer(
-                ordered_article)
-            serialized_articles.append(serialized_article.data)
-            serialized_articles.append(serialized_order_article.data)
         serialized_order = OrderSerializer(updated_order)
         if serialized_order.is_valid:
-            data = {}
-            data.update(serialized_order.data)
-            data['articles'] = serialized_articles
-            return Response(data, status=200)
+            return Response(serialized_order.data, status=200)
         return HttpResponseBadRequest
 
+    def delete(self, request, id):
+        '''Delete order func'''
+        deleted_order = self.order_service.delete_order(id)
+        if deleted_order is None:
+            return HttpResponseBadRequest
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-class Login(APIView):
-    '''Login view.'''
-    # Dependencies are injected, I hope that we will be able to mock (i.e.
-    # make stubs of) these for testing
+
+class LoginWithCredentials(APIView):
+    '''Login a user using credentials username and password and returns
+    the user along with bearer auth token'''
+    permission_classes = [AllowAny]
+
     @si.inject
     def __init__(self, _deps, *args):
         self.user_service: UserService = _deps['UserService']()
 
     def post(self, request):
-        '''Login post. Returns token.'''
+        '''Login a user using credentials username and password. 
+        returns User along with auth token'''
         username = request.data.get('username')
         password = request.data.get('password')
 
         if not username or not password:
-            return Response({'error': 'Please fill in all fields'},
-                            status=status.HTTP_400_BAD_REQUEST)
+            raise AuthenticationFailed
 
-        check_user = User.objects.filter(username=username).exists()
-        if check_user is False:
-            return Response({'error': 'Username does not exist'},
-                            status=status.HTTP_400_BAD_REQUEST)
+        auth = authenticate(username=username, password=password)
+        if auth is None:
+            raise AuthenticationFailed
 
-        user = authenticate(username=username, password=password)
-        if user is not None:
-            return self.user_service.create_auth_token(request, user)
-        else:
-            return Response({'error': 'invalid details'}, status=status.HTTP_400_BAD_REQUEST)
+        login(request, auth)
+
+        user = self.user_service.get_user_info(request.user)
+        serialized_user = UserInfoSerializer(user)
+        data = {
+            "user:": serialized_user.data,
+            "token:": AuthToken.objects.create(auth)[1]
+        }
+        return JsonResponse(data, status=status.HTTP_200_OK)
 
 
-class LoginWithId(APIView):
-    '''Id login view.'''
+class LoginWithBarcodeOrNfc(APIView):
+    '''Login a user using either barcode or NFC to authenticate user.
+    Returns the user along with bearer auth token'''
+    permission_classes = [AllowAny]
+
     @si.inject
     def __init__(self, _deps, *args):
         self.user_service: UserService = _deps['UserService']()
 
     def post(self, request):
-        '''Login using id. Returns token.'''
-        user_id = request.data.get('id')
-        check_user = User.objects.filter(id=user_id).exists()
-        if check_user is False:
-            return Response({'error': 'User ID does not exist'},
-                            status=status.HTTP_404_NOT_FOUND)
+        '''Login a user using either barcode or NFC.
+        returns User along with auth token'''
+        # body = request.data
+        barcode_id = request.data.get('barcodeId')
+        nfc_id = request.data.get('nfcId')
+        if barcode_id is None and nfc_id is None:
+            raise AuthenticationFailed
 
-        user = self.user_service.authenticate_with_id(id=user_id)
-        if user is not None:
-            return self.user_service.create_auth_token(request, user)
-        else:
-            return Response({'error': 'invalid details'},
-                            status=status.HTTP_400_BAD_REQUEST)
+        if barcode_id is not None:
+            check_barcode = make_password(barcode_id, SALT)
+            user = self.user_service.get_user_with_barcode(
+                barcode_id=check_barcode)
+        elif nfc_id is not None:
+            check_nfc = make_password(nfc_id, SALT)
+            user = self.user_service.get_user_with_nfc(nfc_id=check_nfc)
+
+        if user is None:
+            raise AuthenticationFailed
+
+        auth = user.user
+
+        login(request, auth)
+        serialized_user = UserInfoSerializer(user)
+        data = {
+            "user:": serialized_user.data,
+            "token:": AuthToken.objects.create(auth)[1]
+        }
+        return JsonResponse(data, status=status.HTTP_200_OK)
 
 
 class SeeAllStorages(View):
     '''See all storages view.'''
+    authentication_classes = (TokenAuthentication,)
+
     @si.inject
     def __init__(self, _deps, *args):
         storage_management_service = _deps['StorageManagementService']
@@ -460,6 +463,8 @@ class SeeAllStorages(View):
 
 class AddInputUnit(View):
     '''Add input unit view.'''
+    authentication_classes = (TokenAuthentication,)
+
     @si.inject
     def __init__(self, _deps):
         self.storage_management_service = _deps['StorageManagementService']
@@ -494,6 +499,8 @@ class AddInputUnit(View):
 
 class GetUserTransactions(View):
     '''Get user transactions view.'''
+    authentication_classes = (TokenAuthentication,)
+
     @si.inject
     def __init__(self, _deps):
         self.user_service: UserService = _deps['UserService']()
@@ -523,6 +530,8 @@ class GetUserTransactions(View):
 
 class ReturnUnit(View):
     '''Return unit view.'''
+    authentication_classes = (TokenAuthentication,)
+
     @si.inject
     def __init__(self, _deps):
         self.storage_management_service = _deps['StorageManagementService']
@@ -552,6 +561,8 @@ class ReturnUnit(View):
 
 class Transactions(APIView):
     '''Transactions API view.'''
+    authentication_classes = (TokenAuthentication,)
+
     @si.inject
     def __init__(self, _deps):
         self.user_service: UserService = _deps['UserService']()
@@ -634,6 +645,8 @@ class Transactions(APIView):
 
 class TransactionsById(APIView):
     '''Get transaction by ID view.'''
+    authentication_classes = (TokenAuthentication,)
+
     @si.inject
     def __init__(self, _deps):
         StorageManagementService = _deps['StorageManagementService']
@@ -671,6 +684,8 @@ class TransactionsById(APIView):
 
 class GetStorageValue(View):
     '''Get storage value view.'''
+    authentication_classes = (TokenAuthentication,)
+
     @si.inject
     def __init__(self, _deps):
         storage_management_service = _deps['StorageManagementService']
@@ -695,6 +710,8 @@ class GetStorageValue(View):
 
 class GetStorageCost(APIView):
     '''Get storage cost API view.'''
+    authentication_classes = (TokenAuthentication,)
+
     @si.inject
     def __init__(self, _deps, *args):
         storage_management_service = _deps['StorageManagementService']
@@ -732,6 +749,8 @@ class GetArticleAlternatives(View):
        their attributes. If an article id and a storage id is entered, the
        method returns the id for alternative articles and the amount of
        the alternative articles in that storage'''
+    authentication_classes = (TokenAuthentication,)
+
     @si.inject
     def __init__(self, _deps):
         article_management_service = _deps['ArticleManagementService']
@@ -776,6 +795,8 @@ class GetArticleAlternatives(View):
 # FR 8.1 start #
 class SearchForArticleInStorages(View):
     '''Search for article in storages view.'''
+    authentication_classes = (TokenAuthentication,)
+
     @si.inject
     def __init__(self, _deps):
         OrderService = _deps['OrderService']
@@ -845,8 +866,55 @@ class SearchForArticleInStorages(View):
             return JsonResponse(data2, safe=False, status=200)
 
 
+class ArticleToCompartmentByQRcode(APIView):
+    '''Change Article linked to Compartment by using QR code.'''
+    authentication_classes = (TokenAuthentication,)
+
+    @si.inject
+    def __init__(self, _deps):
+        self.storage_management_service: StorageManagementService = (
+            _deps['StorageManagementService']())
+        self.article_management_service: ArticleManagementService = (
+            _deps['ArticleManagementService']())
+
+    def post(self, request, qr_code):
+        '''Sets new article in payload to compartment matching qr_code.'''
+
+        current_compartment = (
+            self.storage_management_service.get_compartment_by_qr(
+                qr_code=qr_code))
+
+        if current_compartment is not None:
+            article_id = request.data.get("lioNr")
+            new_article = (
+                self.article_management_service.get_article_by_lio_id((
+                    article_id)))
+
+            if new_article is not None:
+                # Get attributes from payload
+                new_amount = request.data.get("quantity")
+                new_standard_order_amount = request.data.get(
+                    ("normalOrderQuantity"))
+                new_order_point = request.data.get("orderQuantityLevel")
+
+                # Updates attributes in compartment
+                self.storage_management_service.update_compartment(
+                    current_compartment, new_article, new_amount, new_standard_order_amount, new_order_point)
+
+                return JsonResponse(ApiCompartmentSerializer
+                                    (current_compartment).data)
+            else:  # Exception
+                return Response({'error': 'Could not find article'},
+                                status=status.HTTP_400_BAD_REQUEST)
+        else:  # Exception
+            return Response({'error': 'Could not find compartment'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+
 class getEconomy(APIView):
     '''Returns the total value in storage, and the average turnover rate'''
+    authentication_classes = (TokenAuthentication,)
+
     @si.inject
     def __init__(self, _deps, *args):
         storage_management_service = _deps['StorageManagementService']
@@ -877,6 +945,8 @@ class getEconomy(APIView):
 class MoveArticle(APIView):
     '''Move an amount of a specific article from one compartment to another one.
         This will create two transactions, one for the withdrawal and one for the deposit.'''
+    authentication_classes = (TokenAuthentication,)
+
     @si.inject
     def __init__(self, _deps, *args):
         storage_management_service = _deps['StorageManagementService']
@@ -902,12 +972,12 @@ class MoveArticle(APIView):
             if from_compartment is None or to_compartment is None:
                 return Response({'error': 'Could not find compartment'},
                                 status=status.HTTP_400_BAD_REQUEST)
-           
+
             if (from_compartment.amount-quantity) < 0:
                 return Response({'error': 'Not enough articles in compartment'},
                                 status=status.HTTP_400_BAD_REQUEST)
-            
-            if from_compartment.article.lio_id != to_compartment.article.lio_id :
+
+            if from_compartment.article.lio_id != to_compartment.article.lio_id:
                 return Response({'error': 'Not matching articles'},
                                 status=status.HTTP_400_BAD_REQUEST)
             else:
