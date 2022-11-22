@@ -1072,13 +1072,16 @@ class GetArticles(APIView):
                 current_storage = self.storage_management_service.get_storage_by_id(
                     query_param_storage_id)
 
-                print(current_storage)
+                
 
                 data = {}
                 serialized_compartments = []
                 #Serialize every article in the compartments in the storage
                 for compartment in list_of_compartments:
-                        serialized_compartments.append(
-                            ArticleCompartmentProximitySerializer(getattr(compartment, "article"), current_storage).data)
+                    serialized_compartments.append(
+                        ArticleCompartmentProximitySerializer(getattr(compartment, "article"), current_storage).data)
+                    print(getattr(compartment, "article"))
+                    serialized_compartments.append(ApiArticleSerializer(getattr(compartment, "article")))
                 data[''] = serialized_compartments
-                return JsonResponse(data, safe=False, status=200)
+
+                return JsonResponse(data, safe=False, status=200) 
