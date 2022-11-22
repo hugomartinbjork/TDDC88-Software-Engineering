@@ -83,7 +83,7 @@ class OrderService():
             CentralStorageAccess.get_stock_by_article_id(self,
                                                          article_id=article_id))
         if central_storage_stock is None:
-            central_storage_stock = 0
+            return None
         if central_storage_stock > amount:
             return 2
         else:
