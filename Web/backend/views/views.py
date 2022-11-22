@@ -208,7 +208,7 @@ class Compartments(APIView):
         if request.method == 'POST':
             # A user can add a compartment if they have permission
             if not request.user.has_perm('backend.add_compartment'):
-               raise PermissionDenied
+                raise PermissionDenied
             try:
                 json_body = request.data
                 storage_id = json_body['storageId']
@@ -992,6 +992,10 @@ class MoveArticle(APIView):
 
             if from_compartment.article.lio_id != to_compartment.article.lio_id:
                 return Response({'error': 'Not matching articles'},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+            if (from_compartment.amount - quantity) < 0 or (to_compartment.amount + quantity) > to_compartment.maximal_capacity:
+                return Response({'error': 'Not allowed qunatity, not enough in storage or not enough space in target'},
                                 status=status.HTTP_400_BAD_REQUEST)
             else:
                 if unit == "output":
