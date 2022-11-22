@@ -1,4 +1,4 @@
-from ..serializers import AlternativeNameSerializer, StorageSerializer, ApiCompartmentSerializer, UserInfoSerializer, ApiArticleSerializer
+from ..serializers import AlternativeNameSerializer, ArticleCompartmentProximitySerializer, StorageSerializer, ApiCompartmentSerializer, UserInfoSerializer, ApiArticleSerializer
 from ..serializers import ArticleSerializer, OrderSerializer, OrderedArticleSerializer
 from ..serializers import CompartmentSerializer, TransactionSerializer
 from ..serializers import GroupSerializer, NearbyStoragesSerializer
@@ -1018,10 +1018,8 @@ class MoveArticle(APIView):
 
     
 class GetArticles(APIView):
-    '''Article view.'''
+    '''Get articles according to lioNr, name or storageId.'''
     #authentication_classes = (TokenAuthentication,)
-    # Dependencies are injected, I hope that we will be able to mock
-    # (i.e. make stubs of) these for testing
 
     @si.inject
     def __init__(self, _deps, *args):
@@ -1031,40 +1029,43 @@ class GetArticles(APIView):
             _deps['StorageManagementService']())
 
     def get(self, request):
-        '''Get.'''
+        '''Get articles according to lioNr, name or storageId.'''
         if request.method == 'GET':
-           # A user can see articles if they have permission
+            #A user can see articles if they have permission
             query_param_lio_nr = request.GET.get('lioNr', None)
             query_param_name = request.GET.get('name', None)
             query_param_storage_id = request.GET.get('storageId', None)
-
-            article_id = 1
-            article = self.article_management_service.get_article_by_lio_id(article_id)
-            qr_code=None
-            name=None
-            storage_id=None
 
             if not request.user.has_perm('backend.view_article'):
                 raise PermissionDenied
 
             if query_param_lio_nr != None:
-                print(query_param_lio_nr)
-                print("lio")
                 article = self.article_management_service.get_article_by_lio_id(
                     query_param_lio_nr)
-            elif query_param_name != None:
-                print(query_param_name)
-                print("namn")
-                #article = self.storage_management_service.get_article_in_compartment(
-                #    qr_code)
-            elif query_param_storage_id != None:
-                print(query_param_storage_id)
-                print("storage")
-                #article = self.article_management_service.get_article_by_name(
-                #    name)
-
-            serializer = ApiArticleSerializer(article)
-
-            if serializer.is_valid:
+                serializer = ApiArticleSerializer(article)
                 return JsonResponse(serializer.data, safe=False, status=200)
-            return HttpResponseBadRequest
+
+            elif query_param_name != None:
+                article = self.article_management_service.get_article_by_name(
+                    query_param_name)
+                serializer = ApiArticleSerializer(article)
+                return JsonResponse(serializer.data, safe=False, status=200)
+
+            elif query_param_storage_id != None:
+                #Get a list of all compartments in storage 
+                list_of_compartments = self.storage_management_service.get_compartment_by_storage_id(
+                    query_param_storage_id)
+
+                current_storage = self.storage_management_service.get_storage_by_id(
+                    query_param_storage_id)
+
+                print(current_storage)
+
+                data = {}
+                serialized_compartments = []
+                #Serialize every article in the compartments in the storage
+                for compartment in list_of_compartments:
+                        serialized_compartments.append(
+                            ArticleCompartmentProximitySerializer(getattr(compartment, "article"), current_storage).data)
+                data[''] = serialized_compartments
+                return JsonResponse(data, safe=False, status=200)
