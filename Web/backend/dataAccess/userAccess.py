@@ -3,6 +3,7 @@ from backend.coremodels.cost_center import CostCenter
 from django.contrib.auth.models import User, Group
 from ..__init__ import dataAccessInjector as di
 from rest_framework.authtoken.models import Token
+from django.contrib.auth.hashers import make_password
 
 
 @di.register(name="UserAccess")
@@ -78,19 +79,17 @@ class UserAccess():
     def update_user(self, user_id, barcode_id, nfc_id, username,
                     password, cost_center, group):
         '''Updates the user info'''
-        print(group)
-        print('slkfjs')
         try:
             updated_user = self.get_user_info(user_id=user_id)
             django_user_model = User.objects.get(username=updated_user.user)
             if username is not None:
                 django_user_model.username = username
             if password is not None:
-                django_user_model.password = password
+                django_user_model.password = make_password(password)
             django_user_model.save()
             updated_user = self.get_user_info(user_id=user_id)
             if barcode_id is not None:
-                updated_user.barcode_id = barcode_id,
+                updated_user.barcode_id = barcode_id
             if nfc_id is not None:
                 updated_user.nfc_id = nfc_id
             if cost_center is not None:
@@ -116,8 +115,6 @@ class UserAccess():
     def delete_user(self, user_id):
         '''Deletes user'''
         try:
-            user = self.get_user_info(user_id)
-            User.objects.filter(user=user).delete()
-            return UserInfo.objects.filter(user=user_id).delete()
+            return User.objects.filter(id=user_id).delete()
         except Exception:
             return None

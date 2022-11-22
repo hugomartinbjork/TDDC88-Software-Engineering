@@ -5,7 +5,6 @@ from django.db.models import Q, Case, When, Value, IntegerField
 
 from django.contrib.auth.models import User
 from backend.coremodels.alternative_article_name import AlternativeArticleName
-from backend.coremodels.article_has_supplier import ArticleHasSupplier
 from backend.coremodels.cost_center import CostCenter
 from backend.coremodels.article import Article
 from backend.coremodels.article import GroupInfo
@@ -110,15 +109,15 @@ class UnitsSerializer(serializers.ModelSerializer):
         fields = ('output', 'input', 'outputPerInput')
 
 
-class ArticleSupplierSerializer(serializers.ModelSerializer):
-    supplierName = serializers.CharField(
-        source='article_supplier.name', read_only=True)
-    supplierArticleNr = serializers.CharField(
-        source='supplier_article_nr', read_only=True)
+# class SupplierSerializer(serializers.ModelSerializer):
+#     supplierName = serializers.CharField(
+#         source='article_supplier.name', read_only=True)
+#     supplierArticleNr = serializers.CharField(
+#         source='supplier_article_nr', read_only=True)
 
-    class Meta:
-        model = ArticleHasSupplier
-        fields = ('supplierName', 'supplierArticleNr')
+#     class Meta:
+#         model = ArticleHasSupplier
+#         fields = ('supplierName', 'supplierArticleNr')
 
 
 class NoArticleCompartmentSerializer(serializers.ModelSerializer):
@@ -167,7 +166,6 @@ class ApiArticleSerializer(serializers.ModelSerializer):
         'Z41')
 
 
-
 class OrderedArticleSerializer(serializers.ModelSerializer):
     orderedQuantity = serializers.CharField(source= 'quantity')
     articleInfo = ApiArticleSerializer(source='article', read_only=True, many=False)
@@ -176,7 +174,6 @@ class OrderedArticleSerializer(serializers.ModelSerializer):
         model = OrderedArticle
         fields = ('articleInfo', 'orderedQuantity', 'unit')
 
-
 class OrderSerializer(serializers.ModelSerializer):
     articles = OrderedArticleSerializer(
         source='orderedarticle_set', read_only=True, many=True)
@@ -184,12 +181,14 @@ class OrderSerializer(serializers.ModelSerializer):
     orderDate = serializers.CharField(source='order_date')
     estimatedDeliveryDate = serializers.CharField(
         source='estimated_delivery_date')
+    DeliveryDate = serializers.CharField(
+        source='delivery_date')
     state = serializers.CharField(source='order_state')
     
     class Meta:
         model = Order
         fields = ['id', 'storageId', 'orderDate',
-                  'estimatedDeliveryDate', 'state', 'articles']
+                  'estimatedDeliveryDate', 'DeliveryDate', 'state', 'articles']
 
 
 class LocationSerializer(serializers.ModelSerializer):
@@ -219,12 +218,14 @@ class NearbyStoragesSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(
         source='storage.id', read_only=True)
     location = LocationSerializer(source='storage', read_only=True)
+    #Calls the later defined function get_self_reference below
     compartment = serializers.SerializerMethodField('get_self_reference')
 
     class Meta:
         model = Compartment
         fields = ('id', 'location', 'compartment')
 
+    #A function to get a nested dictionary with data from the current object that is being serialized
     def get_self_reference(self, object):
         return ApiCompartmentSerializer(object).data
 
