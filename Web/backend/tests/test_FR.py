@@ -245,18 +245,18 @@ class FR4_2_test(TestCase):
 #         cost_center1 = CostCenter.objects.create(id="123")
 #         self.Storage1 = Storage.objects.create(id="99", cost_center = cost_center1)
 
-        # create 2 mock users
-        self.user1 = User.objects.create(username="userOne", password="TDDC88")
-        self.use_info1 = UserInfo.objects.create(
-            user=self.user1, cost_center=cost_center1)
-        self.user2 = User.objects.create(username="userTwo", password="TDDC88")
-        self.use_info2 = UserInfo.objects.create(
-            user=self.user2, cost_center=cost_center1)
+        # # create 2 mock users
+        # self.user1 = User.objects.create(username="userOne", password="TDDC88")
+        # self.use_info1 = UserInfo.objects.create(
+        #     user=self.user1, cost_center=cost_center1)
+        # self.user2 = User.objects.create(username="userTwo", password="TDDC88")
+        # self.use_info2 = UserInfo.objects.create(
+        #     user=self.user2, cost_center=cost_center1)
 
-        self.compartment1 = Compartment.objects.create(id="1", storage=self.storage_management_service.get_storage_by_id(
-            id="99"), article=self.article_management_service.get_article_by_lio_id(lio_id="1"))
-        self.compartment2 = Compartment.objects.create(id="2", storage=self.storage_management_service.get_storage_by_id(
-            id="99"), article=self.article_management_service.get_article_by_lio_id(lio_id="2"))
+        # self.compartment1 = Compartment.objects.create(id="1", storage=self.storage_management_service.get_storage_by_id(
+        #     id="99"), article=self.article_management_service.get_article_by_lio_id(lio_id="1"))
+        # self.compartment2 = Compartment.objects.create(id="2", storage=self.storage_management_service.get_storage_by_id(
+        #     id="99"), article=self.article_management_service.get_article_by_lio_id(lio_id="2"))
 
         # #transactions in 2000
         # #takeout article 1; amount =2 i.e cost +20
