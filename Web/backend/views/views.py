@@ -1015,3 +1015,56 @@ class MoveArticle(APIView):
                 data['qunatity'] = quantity
 
                 return JsonResponse(data, safe=False, status=200)
+
+    
+class GetArticles(APIView):
+    '''Article view.'''
+    #authentication_classes = (TokenAuthentication,)
+    # Dependencies are injected, I hope that we will be able to mock
+    # (i.e. make stubs of) these for testing
+
+    @si.inject
+    def __init__(self, _deps, *args):
+        self.article_management_service: ArticleManagementService = (
+            _deps['ArticleManagementService']())
+        self.storage_management_service: StorageManagementService = (
+            _deps['StorageManagementService']())
+
+    def get(self, request):
+        '''Get.'''
+        if request.method == 'GET':
+           # A user can see articles if they have permission
+            query_param_lio_nr = request.GET.get('lioNr', None)
+            query_param_name = request.GET.get('name', None)
+            query_param_storage_id = request.GET.get('storageId', None)
+
+            article_id = 1
+            article = self.article_management_service.get_article_by_lio_id(article_id)
+            qr_code=None
+            name=None
+            storage_id=None
+
+            if not request.user.has_perm('backend.view_article'):
+                raise PermissionDenied
+
+            if query_param_lio_nr != None:
+                print(query_param_lio_nr)
+                print("lio")
+                article = self.article_management_service.get_article_by_lio_id(
+                    query_param_lio_nr)
+            elif query_param_name != None:
+                print(query_param_name)
+                print("namn")
+                #article = self.storage_management_service.get_article_in_compartment(
+                #    qr_code)
+            elif query_param_storage_id != None:
+                print(query_param_storage_id)
+                print("storage")
+                #article = self.article_management_service.get_article_by_name(
+                #    name)
+
+            serializer = ApiArticleSerializer(article)
+
+            if serializer.is_valid:
+                return JsonResponse(serializer.data, safe=False, status=200)
+            return HttpResponseBadRequest
