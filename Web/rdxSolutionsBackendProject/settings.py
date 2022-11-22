@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'backend',
     'django_probes',
+    'knox'
 
 ]
 

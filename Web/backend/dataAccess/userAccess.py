@@ -77,6 +77,8 @@ class UserAccess():
     def update_user(self, user_id, barcode_id, nfc_id, username,
                     password, cost_center, group):
         '''Updates the user info'''
+        print(group)
+        print('slkfjs')
         try:
             updated_user = self.get_user_info(user_id=user_id)
             django_user_model = User.objects.get(username=updated_user.user)
@@ -94,7 +96,6 @@ class UserAccess():
                 try:
                     new_cost_center = []
                     for cost_c in cost_center:
-                        print(CostCenter.objects.filter(id=cost_c).first())
                         new_cost_center.append(
                             CostCenter.objects.filter(id=cost_c).first())
                     updated_user.cost_center.set(new_cost_center)
@@ -102,8 +103,10 @@ class UserAccess():
                     Exception
             if group is not None:
                 try:
+                    print(Group.objects.filter(id=group).first())
                     new_group = Group.objects.filter(id=group).first()
                     updated_user.group = new_group
+                    print(updated_user.group)
                 except:
                     Exception
             updated_user.save()

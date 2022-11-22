@@ -4,7 +4,7 @@ from backend.services.userService import UserService
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.authentication import TokenAuthentication
+from knox.auth import TokenAuthentication
 
 from django.http import Http404, HttpResponseBadRequest
 from ..serializers import UserInfoSerializer
@@ -104,6 +104,7 @@ class UserId(APIView):
             cost_center = None
         try:
             group = json_body['role']
+            print(group)
         except:
             group = None
 
