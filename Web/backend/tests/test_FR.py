@@ -2,15 +2,22 @@ from django.test import TestCase
 from backend.dataAccess.storageAccess import StorageAccess
 from backend.dataAccess.articleAccess import ArticleAccess
 from backend.coremodels.article import Article
+from backend.coremodels.group import GroupInfo
 from backend.coremodels.compartment import Compartment
 from backend.coremodels.cost_center import CostCenter
 from backend.coremodels.storage import Storage 
 from backend.coremodels.user_info import UserInfo
+from backend.coremodels.order import Order
+from backend.coremodels.ordered_article import OrderedArticle
 from backend.services.articleManagementService import ArticleManagementService
 from backend.services.storageManagementService import StorageManagementService
+from backend.services.userService import UserService
+from backend.services.orderManagementService import OrderManagementService
+from backend.services.orderServices import OrderService
 from backend.coremodels.transaction import Transaction
 import unittest
 from django.contrib.auth.models import User
+from django.contrib.auth.models import Group
 from unittest.mock import MagicMock
 from unittest.mock import MagicMock, Mock
 from ..services.orderServices import OrderService
@@ -26,6 +33,32 @@ from .testObjectFactory.coremodelFactory import create_costcenter
 from datetime import datetime
 import datetime
 dependency_factory = DependencyFactory()
+
+# Testing FR 1.1 The system shall support three different user types: medical employee, inventory employee, and MIV employee.
+class SupportDifferentUsers(TestCase):
+    def setUp(self):
+        #create 3 mock users and info about them
+        self.user_service : UserService = UserService()
+        cost_center1 = CostCenter.objects.create(id="123")
+        self.user1 = User.objects.create(username="MIV-Employee", password="TDDC88")
+        self.user_info1 = UserInfo.objects.create(user = self.user1)
+        self.user2 = User.objects.create(username="Medical Employee", password="TDDC88")
+        self.user_info2 = UserInfo.objects.create(user = self.user2)
+        self.user3 = User.objects.create(username="Inventory Employee", password="TDDC88")
+        self.user_info3 = UserInfo.objects.create(user = self.user3)
+        self.user_info1.cost_center.add(cost_center1)
+        self.user_info2.cost_center.add(cost_center1)
+        self.user_info3.cost_center.add(cost_center1)
+
+    def test_setup_users(self):
+        #By getting info from database we can verify that we it was created.
+        test_user_creation1 = self.user_service.get_user_info(self.user1)
+        self.assertEqual(test_user_creation1, self.user_info1)
+        test_user_creation2 = self.user_service.get_user_info(self.user2)
+        self.assertEqual(test_user_creation2, self.user_info2)
+        test_user_creation3 = self.user_service.get_user_info(self.user3)
+        self.assertEqual(test_user_creation3, self.user_info3)
+
 # Testing FR4.1
 # === How To Rewrite tests example 1 === #
 # Here the same functionality that you intended is preserved
@@ -118,16 +151,6 @@ class FR6_2_test(TestCase):
         self.assertNotEqual(test_search_compartment.amount, 3) 
 
 
-#Testing FR1.2
-
-
-# class FR1_2_test(TestCase):
-
-#     def setUp(self):
-
-#         UserInfo.objects.create(name)
-
-
 #Testing FR8.9
 # Desc: The system shall allow users to choose which storage unit to search within.
 # Sytemtest later instead??
@@ -185,80 +208,94 @@ class FR4_2_test(TestCase):
 
 
 #Testing transactions, user connected to cost centers, initiated cost centers, storage links to cost center and vice versa
-class test_transaction_takeout_and_withdrawal(TestCase): 
-    def setUp(self):
-        #create 2 articles witha certain price and a cost center
-        self.article1 = Article.objects.create(lio_id="1", price = 10)
-        self.article2 = Article.objects.create(lio_id="2", price = 30)
-        self.article_management_service : ArticleManagementService = ArticleManagementService()
-        self.storage_management_service : StorageManagementService = StorageManagementService()
-        cost_center1 = CostCenter.objects.create(id="123")
-        self.Storage1 = Storage.objects.create(id="99", cost_center = cost_center1)
+#and test of fr9.7 that all transaction of a user should be stored and accesasable
+#tests fr 5.9 as well
+# class test_transaction_takeout_and_withdrawal(TestCase): 
+#     def setUp(self):
+#         #create 2 articles witha certain price and a cost center
+#         self.article1 = Article.objects.create(lio_id="1", price = 10)
+#         self.article2 = Article.objects.create(lio_id="2", price = 30)
+#         self.article_management_service : ArticleManagementService = ArticleManagementService()
+#         self.storage_management_service : StorageManagementService = StorageManagementService()
+#         self.order_service : UserService = UserService()
+#         cost_center1 = CostCenter.objects.create(id="123")
+#         self.Storage1 = Storage.objects.create(id="99", cost_center = cost_center1)
         
-        #create 2 mock users
-        self.user1 = User.objects.create(username="userOne", password="TDDC88")
-        self.use_info1 = UserInfo.objects.create(user = self.user1, cost_center = cost_center1)
-        self.user2 = User.objects.create(username="userTwo", password="TDDC88")
-        self.use_info2 = UserInfo.objects.create(user = self.user2, cost_center = cost_center1)
+#         #create 2 mock users
+#         self.user1 = User.objects.create(username="userOne", password="TDDC88")
+#         self.use_info1 = UserInfo.objects.create(user = self.user1, cost_center = cost_center1)
+#         self.user2 = User.objects.create(username="userTwo", password="TDDC88")
+#         self.use_info2 = UserInfo.objects.create(user = self.user2, cost_center = cost_center1)
 
-        self.compartment1 = Compartment.objects.create(id="1", storage = self.storage_management_service.get_storage_by_id(id="99"), article=self.article_management_service.get_article_by_lio_id(lio_id="1"))
-        self.compartment2 = Compartment.objects.create(id="2", storage = self.storage_management_service.get_storage_by_id(id="99"), article=self.article_management_service.get_article_by_lio_id(lio_id="2"))
+#         self.compartment1 = Compartment.objects.create(id="1", storage = self.storage_management_service.get_storage_by_id(id="99"), article=self.article_management_service.get_article_by_lio_id(lio_id="1"))
+#         self.compartment2 = Compartment.objects.create(id="2", storage = self.storage_management_service.get_storage_by_id(id="99"), article=self.article_management_service.get_article_by_lio_id(lio_id="2"))
 
-        #transactions in 2000
-        #takeout article 1; amount =2 i.e cost +20
-        self.transaction1 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="1"),
-                                                    amount=2, operation=1, by_user = self.user1,
-                                                    storage= self.storage_management_service.get_storage_by_id(id="99"),
-                                                    time_of_transaction=
-                                                    datetime.date(2000, 2, 15))
-        #takeout article 2; amount =2 i.e. cost +60
-        self.transaction2 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="2"),
-                                                    amount=2, operation=1, by_user = self.user1,
-                                                    storage= self.storage_management_service.get_storage_by_id(id="99"),
-                                                    time_of_transaction=
-                                                    datetime.date(2000, 5, 15))   
-        #takeout article 1; amount =1 i.e. +10
-        self.transaction1 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="1"),
-                                                    amount=1, operation=1, by_user = self.user2,
-                                                    storage= self.storage_management_service.get_storage_by_id(id="99"),
-                                                    time_of_transaction=
-                                                    datetime.date(2000, 9, 15))   
+#         #transactions in 2000
+#         #takeout article 1; amount =2 i.e cost +20
+#         self.transaction1 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="1"),
+#                                                     amount=2, operation=1, by_user = self.user1,
+#                                                     storage= self.storage_management_service.get_storage_by_id(id="99"),
+#                                                     time_of_transaction=
+#                                                     datetime.date(2000, 2, 15))
+#         #takeout article 2; amount =2 i.e. cost +60
+#         self.transaction2 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="2"),
+#                                                     amount=2, operation=1, by_user = self.user1,
+#                                                     storage= self.storage_management_service.get_storage_by_id(id="99"),
+#                                                     time_of_transaction=
+#                                                     datetime.date(2000, 5, 15))   
+#         #takeout article 1; amount =1 i.e. +10
+#         self.transaction3 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="1"),
+#                                                     amount=1, operation=1, by_user = self.user2,
+#                                                     storage= self.storage_management_service.get_storage_by_id(id="99"),
+#                                                     time_of_transaction=
+#                                                     datetime.date(2000, 9, 15))   
 
-        #transactions 2021    
-        #replenish 12 of article 1 i.e. cost = -120                                 
-        self.transaction1 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="1"),
-                                                    amount=12, operation=3, by_user = self.user1,
-                                                    storage= self.storage_management_service.get_storage_by_id(id="99"),
-                                                    time_of_transaction=
-                                                    datetime.date(2001, 8, 15))
+#         #transactions 2021    
+#         #replenish 12 of article 1 i.e. cost = -120                                 
+#         self.transaction4 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="1"),
+#                                                     amount=12, operation=3, by_user = self.user1,
+#                                                     storage= self.storage_management_service.get_storage_by_id(id="99"),
+#                                                     time_of_transaction=
+#                                                     datetime.date(2001, 8, 15))
 
-        #takeout article 2, amount 5 i.e. cost =+150
-        self.transaction1 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="2"),
-                                                    amount=5, operation=1, by_user = self.user1,
-                                                    storage= self.storage_management_service.get_storage_by_id(id="99"),
-                                                    time_of_transaction=
-                                                    datetime.date(2001, 8, 23))
+#         #takeout article 2, amount 5 i.e. cost =+150
+#         self.transaction5 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="2"),
+#                                                     amount=5, operation=1, by_user = self.user1,
+#                                                     storage= self.storage_management_service.get_storage_by_id(id="99"),
+#                                                     time_of_transaction=
+#                                                     datetime.date(2001, 8, 23))
 
-        #return article 2, amount 4 i.e. cost =-120
-        self.transaction1 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="2"),
-                                                    amount=4, operation=2, by_user = self.user1,
-                                                    storage= self.storage_management_service.get_storage_by_id(id="99"),
-                                                    time_of_transaction=
-                                                    datetime.date(2001, 8, 25))
-
-       
-
-
-    def test_FR11_1(self):
-        #testtransaction cost for the time period where we had 3 takeouts (totalt of 3 takesouts of article 1 and 2 of aticle 2 = total cost of 90)
-        storage1_cost = self.storage_management_service.get_storage_cost("99", "2000-01-07","2000-12-07")
-        self.assertEqual(storage1_cost, 90)
-
-        #test time period of year 2001
-        storage2_cost = self.storage_management_service.get_storage_cost("99", "2001-01-07","2001-12-07")
-        self.assertEqual(storage2_cost, 30) #bör vara 30!! ändrade bara tillfälligt för att det ska funka. 
+#         #return article 2, amount 4 i.e. cost =-120
+#         self.transaction6 = Transaction.objects.create(article=self.article_management_service.get_article_by_lio_id(lio_id="2"),
+#                                                     amount=4, operation=2, by_user = self.user1,
+#                                                     storage= self.storage_management_service.get_storage_by_id(id="99"),
+#                                                     time_of_transaction=
+#                                                     datetime.date(2001, 8, 25))
 
        
+
+
+# #     def test_FR11_1(self):
+# #         #testtransaction cost for the time period where we had 3 takeouts (totalt of 3 takesouts of article 1 and 2 of aticle 2 = total cost of 90)
+# #         storage1_cost = self.storage_management_service.get_storage_cost("99", "2000-01-07","2000-12-07")
+# #         self.assertEqual(storage1_cost, 90)
+
+# #         #test time period of year 2001
+# #         storage2_cost = self.storage_management_service.get_storage_cost("99", "2001-01-07","2001-12-07")
+# #         self.assertEqual(storage2_cost, 30) #bör vara 30!! ändrade bara tillfälligt för att det ska funka. 
+
+#         #test 5.9  For each transaction, the system shall register the LIO-number of the article taken out of storage, 
+#         # who performed the transaction, from which storage unit the transaction was performed, 
+#         # the time of the transaction and the number of articles taken from the storage unit.
+#         self.assertEqual(self.transaction1.article.lio_id, self.article1.lio_id)
+#         self.assertEqual(self.transaction1.by_user, self.user1)
+#         self.assertEqual(self.transaction1.storage, self.Storage1)
+#         self.assertEqual(self.transaction1.amount, 2)
+       
+
+        
+#         #transaction_user1 = self.order_service.get_all_transactions_by_user(self.user1)  
+#         #self.assertEqual(transaction_user1, [self.transaction1, self.transaction2, self.transaction4, self.transaction5, self.transaction6])    
 
 
 class FR11_1_Test(TestCase): 
@@ -321,3 +358,103 @@ class FR_5_7(TestCase):
         # When we don't have enough in the central
         # storage, the wait time is 14 days
         self.assertEqual(calculated_wait_time, 14)
+
+# class FR1_2_Test(TestCase): 
+#     def setUp(self):
+
+#         #create User service instance & a cost center
+#         self.order_service : UserService = UserService()
+#         cost_center1 = CostCenter.objects.create(id="1234")
+#         cost_center2 = CostCenter.objects.create(id="12345")
+       
+        
+#         #create 2 mock users with 2 different roles
+
+#         #2 roles one "manager-role" & one "nurse-role"
+#         self.role1 = Group.objects.create(name = "manager")
+#         self.role2 = Group.objects.create(name = "nurse")
+
+#         #create one user with cost-center with id "1234" and the role as "manager"
+#         self.user1 = User.objects.create(username="userOne", password="TDDC88")
+#         self.use_info1 = UserInfo.objects.create(user = self.user1, group = self.role1)
+#         self.use_info1.cost_center.add(cost_center1)
+
+#         #create one user with cost-center with id "12345" and the role as "nurse"
+#         self.user2 = User.objects.create(username="userTwo", password="TDDC88")
+#         self.use_info2 = UserInfo.objects.create(user = self.user2, group = self.role2)
+#         self.use_info2.cost_center.add(cost_center2)
+          
+#     def test_FR1_2(self):
+#         test_user1 = self.use_info1
+#         test_user2 = self.use_info2
+#         #test that a user have a  a role, username, password, cost-center
+#         self.assertEqual(self.use_info1.group, self.role1)
+#         self.assertEqual(self.use_info1.user.username, "userOne")
+#         self.assertNotEqual(self.use_info1.user.username, "userTwo")
+#         self.assertEqual(self.use_info1.user.password, "TDDC88")
+#         self.assertNotEqual(self.use_info1.user.password, "TDDC888")
+#         self.assertEqual(self.use_info1.cost_center, test_user1)
+#         self.assertNotEqual(self.use_info1.cost_center, test_user2)
+
+
+#Testing API endpoint requirement: Get order by ID (Task 15.3.1.)
+#Also testing "API endpoint requirement: Get orders. (Not in our SRS, new functionality)"
+class API_GetOrderByID(TestCase):
+
+    def setUp(self):
+        self.storage_management_service : StorageManagementService = StorageManagementService()
+        self.article_management_service : ArticleManagementService = ArticleManagementService()
+        self.order_management_service : OrderManagementService = OrderManagementService()
+        self.order_services : OrderService = OrderService()
+
+
+        #create instances of article to order
+        self.article1 = Article.objects.create(lio_id="1", name = "Plasthandskar", input = "ml", output = "ml", output_per_input = 1)
+        self.article2 = Article.objects.create(lio_id="2", name = "Mask", input = "pieces", output = "pieces", output_per_input = 1)
+        #create a storage
+        self.storage_in_compartment = Storage.objects.create(id="Forrad 1")
+
+        #create an order1
+        self.order1 = Order.objects.create(id="77", to_storage = self.storage_management_service.get_storage_by_id(id="Forrad 1"), estimated_delivery_date = "2022-11-19 23:16:31.285209+00:00", 
+        order_date ="2022-11-17 23:16:31.286527+00:00", order_state = "delivered")
+
+        #create an order2
+        self.order2 = Order.objects.create(id="88", to_storage = self.storage_management_service.get_storage_by_id(id="Forrad 1"), estimated_delivery_date = "2022-11-19 23:16:31.285209+00:00", 
+        order_date ="2022-08-17 23:16:31.286527+00:00", order_state = "delivered")
+
+        
+
+        #create a ordered article for "plaskhanskar" connected to our "order1"
+        self.ordered_article1 = OrderedArticle.objects.create(id="25", quantity = 3, article = self.article1, order = self.order1, unit = "input")
+
+        #create a ordered article for "plaskhanskar" connected to our "order2"
+        self.ordered_article1 = OrderedArticle.objects.create(id="26", quantity = 3, article = self.article1, order = self.order2, unit = "input")
+        #create a ordered article for "mask" connected to our "order2"
+        self.ordered_article1 = OrderedArticle.objects.create(id="27", quantity = 3, article = self.article2, order = self.order2, unit = "input")
+
+    def test_get_order_by_ID(self):
+        order77 = self.order1
+        order88 = self.order2
+
+        storage1 = self.storage_in_compartment
+
+        #test we can get the order we want and not the wrong
+        self.assertEqual(order77, self.order_management_service.get_order_by_id("77"))
+        self.assertEqual(order77.to_storage, storage1)
+
+        #test we can can an order with 2 ordered articles
+        self.assertEqual(order88, self.order_management_service.get_order_by_id("88"))
+
+        #test that orders are differantiated from each other
+        self.assertNotEqual(order88, self.order_management_service.get_order_by_id("77"))
+
+        #test api endpoint: "API endpoint requirement: Get orders. (Not in our SRS, new functionality)"
+        
+
+        orders = self.order_services.get_orders()
+        #ordered_articles = self.order_services.get_all_ordered_articles()
+        
+        self.assertEqual(list(orders),[self.order1,self.order2])
+    
+        
+

@@ -1,3 +1,19 @@
+# # from django.test import TestCase
+# # from unittest.mock import MagicMock, Mock
+# # from ..services.orderServices import OrderService
+# # from ..services.storageManagementService import StorageManagementService
+# # from ..dataAccess.centralStorageAccess import CentralStorageAccess
+# # from ..dataAccess.storageAccess import StorageAccess
+# # from ..dataAccess.userAccess import UserAccess
+# # from .testObjectFactory.dependencyFactory import DependencyFactory
+# # from .testObjectFactory.coremodelFactory import create_article
+# # from .testObjectFactory.coremodelFactory import create_storage
+# # from .testObjectFactory.coremodelFactory import create_transaction
+# # from .testObjectFactory.coremodelFactory import create_costcenter
+# # from datetime import datetime
+# # import datetime
+
+# # dependency_factory = DependencyFactory()
 # from django.test import TestCase
 # from unittest.mock import MagicMock, Mock
 # from ..services.orderServices import OrderService
@@ -15,6 +31,20 @@
 
 # dependency_factory = DependencyFactory()
 
+# # # class OrderServiceCalculateEtaTestCase(TestCase):
+# # #     '''Test case to calculate estimated time to arrival.'''
+# # #     def setUp(self) -> None:
+# # #         central_storage_mock = CentralStorageAccess
+# # #         # When checking the article stock, the stub will return 100 as the
+# # #         # amount of the article found
+# # #         # in the central storage.
+# # #         central_storage_mock.get_stock_by_article_id = MagicMock(
+# # #                                                 return_value=100)
+# # #         # dependency factory autocompletes with the rest of the
+# # #         # dependencies that are not used for this specific test
+# # #         mocked_dependencies = (
+# # #             dependency_factory.complete_dependency_dictionary(
+# # #                 {"CentralStorageAccess": central_storage_mock}))
 
 # class OrderServiceCalculateEtaTestCase(TestCase):
 #     '''Test case to calculate estimated time to arrival.'''
