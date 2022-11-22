@@ -180,12 +180,14 @@ class OrderSerializer(serializers.ModelSerializer):
     orderDate = serializers.CharField(source='order_date')
     estimatedDeliveryDate = serializers.CharField(
         source='estimated_delivery_date')
+    DeliveryDate = serializers.CharField(
+        source='delivery_date')
     state = serializers.CharField(source='order_state')
     
     class Meta:
         model = Order
         fields = ['id', 'storageId', 'orderDate',
-                  'estimatedDeliveryDate', 'state', 'articles']
+                  'estimatedDeliveryDate', 'DeliveryDate', 'state', 'articles']
 
 
 class LocationSerializer(serializers.ModelSerializer):

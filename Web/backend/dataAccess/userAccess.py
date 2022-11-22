@@ -115,8 +115,6 @@ class UserAccess():
     def delete_user(self, user_id):
         '''Deletes user'''
         try:
-            user = self.get_user_info(user_id)
-            User.objects.filter(user=user).delete()
-            return UserInfo.objects.filter(user=user_id).delete()
+            return User.objects.filter(id=user_id).delete()
         except Exception:
             return None
