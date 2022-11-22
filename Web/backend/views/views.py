@@ -1,5 +1,5 @@
 from ..serializers import AlternativeNameSerializer, StorageSerializer, ApiCompartmentSerializer, UserInfoSerializer, ApiArticleSerializer
-from ..serializers import ArticleSerializer, OrderSerializer, OrderedArticleSerializer
+from ..serializers import ArticleSerializer, OrderSerializer, OrderedArticleSerializer, ArticleCompartmentProximitySerializer
 from ..serializers import CompartmentSerializer, TransactionSerializer
 from ..serializers import GroupSerializer, NearbyStoragesSerializer
 
@@ -54,7 +54,7 @@ class Article(APIView):
         self.storage_management_service: StorageManagementService = (
             _deps['StorageManagementService']())
 
-    def get(self, request, article_id=None, qr_code=None, name=None, storage_id=None):
+    def get(self, request, article_id=None, qr_code=None, name=None):
         '''Get.'''
         if request.method == 'GET':
            # A user can get articles if they have permission
@@ -70,12 +70,11 @@ class Article(APIView):
             elif name != None:
                 article = self.article_management_service.get_article_by_name(
                     name)
-
             if article is None:
                 raise Http404("Could not find article")
-
+        
             serializer = ApiArticleSerializer(article)
-
+        
             if serializer.is_valid:
                 return JsonResponse(serializer.data, safe=False, status=200)
             return HttpResponseBadRequest
