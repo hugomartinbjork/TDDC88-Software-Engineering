@@ -17,8 +17,8 @@ class Transaction(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     attribute_cost_to = models.ForeignKey(CostCenter, on_delete=models.CASCADE)
     amount = models.PositiveSmallIntegerField(default=0)
-    time_of_transaction = models.DateField(
-        default=now, null=True, blank=True)
+    time_of_transaction = models.DateTimeField(
+       auto_now_add=True, null=True, blank=True)
     unit = models.CharField(max_length=100, choices=OrderedUnitOperator.choices, default="output", null=False)
     operation = models.CharField(max_length=100, choices=TransactionOperator.choices, default="return", null=False)
 

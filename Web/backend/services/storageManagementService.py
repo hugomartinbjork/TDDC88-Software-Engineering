@@ -65,9 +65,9 @@ class StorageManagementService():
             value += compartment.article.price * compartment.amount
         return value
 
-    def get_all_transactions(self) -> dict:
-        '''Returns every transaction.'''
-        return self.storage_access.get_all_transactions()
+    def get_all_transactions(self, fromDate=None, toDate=None, limit=None) -> dict:
+        '''Returns every transaction. Takes fromDate, toDate and limit as optimal parameters for limiting the return.'''
+        return self.storage_access.get_all_transactions(fromDate, toDate, limit)
 
     def get_transaction_by_id(self, transaction_id: str) -> Transaction:
         '''Returns a transaction by id'''
@@ -102,21 +102,16 @@ class StorageManagementService():
     def get_storage_cost(self, storage_id: str, start_date: str,
                          end_date: str) -> int:
         '''Get storage cost.'''
-        start_date_date = parse_date(start_date)
-        end_date_date = parse_date(end_date)
-        transactions = self.storage_access.get_transaction_by_storage(
-            storage_id=storage_id)
         sum_value = 0
+        transactions = self.storage_access.get_transaction_by_storage_date(storage_id=storage_id, start=start_date, end=end_date)
         takeout_value = 0
         return_value = 0
         for transaction in transactions:
-            transaction_date = transaction.time_of_transaction
-            transaction_date_date = transaction_date  # .date()
-            if (start_date_date <= transaction_date_date
-                    and end_date_date >= transaction_date_date):
-                if transaction.operation == "takeout":
+            user_cost_center = self.user_access.get_user_cost_center(transaction.by_user)
+            if (user_cost_center == transaction.storage.cost_center):
+                if transaction.operation == 1:
                     takeout_value = transaction.get_value() + takeout_value
-                if transaction.operation == "return":
+                if transaction.operation == 2:
                     return_value = transaction.get_value() + return_value
         sum_value = takeout_value - return_value
         return sum_value

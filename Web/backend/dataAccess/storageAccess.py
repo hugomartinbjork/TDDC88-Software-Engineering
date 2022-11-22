@@ -96,10 +96,13 @@ class StorageAccess():
         except Exception:
             return None
 
-    def get_all_transactions(self) -> dict:
-        '''Return every transaction.'''
+    def get_all_transactions(self, fromDate, toDate, limit) -> dict:
+        '''Return every transaction. If optional querying parameters are passed, filter by these'''
         try:
-            all_transactions = Transaction.objects.all().values()
+            if fromDate and toDate and limit:
+                all_transactions = Transaction.objects.filter(time_of_transaction__range=(fromDate,toDate)).order_by('-time_of_transaction').values()[:int(limit)]
+            else:
+                all_transactions = Transaction.objects.all().values()
             return all_transactions
         except Exception:
             return None
@@ -125,6 +128,15 @@ class StorageAccess():
         '''Return transaction from storage id.'''
         try:
             return Transaction.objects.filter(storage=storage_id)
+        except Exception:
+            return None
+    
+    def get_transaction_by_storage_date(self, storage_id: str, start: str, end:str) -> dict:
+        '''Return transaction from storage id.'''
+        try:
+            return Transaction.objects.filter(storage=storage_id, time_of_transaction__range=(start,end))
+   
+            
         except Exception:
             return None
 
