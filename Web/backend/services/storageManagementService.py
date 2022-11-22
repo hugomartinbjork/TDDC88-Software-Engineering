@@ -85,10 +85,15 @@ class StorageManagementService():
         article = self.storage_access.get_article_in_compartment(
             compartment_id=compartment_id)
         user = User.objects.get(username=username)
+        cost_center = storage.cost_center
+        if add_output_unit:
+            unit = "output"
+        else:
+            unit = "input"
         transaction = Transaction.objects.create(
-            storage=storage, article=article, operation=4,
+            storage=storage, article=article, attribute_cost_to=cost_center, operation="adjust",
             by_user=user, amount=amount,
-            time_of_transaction=time_of_transaction)
+            time_of_transaction=time_of_transaction, unit=unit)
         return transaction
 
     # Storage is not connected to a costcenter atm
@@ -109,9 +114,9 @@ class StorageManagementService():
             transaction_date_date = transaction_date  # .date()
             if (start_date_date <= transaction_date_date
                     and end_date_date >= transaction_date_date):
-                if transaction.operation == 1:
+                if transaction.operation == "takeout":
                     takeout_value = transaction.get_value() + takeout_value
-                if transaction.operation == 2:
+                if transaction.operation == "return":
                     return_value = transaction.get_value() + return_value
         sum_value = takeout_value - return_value
         return sum_value
@@ -131,27 +136,29 @@ class StorageManagementService():
         '''Add to storage.'''
         compartment = self.storage_access.get_compartment_by_qr(id)
         storage_id = compartment.storage
+        cost_center = storage_id.cost_center
         article = Article.objects.get(lio_id=compartment.article.lio_id)
-        # inputOutput = InputOutput.objects.get(article=article)
-        converter = 1
+        converter = article.output_per_input
         user = User.objects.get(username=username)
         if (add_output_unit):
             amount_in_storage = Compartment.objects.get(
                 id=id).amount + amount
             new_amount = amount
+            unit = "output"
         else:
             amount_in_storage = Compartment.objects.get(
                 id=id).amount + amount*converter
             new_amount = amount*converter
-
+            unit = "input"
+       
         if (amount_in_storage < 0):
             return None
         else:
             Compartment.objects.update(amount=amount_in_storage)
             new_transaction = Transaction.objects.create(
-                storage=storage_id, article=article, operation=3,
-                by_user=user, amount=new_amount,
-                time_of_transaction=time_of_transaction)
+                storage=storage_id, article=article, attribute_cost_to=cost_center, operation="replenish",
+                by_user=user, amount=amount,
+                time_of_transaction=time_of_transaction, unit=unit)
             new_transaction.save()
             return new_transaction
             # except:
@@ -167,21 +174,13 @@ class StorageManagementService():
         '''Add return to storage.'''
         compartment = Compartment.objects.get(id=id)
         storage_id = compartment.storage
+        cost_center = storage_id.cost_center
         amount = amount
         article = Article.objects.get(lio_id=compartment.article.lio_id)
         user = User.objects.get(username=username)
         medical_employee = User.objects.get(username=username).groups.filter(
             name='medical employee').exists()
-        input_output_check = InputOutput.objects.filter(
-            article=article).exists()
-        if (input_output_check):
-            input_output = InputOutput.objects.get(article=article)
-            converter = input_output.output_unit_per_input_unit
-            if not converter:
-                converter = 1
-        else:
-            input_output = InputOutput.objects.create(article=article)
-            converter = input_output.output_unit_per_input_unit
+        converter = article.output_per_input
 
         if (medical_employee and article.sanitation_level == 'Z41'):
             return None
@@ -190,10 +189,12 @@ class StorageManagementService():
             amount_in_storage = Compartment.objects.get(
                 id=id).amount + amount
             new_return_amount = amount
+            unit = "output"
         else:
             amount_in_storage = Compartment.objects.get(
                 id=id).amount + amount*converter
             new_return_amount = amount*converter
+            unit = "input"
         if (amount_in_storage < 0):
             return None
         else:
@@ -201,9 +202,9 @@ class StorageManagementService():
             print(new_return_amount)
             Compartment.objects.filter(id=id).update(amount=amount_in_storage)
             new_transaction = Transaction.objects.create(
-                storage=storage_id, article=article, operation=2,
-                by_user=user, amount=new_return_amount,
-                time_of_transaction=time_of_transaction)
+                storage=storage_id, article=article, attribute_cost_to=cost_center, operation="return",
+                by_user=user, amount=amount,
+                time_of_transaction=time_of_transaction, unit=unit)
             new_transaction.save()
             return new_transaction
 
@@ -213,29 +214,27 @@ class StorageManagementService():
         compartment = self.storage_access.get_compartment_by_qr(id)
         article = Article.objects.get(lio_id=compartment.article.lio_id)
 # inputOutput = InputOutput.objects.get(article=article)
-        converter = 2
+        converter = article.output_per_input
         user = User.objects.get(username=username)
+        cost_center = compartment.storage.cost_center
         if (add_output_unit):
             amount_in_storage = Compartment.objects.get(
                 id=id).amount - amount
             new_amount = amount
+            unit = "output"
         else:
-            # eftersom det inte verkar finnas funktionalitet för
-            # input/output-amounts så har jag satt denna till 2 bara för
-            # testningens skull.
-            if not converter:
-                converter = 2
             amount_in_storage = Compartment.objects.get(
                 id=id).amount - amount*converter
             new_amount = amount*converter
+            unit ="input"
         if (amount_in_storage < 0):
             return None
         else:
             Compartment.objects.filter(id=id).update(amount=amount_in_storage)
             new_transaction = Transaction.objects.create(
-                storage=compartment.storage, article=article,
-                operation=1, by_user=user, amount=new_amount,
-                time_of_transaction=time_of_transaction)
+                storage=compartment.storage, article=article, attribute_cost_to=cost_center,
+                operation="takeout", by_user=user, amount=amount,
+                time_of_transaction=time_of_transaction, unit=unit)
             new_transaction.save()
             return new_transaction
 

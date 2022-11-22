@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django import forms
+from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
@@ -59,7 +61,7 @@ admin.site.register(GroupInfo, GroupAdmin)
 
 admin.site.register(Supplier)
 
-# Displays which storage components that the articles are in, 
+# Displays which storage components that the articles are in,
 # the supplier that the article has and its alternative names
 
 
