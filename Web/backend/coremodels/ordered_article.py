@@ -13,7 +13,7 @@ class OrderedArticle(models.Model):
     unit = models.CharField(max_length=10,
                             choices=OrderedUnitOperator.choices, default=OrderedUnitOperator.INPUT)
 
-
+   
     def __str__(self):
         return (str(self.id)
                 + ": " + str(self.article)
