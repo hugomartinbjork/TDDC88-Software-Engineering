@@ -13,6 +13,7 @@ from backend.services.articleManagementService import ArticleManagementService
 from backend.services.storageManagementService import StorageManagementService
 from backend.services.userService import UserService
 from backend.services.orderManagementService import OrderManagementService
+from backend.services.orderServices import OrderService
 from backend.coremodels.transaction import Transaction
 import unittest
 from django.contrib.auth.models import User
@@ -397,15 +398,19 @@ class FR_5_7(TestCase):
 
 
 #Testing API endpoint requirement: Get order by ID (Task 15.3.1.)
+#Also testing "API endpoint requirement: Get orders. (Not in our SRS, new functionality)"
 class API_GetOrderByID(TestCase):
 
     def setUp(self):
         self.storage_management_service : StorageManagementService = StorageManagementService()
         self.article_management_service : ArticleManagementService = ArticleManagementService()
         self.order_management_service : OrderManagementService = OrderManagementService()
+        self.order_services : OrderService = OrderService()
+
 
         #create instances of article to order
         self.article1 = Article.objects.create(lio_id="1", name = "Plasthandskar", input = "ml", output = "ml", output_per_input = 1)
+        self.article2 = Article.objects.create(lio_id="2", name = "Mask", input = "pieces", output = "pieces", output_per_input = 1)
         #create a storage
         self.storage_in_compartment = Storage.objects.create(id="Forrad 1")
 
@@ -417,17 +422,39 @@ class API_GetOrderByID(TestCase):
         self.order2 = Order.objects.create(id="88", to_storage = self.storage_management_service.get_storage_by_id(id="Forrad 1"), estimated_delivery_date = "2022-11-19 23:16:31.285209+00:00", 
         order_date ="2022-08-17 23:16:31.286527+00:00", order_state = "delivered")
 
-        #create a order for "plaskhanskar" connected to our "order1"
+        
+
+        #create a ordered article for "plaskhanskar" connected to our "order1"
         self.ordered_article1 = OrderedArticle.objects.create(id="25", quantity = 3, article = self.article1, order = self.order1, unit = "input")
 
-        #create a order for "plaskhanskar" connected to our "order1"
+        #create a ordered article for "plaskhanskar" connected to our "order2"
         self.ordered_article1 = OrderedArticle.objects.create(id="26", quantity = 3, article = self.article1, order = self.order2, unit = "input")
+        #create a ordered article for "mask" connected to our "order2"
+        self.ordered_article1 = OrderedArticle.objects.create(id="27", quantity = 3, article = self.article2, order = self.order2, unit = "input")
 
     def test_get_order_by_ID(self):
         order77 = self.order1
         order88 = self.order2
 
+        storage1 = self.storage_in_compartment
+
         #test we can get the order we want and not the wrong
         self.assertEqual(order77, self.order_management_service.get_order_by_id("77"))
+        self.assertEqual(order77.to_storage, storage1)
+
+        #test we can can an order with 2 ordered articles
         self.assertEqual(order88, self.order_management_service.get_order_by_id("88"))
+
+        #test that orders are differantiated from each other
         self.assertNotEqual(order88, self.order_management_service.get_order_by_id("77"))
+
+        #test api endpoint: "API endpoint requirement: Get orders. (Not in our SRS, new functionality)"
+        
+
+        orders = self.order_services.get_orders()
+        #ordered_articles = self.order_services.get_all_ordered_articles()
+        
+        self.assertEqual(list(orders),[self.order1,self.order2])
+    
+        
+
