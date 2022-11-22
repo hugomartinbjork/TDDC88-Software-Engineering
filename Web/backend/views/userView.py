@@ -104,7 +104,6 @@ class UserId(APIView):
             cost_center = None
         try:
             group = json_body['role']
-            print(group)
         except:
             group = None
 
