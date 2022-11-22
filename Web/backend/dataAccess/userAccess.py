@@ -103,10 +103,8 @@ class UserAccess():
                     Exception
             if group is not None:
                 try:
-                    print(Group.objects.filter(id=group).first())
                     new_group = Group.objects.filter(id=group).first()
                     updated_user.group = new_group
-                    print(updated_user.group)
                 except:
                     Exception
             updated_user.save()

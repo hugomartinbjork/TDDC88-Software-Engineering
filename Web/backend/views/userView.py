@@ -108,12 +108,9 @@ class UserId(APIView):
         except:
             group = None
 
- #       user = self.userService.get_user_info(user_id)
-  #      if user is None:
-   #         raise Http404("Could not find user")
         updated_user = self.userService.update_user(user_id=user_id, barcode_id=barcode_id, nfc_id=nfc_id, username=username,
                                                     password=password, cost_center=cost_center, group=group)
-        print(updated_user)
+
         serialized_order = UserInfoSerializer(updated_user)
         if serialized_order.is_valid:
             return Response(serialized_order.data, status=200)
