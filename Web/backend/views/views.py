@@ -72,18 +72,11 @@ class Article(APIView):
                     name)
             if article is None:
                 raise Http404("Could not find article")
-            storage_id = request.GET.get('storage_id', None)
-            
-            if storage_id != None:
-                storage = self.storage_management_service.get_storage_by_id(storage_id)
-                compartment_serializer = ArticleCompartmentProximitySerializer(article, storage)
-                print(compartment_serializer.data[1])
+        
             serializer = ApiArticleSerializer(article)
-            new_dict = {'compartments'}
-            new_dict.update(compartment_serializer.data)
-            new_dict.update(serializer.data)
+        
             if serializer.is_valid:
-                return JsonResponse(new_dict, safe=False, status=200)
+                return JsonResponse(serializer.data, safe=False, status=200)
             return HttpResponseBadRequest
 
 
