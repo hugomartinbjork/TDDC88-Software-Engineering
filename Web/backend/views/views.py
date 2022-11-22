@@ -225,7 +225,7 @@ class Compartments(APIView):
 
 class Order(APIView):
     '''Order endpoint handling all request from /orders'''
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication, )
 
     @si.inject
     def __init__(self, _deps, *args):
@@ -240,30 +240,14 @@ class Order(APIView):
             raise PermissionDenied
 
         orders = self.order_service.get_orders()
-        ordered_articles = self.order_service.get_all_ordered_articles()
+        if orders is None:
+            return Response({'No orders found'}, status=status.HTTP_404_NOT_FOUND)
 
-        serialized_articles = []
-        for ordered_article in ordered_articles:
-            real_article = self.article_management_service.get_article_by_lio_id(
-                ordered_article.article.lio_id)
-            print(ordered_article)
-            serialized_article = ArticleSerializer(real_article)
-            serialized_order_article = OrderedArticleSerializer(
-                ordered_article)
-            serialized_articles.append(serialized_article.data)
-            serialized_articles.append(serialized_order_article.data)
-            if ordered_article is None:
-                return HttpResponseBadRequest
+        serializer = OrderSerializer(orders, many=True)
 
-        for order in orders:
-            serialized_order = OrderSerializer(order)
-
-            if serialized_order.is_valid:
-                data = {}
-                data.update(serialized_order.data)
-                data['articles'] = serialized_articles
-                return Response(data, status=200)
-            return HttpResponseBadRequest
+        if serializer.is_valid:
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({'Serialization failed'}, status=status.HTTP_400_BAD_REQUEST)
 
     def post(self, request, format=None):
         '''Places an order'''
@@ -272,13 +256,18 @@ class Order(APIView):
             if not request.user.has_perm('backend.add_order'):
                 raise PermissionDenied
             json_body = request.data
-            storage_id = json_body['storageId']
-            ordered_articles = json_body['articles']
+            try:
+                storage_id = json_body['storageId']
+                ordered_articles = json_body['articles']
+            except:
+                return Response({'JSON payload not correctly formatted'}, status=status.HTTP_400_BAD_REQUEST)
 
             max_wait = 0
             for ordered_article in ordered_articles:
                 temp = self.order_service.calculate_expected_wait(
                     article_id=ordered_article['lioNr'], amount=ordered_article['quantity'])
+                if temp is None:
+                    return Response({'Article not in central storage'}, status=status.HTTP_400_BAD_REQUEST)
                 if (temp > max_wait):
                     max_wait = temp
 
@@ -289,15 +278,16 @@ class Order(APIView):
                 storage_id=storage_id, estimated_delivery_date=estimated_delivery_date, ordered_articles=ordered_articles)
 
             if order is None:
-                return HttpResponseBadRequest
+                return Response({'Order could not be placed'}, status=status.HTTP_400_BAD_REQUEST)
 
             for ordered_article in ordered_articles:
                 OrderService.create_ordered_article(
                     ordered_article['lioNr'], ordered_article['quantity'], ordered_article['unit'], order)
+
             serialized_order = OrderSerializer(order)
             if serialized_order.is_valid:
                 return Response(serialized_order.data, status=200)
-            return HttpResponseBadRequest
+            return Response({'Serialization failed'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class OrderId(APIView):
@@ -312,14 +302,13 @@ class OrderId(APIView):
 
     def get(self, request, id):
         order = self.order_service.get_order_by_id(id)
-        print(order)
         if order is None:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response({'Order not found'}, status=status.HTTP_404_NOT_FOUND)
 
         serialized_order = OrderSerializer(order)
         if serialized_order.is_valid:
             return Response(serialized_order.data, status=200)
-        return HttpResponseBadRequest
+        return Response({'Serialization failed'}, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, id):
         '''OBS! Not yet finished! Only used for testing. Written by Hugo and Jakob. 
@@ -331,18 +320,18 @@ class OrderId(APIView):
             updated_order = self.order_service.order_arrived(id)
 
         if updated_order is None:
-            return HttpResponseBadRequest
+            return Response({'Order could not be updated'}, status=status.HTTP_400_BAD_REQUEST)
 
         serialized_order = OrderSerializer(updated_order)
         if serialized_order.is_valid:
             return Response(serialized_order.data, status=200)
-        return HttpResponseBadRequest
+        return Response({'Serialization failed'}, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, id):
         '''Delete order func'''
         deleted_order = self.order_service.delete_order(id)
         if deleted_order is None:
-            return HttpResponseBadRequest
+            return Response({'Order deletion failed'}, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -588,7 +577,8 @@ class Transactions(APIView):
             raise PermissionDenied
         compartment = self.storage_management_service.get_compartment_by_qr(
             qr_code=request.data.get("qrCode"))
-        storage = self.storage_management_service.get_storage_by_id(request.data.get('storageId'))
+        storage = self.storage_management_service.get_storage_by_id(
+            request.data.get('storageId'))
         if compartment is None:
             return Response({'error': 'Could not find compartment'},
                             status=status.HTTP_400_BAD_REQUEST)
@@ -596,7 +586,7 @@ class Transactions(APIView):
             return Response({'error': 'Could not find compartment in storage'},
                             status=status.HTTP_400_BAD_REQUEST)
         else:
-        
+
             amount = request.data.get("quantity")
             unit = request.data.get("unit")
             user = request.user
@@ -645,6 +635,7 @@ class Transactions(APIView):
                         time_of_transaction=time_of_transaction))
                 return JsonResponse(TransactionSerializer(transaction).data,
                                     status=200)
+
 
 class TransactionsById(APIView):
     '''Get transaction by ID view.'''

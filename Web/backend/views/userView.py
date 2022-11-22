@@ -29,7 +29,7 @@ class User(APIView):
         serializer = UserInfoSerializer(users, many=True)
         if serializer.is_valid:
             return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'serialization failed'}, status=status.HTTP_400_BAD_REQUEST)
 
     def post(self, request):
         '''posts a user to the database. Should Only accessable by Admins'''
@@ -54,7 +54,7 @@ class User(APIView):
         serializer = UserInfoSerializer(new_user)
         if serializer.is_valid:
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'serialization failed'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserId(APIView):
@@ -77,7 +77,7 @@ class UserId(APIView):
             serializer = UserInfoSerializer(user)
             if serializer.is_valid:
                 return Response(serializer.data, status=200)
-        return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'serialization failed'}, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, user_id):
         '''Edit user'''
@@ -114,11 +114,11 @@ class UserId(APIView):
         serialized_order = UserInfoSerializer(updated_user)
         if serialized_order.is_valid:
             return Response(serialized_order.data, status=200)
-        return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'serialization failed'}, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, user_id):
         '''Delete order func'''
         deleted = self.userService.delete_user(user_id=user_id)
         if deleted is None:
-            return HttpResponseBadRequest
+            return Response({'User deletion failed'}, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_204_NO_CONTENT)
