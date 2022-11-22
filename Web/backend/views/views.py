@@ -207,20 +207,26 @@ class Compartments(APIView):
         '''Post compartment.'''
         if request.method == 'POST':
             # A user can add a compartment if they have permission
-          #          if not request.user.has_perm('backend.add_compartment'):
-           #             raise PermissionDenied
-            json_body = request.data
-            storage_id = json_body['storageId']
-            placement = json_body['placement']
-            qr_code = json_body['qrCode']
-            compartment = self.storage_management_service.create_compartment(
-                storage_id, placement, qr_code
-            )
+            if not request.user.has_perm('backend.add_compartment'):
+               raise PermissionDenied
+            try:
+                json_body = request.data
+                storage_id = json_body['storageId']
+                placement = json_body['placement']
+                qr_code = json_body['qrCode']
+            except:
+                return Response({'JSON payload not correctly formatted'}, status=status.HTTP_400_BAD_REQUEST)
+
+        compartment = self.storage_management_service.create_compartment(
+            storage_id, placement, qr_code)
+
+        if compartment is None:
+            return Response({'Compartment could not be created'}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = CompartmentSerializer(compartment)
         if serializer.is_valid:
             return JsonResponse(serializer.data, status=200)
-        return HttpResponseBadRequest
+        return Response({'Serialization failed'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class Order(APIView):
@@ -311,13 +317,26 @@ class OrderId(APIView):
         return Response({'Serialization failed'}, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, id):
-        '''OBS! Not yet finished! Only used for testing. Written by Hugo and Jakob. 
-        Alters the state of an order to delivered and updates the amount in the correct compartments.'''
+        '''Alters the state of an order to delivered and updates the amount in the correct compartments.'''
         json_body = request.data
-        order_state = json_body['state']
+        try:
+            order_state = json_body['state']
+        except:
+            return Response({'JSON payload not correctly formatted'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if order_state == "delivered":
+        current_state = self.order_service.get_order_by_id(id).order_state
+
+        if current_state == 'delivered' and order_state == 'delivered' or current_state == 'order placed' and order_state == 'order placed':
+            return Response({'This order has already been handled'}, status=status.HTTP_400_BAD_REQUEST)
+
+        elif current_state == 'delivered' and order_state == 'order placed':
+            return Response({'You are not allowed to alter an order in this way'}, status=status.HTTP_400_BAD_REQUEST)
+
+        elif current_state == 'order placed' and order_state == 'delivered':
             updated_order = self.order_service.order_arrived(id)
+
+        else:
+            return Response({'Somthing went wrong'}, status=status.HTTP_400_BAD_REQUEST)
 
         if updated_order is None:
             return Response({'Order could not be updated'}, status=status.HTTP_400_BAD_REQUEST)

@@ -10,6 +10,7 @@ from backend.coremodels.storage import Storage
 from backend.coremodels.compartment import Compartment
 from backend.coremodels.centralStorageSpace import CentralStorageSpace
 from backend.coremodels.article import Article
+from datetime import datetime
 
 from backend.Order_text_files.utils import make_text_file
 
@@ -72,6 +73,7 @@ class OrderService():
                 compartment.save()
 
         order.order_state = "delivered"
+        order.delivery_date = datetime.now()
         order.save()
         return order
 
