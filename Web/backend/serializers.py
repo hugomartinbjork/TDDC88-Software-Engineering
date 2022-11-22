@@ -159,12 +159,36 @@ class ApiArticleSerializer(serializers.ModelSerializer):
         source='supplier_article_nr', read_only=True)
     supplierName = serializers.CharField(
         source='supplier.name', read_only=True)
-
+    
     class Meta:
         model = Article
         fields = ('compartments', 'inputUnit', 'outputUnit', 'outputPerInputUnit', 'price', 'supplierName', 'supplierArticleNr', 'name', 'alternativeNames', 'lioNr', 'alternativeProducts', 
         'Z41')
 
+
+class OrderedArticleSerializer(serializers.ModelSerializer):
+    orderedQuantity = serializers.CharField(source= 'quantity')
+    articleInfo = ApiArticleSerializer(source='article', read_only=True, many=False)
+    
+    class Meta:
+        model = OrderedArticle
+        fields = ('articleInfo', 'orderedQuantity', 'unit')
+
+class OrderSerializer(serializers.ModelSerializer):
+    articles = OrderedArticleSerializer(
+        source='orderedarticle_set', read_only=True, many=True)
+    storageId = serializers.CharField(source='to_storage')
+    orderDate = serializers.CharField(source='order_date')
+    estimatedDeliveryDate = serializers.CharField(
+        source='estimated_delivery_date')
+    DeliveryDate = serializers.CharField(
+        source='delivery_date')
+    state = serializers.CharField(source='order_state')
+    
+    class Meta:
+        model = Order
+        fields = ['id', 'storageId', 'orderDate',
+                  'estimatedDeliveryDate', 'DeliveryDate', 'state', 'articles']
 
 
 class LocationSerializer(serializers.ModelSerializer):
