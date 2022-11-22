@@ -150,8 +150,8 @@ class StorageManagementService():
                 id=id).amount + amount*converter
             new_amount = amount*converter
             unit = "input"
-       
-        if (amount_in_storage < 0):
+
+        if (amount_in_storage < 0 or Compartment.objects.get(id=id).maximal_capacity < amount_in_storage):
             return None
         else:
             Compartment.objects.update(amount=amount_in_storage)
@@ -195,7 +195,7 @@ class StorageManagementService():
                 id=id).amount + amount*converter
             new_return_amount = amount*converter
             unit = "input"
-        if (amount_in_storage < 0):
+        if (amount_in_storage < 0 or Compartment.objects.get(id=id).maximal_capacity < amount_in_storage):
             return None
         else:
             print(amount)
@@ -226,8 +226,8 @@ class StorageManagementService():
             amount_in_storage = Compartment.objects.get(
                 id=id).amount - amount*converter
             new_amount = amount*converter
-            unit ="input"
-        if (amount_in_storage < 0):
+            unit = "input"
+        if (amount_in_storage < 0 or Compartment.objects.get(id=id).maximal_capacity < amount_in_storage):
             return None
         else:
             Compartment.objects.filter(id=id).update(amount=amount_in_storage)
@@ -344,5 +344,7 @@ class StorageManagementService():
 
         self.storage_access.set_article(current_compartment, new_article)
         self.storage_access.set_amount(current_compartment, new_amount)
-        self.storage_access.set_standard_order_amount(current_compartment, new_std_order_amount)
-        self.storage_access.set_order_point(current_compartment, new_order_point)
+        self.storage_access.set_standard_order_amount(
+            current_compartment, new_std_order_amount)
+        self.storage_access.set_order_point(
+            current_compartment, new_order_point)
