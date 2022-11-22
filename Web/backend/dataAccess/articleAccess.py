@@ -1,4 +1,4 @@
-from backend.coremodels.article_has_supplier import ArticleHasSupplier
+
 from backend.coremodels.supplier import Supplier
 from ..coremodels.article import Article
 from ..__init__ import dataAccessInjector as di

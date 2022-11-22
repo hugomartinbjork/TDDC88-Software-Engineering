@@ -8,7 +8,6 @@ from backend.coremodels.centralStorageSpace import CentralStorageSpace
 from backend.coremodels.storage import Storage
 from backend.coremodels.cost_center import CostCenter
 from backend.coremodels.compartment import Compartment
-from backend.coremodels.article_has_supplier import ArticleHasSupplier
 from backend.coremodels.supplier import Supplier
 from backend.coremodels.transaction import Transaction
 from backend.coremodels.order import Order
@@ -67,8 +66,7 @@ class CompartmentInline(admin.TabularInline):
     model = Compartment
 
 
-class ArticleHasSupplierInline(admin.TabularInline):
-    model = ArticleHasSupplier
+
 
 
 class AlternativeNameInLine(admin.TabularInline):
@@ -76,7 +74,7 @@ class AlternativeNameInLine(admin.TabularInline):
 
 
 class ArticleAdmin(admin.ModelAdmin):
-    inlines = (CompartmentInline, ArticleHasSupplierInline,
+    inlines = (CompartmentInline,
                AlternativeNameInLine, )
 
 
