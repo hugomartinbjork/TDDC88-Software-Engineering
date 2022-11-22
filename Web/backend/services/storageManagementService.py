@@ -77,11 +77,11 @@ class StorageManagementService():
         '''Edit time of a transaction'''
         return self.storage_access.edit_transaction_by_id(transaction_id, new_time_of_transaction)
 
-    def set_compartment_amount(self, compartment_id: int, amount: int, username: str, add_output_unit: bool, time_of_transaction: str) -> Transaction:
+    def set_compartment_amount(self, compartment_id: int, storage_id: str, amount: int, username: str, add_output_unit: bool, time_of_transaction: str) -> Transaction:
         '''Set a storage to a specified level. Return a transaction.'''
         compartment = self.storage_access.set_compartment_amount(
             compartment_id, amount)
-        storage = self.storage_access.get_storage(id=compartment.storage.id)
+        storage = self.storage_access.get_storage(id=storage_id)
         article = self.storage_access.get_article_in_compartment(
             compartment_id=compartment_id)
         user = User.objects.get(username=username)
@@ -91,7 +91,8 @@ class StorageManagementService():
         else:
             unit = "input"
         transaction = Transaction.objects.create(
-            storage=storage, article=article, attribute_cost_to=cost_center, operation="adjust",
+            storage=Compartment.objects.get(
+                id=compartment_id).storage, article=article, attribute_cost_to=cost_center, operation="adjust",
             by_user=user, amount=amount,
             time_of_transaction=time_of_transaction, unit=unit)
         return transaction
@@ -103,11 +104,13 @@ class StorageManagementService():
                          end_date: str) -> int:
         '''Get storage cost.'''
         sum_value = 0
-        transactions = self.storage_access.get_transaction_by_storage_date(storage_id=storage_id, start=start_date, end=end_date)
+        transactions = self.storage_access.get_transaction_by_storage_date(
+            storage_id=storage_id, start=start_date, end=end_date)
         takeout_value = 0
         return_value = 0
         for transaction in transactions:
-            user_cost_center = self.user_access.get_user_cost_center(transaction.by_user)
+            user_cost_center = self.user_access.get_user_cost_center(
+                transaction.by_user)
             if (user_cost_center == transaction.storage.cost_center):
                 if transaction.operation == 1:
                     takeout_value = transaction.get_value() + takeout_value
@@ -126,12 +129,12 @@ class StorageManagementService():
 # methods work. Leaving this
 # TODO to the original author
 
-    def add_to_storage(self, id: str, amount: int, username: str,
+    def add_to_storage(self, id: str, storage_id: str, amount: int, username: str,
                        add_output_unit: bool, time_of_transaction: str) -> Transaction:
         '''Add to storage.'''
         compartment = self.storage_access.get_compartment_by_qr(id)
-        storage_id = compartment.storage
-        cost_center = storage_id.cost_center
+        storage_id = storage_id
+        cost_center = id = storage_id.cost_center
         article = Article.objects.get(lio_id=compartment.article.lio_id)
         converter = article.output_per_input
         user = User.objects.get(username=username)
@@ -145,13 +148,13 @@ class StorageManagementService():
                 id=id).amount + amount*converter
             new_amount = amount*converter
             unit = "input"
-       
+
         if (amount_in_storage < 0):
             return None
         else:
             Compartment.objects.update(amount=amount_in_storage)
             new_transaction = Transaction.objects.create(
-                storage=storage_id, article=article, attribute_cost_to=cost_center, operation="replenish",
+                storage=compartment.storage, article=article, attribute_cost_to=cost_center, operation="replenish",
                 by_user=user, amount=amount,
                 time_of_transaction=time_of_transaction, unit=unit)
             new_transaction.save()
@@ -163,12 +166,12 @@ class StorageManagementService():
 # Leaving this
 # TODO to the original author
 
-    def add_to_return_storage(self, id: str, amount: int,
+    def add_to_return_storage(self, id: str, storage_id: str, amount: int,
                               username: str, add_output_unit: bool,
                               time_of_transaction) -> Transaction:
         '''Add return to storage.'''
         compartment = Compartment.objects.get(id=id)
-        storage_id = compartment.storage
+        storage_id = storage_id
         cost_center = storage_id.cost_center
         amount = amount
         article = Article.objects.get(lio_id=compartment.article.lio_id)
@@ -197,13 +200,13 @@ class StorageManagementService():
             print(new_return_amount)
             Compartment.objects.filter(id=id).update(amount=amount_in_storage)
             new_transaction = Transaction.objects.create(
-                storage=storage_id, article=article, attribute_cost_to=cost_center, operation="return",
+                storage=compartment.storage, article=article, attribute_cost_to=cost_center, operation="return",
                 by_user=user, amount=amount,
                 time_of_transaction=time_of_transaction, unit=unit)
             new_transaction.save()
             return new_transaction
 
-    def take_from_Compartment(self, id: str, amount: int, username: str,
+    def take_from_Compartment(self, id: str, storage_id: str, amount: int, username: str,
                               add_output_unit: bool, time_of_transaction: str):
         '''Take from compartment. Return transaction.'''
         compartment = self.storage_access.get_compartment_by_qr(id)
@@ -211,7 +214,8 @@ class StorageManagementService():
 # inputOutput = InputOutput.objects.get(article=article)
         converter = article.output_per_input
         user = User.objects.get(username=username)
-        cost_center = compartment.storage.cost_center
+
+        cost_center = storage_id.cost_center
         if (add_output_unit):
             amount_in_storage = Compartment.objects.get(
                 id=id).amount - amount
@@ -221,7 +225,7 @@ class StorageManagementService():
             amount_in_storage = Compartment.objects.get(
                 id=id).amount - amount*converter
             new_amount = amount*converter
-            unit ="input"
+            unit = "input"
         if (amount_in_storage < 0):
             return None
         else:
@@ -339,5 +343,7 @@ class StorageManagementService():
 
         self.storage_access.set_article(current_compartment, new_article)
         self.storage_access.set_amount(current_compartment, new_amount)
-        self.storage_access.set_standard_order_amount(current_compartment, new_std_order_amount)
-        self.storage_access.set_order_point(current_compartment, new_order_point)
+        self.storage_access.set_standard_order_amount(
+            current_compartment, new_std_order_amount)
+        self.storage_access.set_order_point(
+            current_compartment, new_order_point)

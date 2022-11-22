@@ -36,6 +36,7 @@ from datetime import date
 from datetime import datetime
 import datetime
 from django.utils.timezone import now
+import json
 
 
 # from Web.backend import serializers
@@ -575,15 +576,17 @@ class Transactions(APIView):
             # Custom permission to be able to see all transactions. Can be found in the coremodel transaction.py
             if not request.user.has_perm('backend.get_all_transaction'):
                 raise PermissionDenied
-            fromDate =request.query_params.get('fromDate', None)
+            fromDate = request.query_params.get('fromDate', None)
             toDate = request.query_params.get('toDate', None)
             limit = request.query_params.get('limit', None)
             all_transactions = (
-                self.storage_management_service.get_all_transactions(fromDate=fromDate,toDate=toDate,limit=limit))
+                self.storage_management_service.get_all_transactions(fromDate=fromDate, toDate=toDate, limit=limit))
         if all_transactions is None:
             raise Http404("Could not find any transactions")
         else:
-            return JsonResponse(list(all_transactions), safe=False, status=200)
+            serializer = TransactionSerializer(all_transactions, many=True)
+
+            return JsonResponse(serializer.data, safe=False, status=200)
 
     def post(self, request):
         '''Description needed.'''
@@ -591,15 +594,13 @@ class Transactions(APIView):
             raise PermissionDenied
         compartment = self.storage_management_service.get_compartment_by_qr(
             qr_code=request.data.get("qrCode"))
-        storage = self.storage_management_service.get_storage_by_id(request.data.get('storageId'))
+        storage = self.storage_management_service.get_storage_by_id(
+            request.data.get('storageId'))
         if compartment is None:
             return Response({'error': 'Could not find compartment'},
                             status=status.HTTP_400_BAD_REQUEST)
-        if compartment.storage.id != storage.id:
-            return Response({'error': 'Could not find compartment in storage'},
-                            status=status.HTTP_400_BAD_REQUEST)
         else:
-        
+
             amount = request.data.get("quantity")
             unit = request.data.get("unit")
             user = request.user
@@ -616,7 +617,7 @@ class Transactions(APIView):
 
             if operation == "replenish":
                 transaction = self.storage_management_service.add_to_storage(
-                    id=compartment.id, amount=amount,
+                    id=compartment.id, storage_id=storage, amount=amount,
                     username=user.username, add_output_unit=add_output_unit,
                     time_of_transaction=time_of_transaction)
                 return JsonResponse(TransactionSerializer(transaction).data,
@@ -624,7 +625,7 @@ class Transactions(APIView):
             elif operation == "return":
                 transaction = (
                     self.storage_management_service.add_to_return_storage(
-                        id=compartment.id, amount=amount,
+                        id=compartment.id, storage_id=storage, amount=amount,
                         username=user.username,
                         add_output_unit=add_output_unit,
                         time_of_transaction=time_of_transaction))
@@ -633,7 +634,7 @@ class Transactions(APIView):
             elif operation == "takeout":
                 transaction = (
                     self.storage_management_service.take_from_Compartment(
-                        id=compartment.id, amount=amount,
+                        id=compartment.id, storage_id=storage, amount=amount,
                         username=user.username,
                         add_output_unit=add_output_unit,
                         time_of_transaction=time_of_transaction))
@@ -642,12 +643,13 @@ class Transactions(APIView):
             elif operation == "adjust":
                 transaction = (
                     self.storage_management_service.set_compartment_amount(
-                        compartment_id=compartment.id, amount=amount,
+                        compartment_id=compartment.id, storage_id=storage, amount=amount,
                         username=user.username,
                         add_output_unit=add_output_unit,
                         time_of_transaction=time_of_transaction))
                 return JsonResponse(TransactionSerializer(transaction).data,
                                     status=200)
+
 
 class TransactionsById(APIView):
     '''Get transaction by ID view.'''
@@ -997,21 +999,21 @@ class MoveArticle(APIView):
 
                 from_transaction = (
                     self.storage_management_service.take_from_Compartment(
-                        id=from_compartment_qr_code, amount=quantity,
+                        id=from_compartment_qr_code, storage_id=from_compartment.storage, amount=quantity,
                         username=user.username,
                         add_output_unit=add_output_unit,
                         time_of_transaction=time_of_transaction))
 
                 to_transaction = (
                     self.storage_management_service.add_to_return_storage(
-                        id=to_compartment_qr_code, amount=quantity,
+                        id=to_compartment_qr_code, storage_id=to_compartment.storage, amount=quantity,
                         username=user.username,
                         add_output_unit=add_output_unit,
                         time_of_transaction=time_of_transaction))
                 '''Prints JsonResponse directly instead of using Serializer'''
                 data = {}
                 data['userId'] = str(user.id)
-                data['timeStamp'] = time_of_transaction
+                data['timeStamp'] = to_transaction.time_of_transaction
                 data['fromCompartmentQrCode'] = from_compartment_qr_code
                 data['toCompartmentQrCode'] = to_compartment_qr_code
                 data['lioNr'] = from_compartment.article.lio_id
