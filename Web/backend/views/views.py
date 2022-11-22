@@ -1,5 +1,5 @@
 from ..serializers import AlternativeNameSerializer, StorageSerializer, ApiCompartmentSerializer, UserInfoSerializer, ApiArticleSerializer
-from ..serializers import ArticleSerializer, OrderSerializer, OrderedArticleSerializer
+from ..serializers import ArticleSerializer, OrderSerializer, OrderedArticleSerializer, ArticleCompartmentProximitySerializer
 from ..serializers import CompartmentSerializer, TransactionSerializer
 from ..serializers import GroupSerializer, NearbyStoragesSerializer
 
@@ -55,7 +55,7 @@ class Article(APIView):
         self.storage_management_service: StorageManagementService = (
             _deps['StorageManagementService']())
 
-    def get(self, request, article_id=None, qr_code=None, name=None, storage_id=None):
+    def get(self, request, article_id=None, qr_code=None, name=None):
         '''Get.'''
         if request.method == 'GET':
            # A user can get articles if they have permission
@@ -71,12 +71,11 @@ class Article(APIView):
             elif name != None:
                 article = self.article_management_service.get_article_by_name(
                     name)
-
             if article is None:
                 raise Http404("Could not find article")
-
+        
             serializer = ApiArticleSerializer(article)
-
+        
             if serializer.is_valid:
                 return JsonResponse(serializer.data, safe=False, status=200)
             return HttpResponseBadRequest
@@ -208,25 +207,31 @@ class Compartments(APIView):
         '''Post compartment.'''
         if request.method == 'POST':
             # A user can add a compartment if they have permission
-          #          if not request.user.has_perm('backend.add_compartment'):
-           #             raise PermissionDenied
-            json_body = request.data
-            storage_id = json_body['storageId']
-            placement = json_body['placement']
-            qr_code = json_body['qrCode']
-            compartment = self.storage_management_service.create_compartment(
-                storage_id, placement, qr_code
-            )
+            if not request.user.has_perm('backend.add_compartment'):
+                raise PermissionDenied
+            try:
+                json_body = request.data
+                storage_id = json_body['storageId']
+                placement = json_body['placement']
+                qr_code = json_body['qrCode']
+            except:
+                return Response({'JSON payload not correctly formatted'}, status=status.HTTP_400_BAD_REQUEST)
+
+        compartment = self.storage_management_service.create_compartment(
+            storage_id, placement, qr_code)
+
+        if compartment is None:
+            return Response({'Compartment could not be created'}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = CompartmentSerializer(compartment)
         if serializer.is_valid:
             return JsonResponse(serializer.data, status=200)
-        return HttpResponseBadRequest
+        return Response({'Serialization failed'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class Order(APIView):
     '''Order endpoint handling all request from /orders'''
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication, )
 
     @si.inject
     def __init__(self, _deps, *args):
@@ -241,30 +246,14 @@ class Order(APIView):
             raise PermissionDenied
 
         orders = self.order_service.get_orders()
-        ordered_articles = self.order_service.get_all_ordered_articles()
+        if orders is None:
+            return Response({'No orders found'}, status=status.HTTP_404_NOT_FOUND)
 
-        serialized_articles = []
-        for ordered_article in ordered_articles:
-            real_article = self.article_management_service.get_article_by_lio_id(
-                ordered_article.article.lio_id)
-            print(ordered_article)
-            serialized_article = ArticleSerializer(real_article)
-            serialized_order_article = OrderedArticleSerializer(
-                ordered_article)
-            serialized_articles.append(serialized_article.data)
-            serialized_articles.append(serialized_order_article.data)
-            if ordered_article is None:
-                return HttpResponseBadRequest
+        serializer = OrderSerializer(orders, many=True)
 
-        for order in orders:
-            serialized_order = OrderSerializer(order)
-
-            if serialized_order.is_valid:
-                data = {}
-                data.update(serialized_order.data)
-                data['articles'] = serialized_articles
-                return Response(data, status=200)
-            return HttpResponseBadRequest
+        if serializer.is_valid:
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({'Serialization failed'}, status=status.HTTP_400_BAD_REQUEST)
 
     def post(self, request, format=None):
         '''Places an order'''
@@ -273,13 +262,18 @@ class Order(APIView):
             if not request.user.has_perm('backend.add_order'):
                 raise PermissionDenied
             json_body = request.data
-            storage_id = json_body['storageId']
-            ordered_articles = json_body['articles']
+            try:
+                storage_id = json_body['storageId']
+                ordered_articles = json_body['articles']
+            except:
+                return Response({'JSON payload not correctly formatted'}, status=status.HTTP_400_BAD_REQUEST)
 
             max_wait = 0
             for ordered_article in ordered_articles:
                 temp = self.order_service.calculate_expected_wait(
                     article_id=ordered_article['lioNr'], amount=ordered_article['quantity'])
+                if temp is None:
+                    return Response({'Article not in central storage'}, status=status.HTTP_400_BAD_REQUEST)
                 if (temp > max_wait):
                     max_wait = temp
 
@@ -290,15 +284,16 @@ class Order(APIView):
                 storage_id=storage_id, estimated_delivery_date=estimated_delivery_date, ordered_articles=ordered_articles)
 
             if order is None:
-                return HttpResponseBadRequest
+                return Response({'Order could not be placed'}, status=status.HTTP_400_BAD_REQUEST)
 
             for ordered_article in ordered_articles:
                 OrderService.create_ordered_article(
                     ordered_article['lioNr'], ordered_article['quantity'], ordered_article['unit'], order)
+
             serialized_order = OrderSerializer(order)
             if serialized_order.is_valid:
                 return Response(serialized_order.data, status=200)
-            return HttpResponseBadRequest
+            return Response({'Serialization failed'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class OrderId(APIView):
@@ -313,37 +308,49 @@ class OrderId(APIView):
 
     def get(self, request, id):
         order = self.order_service.get_order_by_id(id)
-        print(order)
         if order is None:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response({'Order not found'}, status=status.HTTP_404_NOT_FOUND)
 
         serialized_order = OrderSerializer(order)
         if serialized_order.is_valid:
             return Response(serialized_order.data, status=200)
-        return HttpResponseBadRequest
+        return Response({'Serialization failed'}, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, id):
-        '''OBS! Not yet finished! Only used for testing. Written by Hugo and Jakob. 
-        Alters the state of an order to delivered and updates the amount in the correct compartments.'''
+        '''Alters the state of an order to delivered and updates the amount in the correct compartments.'''
         json_body = request.data
-        order_state = json_body['state']
+        try:
+            order_state = json_body['state']
+        except:
+            return Response({'JSON payload not correctly formatted'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if order_state == "delivered":
+        current_state = self.order_service.get_order_by_id(id).order_state
+
+        if current_state == 'delivered' and order_state == 'delivered' or current_state == 'order placed' and order_state == 'order placed':
+            return Response({'This order has already been handled'}, status=status.HTTP_400_BAD_REQUEST)
+
+        elif current_state == 'delivered' and order_state == 'order placed':
+            return Response({'You are not allowed to alter an order in this way'}, status=status.HTTP_400_BAD_REQUEST)
+
+        elif current_state == 'order placed' and order_state == 'delivered':
             updated_order = self.order_service.order_arrived(id)
 
+        else:
+            return Response({'Somthing went wrong'}, status=status.HTTP_400_BAD_REQUEST)
+
         if updated_order is None:
-            return HttpResponseBadRequest
+            return Response({'Order could not be updated'}, status=status.HTTP_400_BAD_REQUEST)
 
         serialized_order = OrderSerializer(updated_order)
         if serialized_order.is_valid:
             return Response(serialized_order.data, status=200)
-        return HttpResponseBadRequest
+        return Response({'Serialization failed'}, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, id):
         '''Delete order func'''
         deleted_order = self.order_service.delete_order(id)
         if deleted_order is None:
-            return HttpResponseBadRequest
+            return Response({'Order deletion failed'}, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -988,6 +995,10 @@ class MoveArticle(APIView):
 
             if from_compartment.article.lio_id != to_compartment.article.lio_id:
                 return Response({'error': 'Not matching articles'},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+            if (from_compartment.amount - quantity) < 0 or (to_compartment.amount + quantity) > to_compartment.maximal_capacity:
+                return Response({'error': 'Not allowed qunatity, not enough in storage or not enough space in target'},
                                 status=status.HTTP_400_BAD_REQUEST)
             else:
                 if unit == "output":

@@ -12,7 +12,7 @@ class UserInfo(models.Model):
     '''User model which extends the base django user model.'''
     user = models.OneToOneField(
         User, on_delete=models.CASCADE, primary_key=True)
-    barcode_id = models.CharField(max_length=256, null=True, unique=True)
+    barcode_id = models.CharField(max_length=255, null=True, unique=True)
     nfc_id = models.CharField(max_length=256, null=True, unique=True)
     cost_center = models.ManyToManyField(CostCenter)
     # group points to the built-in django class Group,
@@ -21,18 +21,6 @@ class UserInfo(models.Model):
 
     # Stores barcode and nfc as hashed values in the DB.
     def save(self, **kwargs):
-        print(self.barcode_id)
         self.barcode_id = make_password(self.barcode_id, SALT)
         self.nfc_id = make_password(self.nfc_id, SALT)
         super().save(**kwargs)
-
-    # Might not be needed but keep it.
-    # Code below extends base user model.
-    # @receiver(post_save, sender=User)
-    # def create_user_info(sender, instance, created, **kwargs):
-    #     if created:
-    #         UserInfo.objects.create(user=instance)
-
-    # @receiver(post_save, sender=User)
-    # def save_user_info(sender, instance, **kwargs):
-    #     instance.userinfo.save()

@@ -13,7 +13,6 @@ class TransactionOperator(models.TextChoices):
 class OrderOperator(models.TextChoices):
     '''Order operator that keeps track of our current state'''
     ORDER_PLACED = "order placed",
-    PARTIALLY_DELIVERED = "partially delivered"
     DELIVERED = "delivered",
 
 

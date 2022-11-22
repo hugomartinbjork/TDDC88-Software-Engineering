@@ -1,6 +1,7 @@
 from django.urls import path
 from rest_framework.urlpatterns import format_suffix_patterns
 from backend.views import views
+from backend.views import userView
 from django.views.decorators.csrf import csrf_exempt
 '''Rearranged according to API documentation'''
 
@@ -11,8 +12,8 @@ urlPatterns = [
     path('loginWithNFC/', views.LoginWithBarcodeOrNfc.as_view()),
 
     # User
-    #    path('/users') part of API, not yet implemented
-    #    path('/users/<user_id>') part of API, not yet implemented
+    path('users/', userView.User.as_view()),
+    path('users/<user_id>/', userView.UserId.as_view()),
 
     # This is not a part of the API
     path('user/<int:user_id>/transactions/',
