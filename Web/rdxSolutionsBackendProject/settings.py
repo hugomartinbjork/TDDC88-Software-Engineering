@@ -35,7 +35,7 @@ ALLOWED_HOSTS = ['tddc88-c14.kubernetes-public.it.liu.se', 'tddc88-c24.kubernete
 
 CORS_ORIGIN_ALLOW_ALL = True
 
-CSRF_TRUSTED_ORIGINS = ['tddc88-c14.kubernetes-public.it.liu.se', 'tddc88-c24.kubernetes-public.it.liu.se', 'rdx.kubernetes-public.it.liu.se', 'tddc88-c4.kubernetes-public.it.liu.se', 'https://rdx.kubernetes-public.it.liu.se', 'https://tddc88-c24.kubernetes-public.it.liu.se', 'https://tddc88-c14.kubernetes-public.it.liu.se', 'http://localhost:8000/', 'http://localhost:3000/']
+CSRF_TRUSTED_ORIGINS = ['https://rdx.kubernetes-public.it.liu.se', 'https://tddc88-c24.kubernetes-public.it.liu.se', 'https://tddc88-c14.kubernetes-public.it.liu.se', 'http://localhost:8000/', 'http://localhost:3000/']
 
 # Application definition
 
