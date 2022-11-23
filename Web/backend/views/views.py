@@ -705,7 +705,7 @@ class TransactionsById(APIView):
         else:
             return JsonResponse(TransactionSerializer(transaction).data, safe=False, status=200)
 
-    def put(self, request, id):
+    def put(self, request, transaction_id):
         '''Put transaction.'''
         if request.method == 'PUT':
             # Can only change a transaction if they have the permission
@@ -713,7 +713,7 @@ class TransactionsById(APIView):
                 raise PermissionDenied
             new_time_of_transaction = request.data.get("timeStamp")
             transaction = (
-                self.storage_management_service.edit_transaction_by_id(id, new_time_of_transaction))
+                self.storage_management_service.edit_transaction_by_id(transaction_id, new_time_of_transaction))
 
         if transaction is None:
             raise Http404("Could not find the transaction")
