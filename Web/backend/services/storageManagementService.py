@@ -80,17 +80,20 @@ class StorageManagementService():
 
     def set_compartment_amount(self, compartment_id: int, storage_id: str, amount: int, username: str, add_output_unit: bool, time_of_transaction: str) -> Transaction:
         '''Set a storage to a specified level. Return a transaction.'''
-        compartment = self.storage_access.set_compartment_amount(
-            compartment_id, amount)
+
         storage = self.storage_access.get_storage(id=storage_id)
         article = self.storage_access.get_article_in_compartment(
             compartment_id=compartment_id)
+        converter = article.output_per_input
         user = User.objects.get(username=username)
         cost_center = storage_id.cost_center
         if add_output_unit:
             unit = "output"
+            converter = 1
         else:
             unit = "input"
+        compartment = self.storage_access.set_compartment_amount(
+            compartment_id, amount*converter)
         transaction = Transaction.objects.create(
             storage=Compartment.objects.get(
                 id=compartment_id).storage, article=article, attribute_cost_to=cost_center, operation="adjust",
