@@ -54,7 +54,7 @@ urlPatterns = [
     path('moveArticle', views.MoveArticle.as_view()),
 
     # Transactions
-    path('transactions/', views.Transactions.as_view()),
+    path('transactions', views.Transactions.as_view()),
     path('transactions/<int:transaction_id>',
          views.TransactionsById.as_view()),
 
