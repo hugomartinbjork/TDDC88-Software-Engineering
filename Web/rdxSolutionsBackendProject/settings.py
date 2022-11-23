@@ -31,11 +31,11 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 # always set to false when pushing to dev
 #DEBUG = str(os.environ.get('DEBUG')) == "1"
 DEBUG = True
-ALLOWED_HOSTS = ['https://rdx.kubernetes-public.it.liu.se', 'https://tddc88-c24.kubernetes-public.it.liu.se', 'https://tddc88-c14.kubernetes-public.it.liu.se', 'http://localhost:8000/', 'http://localhost:3000/']
+ALLOWED_HOSTS = ['tddc88-c4.kubernetes-public.it.liu.se', 'https://rdx.kubernetes-public.it.liu.se', 'https://tddc88-c24.kubernetes-public.it.liu.se', 'https://tddc88-c14.kubernetes-public.it.liu.se', 'http://localhost:8000/', 'http://localhost:3000/']
 
 CORS_ORIGIN_ALLOW_ALL = True
 
-CSRF_TRUSTED_ORIGINS = ['https://rdx.kubernetes-public.it.liu.se', 'https://tddc88-c24.kubernetes-public.it.liu.se', 'https://tddc88-c14.kubernetes-public.it.liu.se', 'http://localhost:8000/', 'http://localhost:3000/']
+CSRF_TRUSTED_ORIGINS = ['tddc88-c4.kubernetes-public.it.liu.se', 'https://rdx.kubernetes-public.it.liu.se', 'https://tddc88-c24.kubernetes-public.it.liu.se', 'https://tddc88-c14.kubernetes-public.it.liu.se', 'http://localhost:8000/', 'http://localhost:3000/']
 
 # Application definition
 
