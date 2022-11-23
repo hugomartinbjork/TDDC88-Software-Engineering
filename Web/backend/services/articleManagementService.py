@@ -32,3 +32,11 @@ class ArticleManagementService():
     def get_article_by_name(self, name: str) -> Article:
         '''Returns article using the name of the article'''
         return self.article_operations.get_article_by_name(name)
+
+    def get_articles_by_search_name(self, search_string: str) -> Article:
+        '''Returns articles using the name of the article even if name is not complete'''
+        return self.article_operations.get_articles_by_search_name(search_string)
+
+    def get_articles_by_search_lio(self, search_string: str) -> Article:
+        '''Returns article using the lio of the article even if lio is not complete'''
+        return self.article_operations.get_articles_by_search_lio(search_string)

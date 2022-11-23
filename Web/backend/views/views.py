@@ -31,6 +31,7 @@ from django.http import HttpResponse
 from itertools import chain
 from operator import itemgetter
 from backend.coremodels.compartment import Compartment
+from backend.coremodels.article import Article
 from django.http import HttpResponse
 from datetime import date
 from datetime import datetime
@@ -1040,6 +1041,8 @@ class GetArticles(APIView):
             _deps['ArticleManagementService']())
         self.storage_management_service: StorageManagementService = (
             _deps['StorageManagementService']())
+        self.user_service: UserService = (
+            _deps['UserService']())
 
     def get(self, request):
         '''Get articles according to lioNr, name or storageId.'''
@@ -1053,18 +1056,17 @@ class GetArticles(APIView):
                 raise PermissionDenied
 
             if query_param_lio_nr != None:
-                article = self.article_management_service.get_article_by_lio_id(
-                    query_param_lio_nr)
-                serializer = ApiArticleSerializer(article)
-                return JsonResponse(serializer.data, safe=False, status=200)
+                articles_in_chosen_storage = self.article_management_service.get_articles_by_search_lio(query_param_lio_nr)
+                serializer = ApiArticleSerializer(articles_in_chosen_storage, many=True)
+               # print(serializer.data)
+                #return JsonResponse(serializer.data, safe=False, status=200)
 
-            elif query_param_name != None:
-                article = self.article_management_service.get_article_by_name(
-                    query_param_name)
-                serializer = ApiArticleSerializer(article)
-                return JsonResponse(serializer.data, safe=False, status=200)
+            else:
+                articles_in_chosen_storage = self.article_management_service.get_articles_by_search_name(query_param_name)
+                serializer = ApiArticleSerializer(articles_in_chosen_storage, many=True)
+                #return JsonResponse(serializer.data, safe=False, status=200)
 
-            elif query_param_storage_id != None:
+            if query_param_storage_id != None:
                 #Get a list of all compartments in storage 
                 list_of_compartments = self.storage_management_service.get_compartment_by_storage_id(
                     query_param_storage_id)
@@ -1075,16 +1077,18 @@ class GetArticles(APIView):
                 data_article = {}
 
                 ###Start One Article###
+                
                 data = {}
                 for compartment in list_of_compartments:
 
                     data['compartments'] =ArticleCompartmentProximitySerializer(getattr(compartment, "article"), current_storage).data
-                
-                serializer = ApiArticleSerializer(getattr(compartment, "article"))
-                
-                data.update(serializer.data)
-                return JsonResponse(data, safe=False, status=200)
+                    
+
+                if serializer.is_valid:
+                    
+                    return JsonResponse(serializer.data, safe=False, status=200)
                 ###End One Article###
+            return JsonResponse(serializer.data, safe=False, status=200)
 
 
 
