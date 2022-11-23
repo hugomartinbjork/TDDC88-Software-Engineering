@@ -1072,20 +1072,30 @@ class GetArticles(APIView):
                 current_storage = self.storage_management_service.get_storage_by_id(
                     query_param_storage_id)
 
-                
+                data_article = {}
 
+                ###Start One Article###
                 data = {}
-                serialized_compartments = []
-                serializer_all = []
-                #Serialize every article in the compartments in the storage
                 for compartment in list_of_compartments:
-                    serialized_compartments.append(
-                        ArticleCompartmentProximitySerializer(getattr(compartment, "article"), current_storage).data)
-                    #serializer_all.append(ApiArticleSerializer(getattr(compartment, "article")))
-                    
-                    print(getattr(compartment, "article"))
+
+                    data['compartments'] =ArticleCompartmentProximitySerializer(getattr(compartment, "article"), current_storage).data
                 
-                #data[''] = serializer_all
-                data = serialized_compartments
+                serializer = ApiArticleSerializer(getattr(compartment, "article"))
                 
-                return JsonResponse(data, safe=False, status=200) 
+                data.update(serializer.data)
+                return JsonResponse(data, safe=False, status=200)
+                ###End One Article###
+
+
+
+               #data = {}
+                #serialized_compartments = []
+                #erializer_all = []
+                #Serialize every article in the compartments in the storage
+                #for compartment in list_of_compartments:
+                #   serialized_compartments.append(
+                #        ArticleCompartmentProximitySerializer(getattr(compartment, "article"), current_storage).data)
+                
+                #data['compartments'] = serialized_compartments
+                #data.update(serializer.data)
+                #return JsonResponse(data, safe=False, status=200) 
