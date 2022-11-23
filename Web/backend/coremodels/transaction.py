@@ -18,16 +18,18 @@ class Transaction(models.Model):
     attribute_cost_to = models.ForeignKey(CostCenter, on_delete=models.CASCADE)
     amount = models.PositiveSmallIntegerField(default=0)
     time_of_transaction = models.DateTimeField(
-       auto_now_add=True, null=True, blank=True)
-    unit = models.CharField(max_length=100, choices=OrderedUnitOperator.choices, default="output", null=False)
-    operation = models.CharField(max_length=100, choices=TransactionOperator.choices, default="return", null=False)
-
-
+        auto_now_add=True, null=True, blank=True)
+    unit = models.CharField(
+        max_length=100, choices=OrderedUnitOperator.choices, default="output", null=False)
+    operation = models.CharField(
+        max_length=100, choices=TransactionOperator.choices, default="return", null=False)
 
     class Meta:
         permissions = (("get_all_transaction", "Can get all transactions"),
-        ("get_transaction_by_id", "Can get a transaction by id"),
-        ("get_user_transactions", "Can get a users transactions"),)
+                       ("get_transaction_by_id", "Can get a transaction by id"),
+                       ("get_user_transactions", "Can get a users transactions"),
+                       ("replenish", "Can replenish articles to compartment"),
+                       ("move_article", "Can move articles between compartments"),)
 
     def __str__(self):
         return str(self.id)

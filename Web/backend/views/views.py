@@ -74,26 +74,26 @@ class Article(APIView):
             if article is None:
                 raise Http404("Could not find article")
             storage_id = request.GET.get('storage_id', None)
-            
 
-            storage = self.storage_management_service.get_storage_by_id(storage_id)
-            compartments = self.storage_management_service.get_compartment_by_storage_id(storage_id)
-
+            storage = self.storage_management_service.get_storage_by_id(
+                storage_id)
+            compartments = self.storage_management_service.get_compartment_by_storage_id(
+                storage_id)
 
             data = {}
 
-            #Serialize every article in the compartments in the storage
+            # Serialize every article in the compartments in the storage
 
             for compartment in compartments:
 
-                data['compartments'] =ArticleCompartmentProximitySerializer(getattr(compartment, "article"), storage).data
-                
+                data['compartments'] = ArticleCompartmentProximitySerializer(
+                    getattr(compartment, "article"), storage).data
+
             serializer = ApiArticleSerializer(article)
             if serializer.is_valid:
                 data.update(serializer.data)
                 return JsonResponse(data, safe=False, status=200)
             return HttpResponseBadRequest
-            
 
             serializer = ApiArticleSerializer(article)
             new_dict = {}
@@ -101,7 +101,6 @@ class Article(APIView):
             new_dict.update(serializer.data)
             if serializer.is_valid:
                 return JsonResponse(serializer.data, safe=False, status=200)
-            
 
 
 class Group(APIView):
@@ -646,6 +645,8 @@ class Transactions(APIView):
                 add_output_unit = True
 
             if operation == "replenish":
+                if not request.user.has_perm('backend.replenish'):
+                    raise PermissionDenied
                 transaction = self.storage_management_service.add_to_storage(
                     id=compartment.id, storage_id=storage, amount=amount,
                     username=user.username, add_output_unit=add_output_unit,
@@ -1002,6 +1003,8 @@ class MoveArticle(APIView):
         user = request.user
 
         if request.method == 'POST':
+            if not request.user.has_perm('backend.move_article'):
+                raise PermissionDenied
 
             from_compartment = self.storage_management_service.get_compartment_by_qr(
                 from_compartment_qr_code)

@@ -50,12 +50,13 @@ urlPatterns = [
     path('compartments/', views.Compartments.as_view()),
     path('compartments/<str:qr_code>', views.Compartments.as_view()),
     path('connectArticleToCompartment/<str:qr_code>', (
-     views.ArticleToCompartmentByQRcode.as_view())),
+        views.ArticleToCompartmentByQRcode.as_view())),
     path('moveArticle/', views.MoveArticle.as_view()),
 
     # Transactions
     path('transactions/', views.Transactions.as_view()),
-    path('transactions/<int:id>', views.TransactionsById.as_view()),
+    path('transactions/<int:transaction_id>',
+         views.TransactionsById.as_view()),
 
     # Transaction URLs below, not part of API.
     path('transactions/addinputunit/<str:compartment_id>/<int:amount>/',

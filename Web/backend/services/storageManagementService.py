@@ -85,7 +85,7 @@ class StorageManagementService():
         article = self.storage_access.get_article_in_compartment(
             compartment_id=compartment_id)
         user = User.objects.get(username=username)
-        cost_center = storage.cost_center
+        cost_center = storage_id.cost_center
         if add_output_unit:
             unit = "output"
         else:
@@ -134,7 +134,7 @@ class StorageManagementService():
         '''Add to storage.'''
         compartment = self.storage_access.get_compartment_by_qr(id)
         storage_id = storage_id
-        cost_center = id = storage_id.cost_center
+        cost_center = storage_id.cost_center
         article = Article.objects.get(lio_id=compartment.article.lio_id)
         converter = article.output_per_input
         user = User.objects.get(username=username)
