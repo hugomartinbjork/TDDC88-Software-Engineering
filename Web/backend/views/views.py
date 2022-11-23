@@ -403,8 +403,8 @@ class LoginWithCredentials(APIView):
         user = self.user_service.get_user_info(request.user)
         serialized_user = UserInfoSerializer(user)
         data = {
-            "user:": serialized_user.data,
-            "token:": AuthToken.objects.create(auth)[1]
+            "user": serialized_user.data,
+            "token": AuthToken.objects.create(auth)[1]
         }
         return JsonResponse(data, status=status.HTTP_200_OK)
 
@@ -443,8 +443,8 @@ class LoginWithBarcodeOrNfc(APIView):
         login(request, auth)
         serialized_user = UserInfoSerializer(user)
         data = {
-            "user:": serialized_user.data,
-            "token:": AuthToken.objects.create(auth)[1]
+            "user": serialized_user.data,
+            "token": AuthToken.objects.create(auth)[1]
         }
         return JsonResponse(data, status=status.HTTP_200_OK)
 
