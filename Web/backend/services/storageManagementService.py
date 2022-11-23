@@ -11,6 +11,7 @@ from backend.coremodels.compartment import Compartment
 from backend.coremodels.transaction import Transaction
 from backend.coremodels.inputOutput import InputOutput
 from django.contrib.auth.models import User
+from django.http import Http404, JsonResponse, HttpResponseBadRequest
 # from datetime import datetime, timezone
 from django.utils.dateparse import parse_date
 from backend.__init__ import serviceInjector as si
@@ -178,9 +179,10 @@ class StorageManagementService():
         user = User.objects.get(username=username)
         medical_employee = User.objects.get(username=username).groups.filter(
             name='medical employee').exists()
+
         converter = article.output_per_input
 
-        if (medical_employee and article.sanitation_level == 'Z41'):
+        if (medical_employee and article.Z41):
             return None
 
         if (add_output_unit):
@@ -196,8 +198,7 @@ class StorageManagementService():
         if (amount_in_storage < 0 or Compartment.objects.get(id=id).maximal_capacity < amount_in_storage):
             return None
         else:
-            print(amount)
-            print(new_return_amount)
+
             Compartment.objects.filter(id=id).update(amount=amount_in_storage)
             new_transaction = Transaction.objects.create(
                 storage=compartment.storage, article=article, attribute_cost_to=cost_center, operation="return",
