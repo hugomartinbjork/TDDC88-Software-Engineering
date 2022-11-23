@@ -29,8 +29,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 
 # always set to false when pushing to dev
-#DEBUG = str(os.environ.get('DEBUG')) == "1"
-DEBUG = True
+DEBUG = str(os.environ.get('DEBUG')) == "1"
 ALLOWED_HOSTS = ['tddc88-c14.kubernetes-public.it.liu.se', 'tddc88-c24.kubernetes-public.it.liu.se', 'rdx.kubernetes-public.it.liu.se', 'tddc88-c4.kubernetes-public.it.liu.se', 'https://rdx.kubernetes-public.it.liu.se', 'https://tddc88-c24.kubernetes-public.it.liu.se', 'https://tddc88-c14.kubernetes-public.it.liu.se', 'http://localhost:8000/', 'http://localhost:3000/']
 
 CORS_ORIGIN_ALLOW_ALL = True
