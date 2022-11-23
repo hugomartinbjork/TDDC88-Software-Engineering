@@ -81,6 +81,6 @@ spec:
               service:
                 name: postgres-service
                 port:
-                  number: 81
+                  number: 80
 
 ---
