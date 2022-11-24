@@ -483,3 +483,17 @@ class API_GetOrderByID(TestCase):
         #ordered_articles = self.order_services.get_all_ordered_articles()
 
         self.assertEqual(list(orders), [self.order1, self.order2])
+
+        
+
+       #Testing FR 7.2 The system shall recommend articles based on the list of equivalent articles.
+class RecommendEquivalentArticles(TestCase):
+    def setUp(self):
+        self.article_service : ArticleManagementService = ArticleManagementService()
+        self.article_first = Article.objects.create(lio_id ="1", name="plasthadskar")
+        self.article_second = Article.objects.create(lio_id ="2",name = "gummihandskar")
+        self.article_second.alternative_articles.add(self.article_first)
+
+    def test_recommendation_articles(self):
+        test_equivalent_article = self.article_service.get_alternative_articles(lio_id = "2")
+        self.assertEqual(test_equivalent_article[0], self.article_first)
