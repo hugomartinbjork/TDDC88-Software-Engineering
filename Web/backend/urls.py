@@ -23,7 +23,7 @@ urlPatterns = [
     #   path('/notifications/<order_id>') part of API, not yet implemented
 
     # Articles
-    #     path('articles/') part of API, not yet implemented
+    path('articles/', views.GetArticles.as_view()),
     #     path('articles/qr/<str:qr_code>') part of API, not yet implemented
     #     path('articles/name/<str:name>') part of API, not yet implemented
     #     path('articles/name/<str:name>') part of API, not yet implemented

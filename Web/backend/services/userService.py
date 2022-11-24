@@ -52,3 +52,7 @@ class UserService(BaseBackend):
         '''Deletes the user from the system'''
         return UserAccess.delete_user(self, user_id)
 
+    def get_user_cost_center(self, user):
+        '''Deletes the user from the system'''
+        return UserAccess.get_user_cost_center(self, user)
+

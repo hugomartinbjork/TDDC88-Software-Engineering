@@ -265,3 +265,12 @@ class ArticleCompartmentProximitySerializer():
 
     def is_valid(self):
         return self.valid
+
+
+class StorageSerializer(serializers.ModelSerializer):
+    orderedQuantity = serializers.CharField(source= 'quantity')
+    articleInfo = ApiArticleSerializer(source='article', read_only=True, many=False)
+    
+    class Meta:
+        model = Storage
+        fields = ('articleInfo', 'orderedQuantity', 'unit')

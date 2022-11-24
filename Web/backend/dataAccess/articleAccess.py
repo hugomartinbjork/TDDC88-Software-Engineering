@@ -49,3 +49,17 @@ class ArticleAccess():
             return article
         except:
             return None
+
+    def get_articles_by_search_name(self, search_string: str) -> Article:
+        try:
+            articles = Article.objects.filter(name__contains=search_string)
+            return articles
+        except:
+            return None
+
+    def get_articles_by_search_lio(self, search_string: str) -> Article:
+        try:
+            articles = Article.objects.filter(lio_id__contains=search_string)
+            return articles
+        except:
+            return None

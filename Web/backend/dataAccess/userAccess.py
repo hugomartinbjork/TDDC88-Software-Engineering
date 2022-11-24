@@ -55,8 +55,7 @@ class UserAccess():
     def get_user_cost_center(self, user: User) -> CostCenter:
         '''Return cost center of user.'''
         try:
-            user_info = UserInfo.objects.get(user=user)
-            cost_center = user_info.cost_center
+            cost_center = CostCenter.objects.get(userinfo=user.id)
             return cost_center
         except Exception:
             return None
