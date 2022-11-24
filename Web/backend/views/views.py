@@ -1029,9 +1029,9 @@ class MoveArticle(APIView):
                                 status=status.HTTP_400_BAD_REQUEST)
             else:
                 if unit == "output":
-                    add_output_unit = False
-                elif unit == "input":
                     add_output_unit = True
+                elif unit == "input":
+                    add_output_unit = False
 
                 time_of_transaction = date.today()
 
