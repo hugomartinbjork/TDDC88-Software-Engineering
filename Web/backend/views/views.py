@@ -1015,7 +1015,14 @@ class MoveArticle(APIView):
                 from_compartment_qr_code)
             to_compartment = self.storage_management_service.get_compartment_by_qr(
                 to_compartment_qr_code)
-
+            
+            if unit == "output":
+                add_output_unit = True
+                converter = 1
+            elif unit == "input":
+                add_output_unit = False
+                converter = from_compartment.article.output_per_input
+                
             if from_compartment is None or to_compartment is None:
                 return Response({'error': 'Could not find compartment'},
                                 status=status.HTTP_400_BAD_REQUEST)
@@ -1028,15 +1035,10 @@ class MoveArticle(APIView):
                 return Response({'error': 'Not matching articles'},
                                 status=status.HTTP_400_BAD_REQUEST)
 
-            if (from_compartment.amount - quantity) < 0 or (to_compartment.amount + quantity) > to_compartment.maximal_capacity:
+            if (from_compartment.amount - quantity*converter) < 0 or (to_compartment.amount + quantity*converter) > to_compartment.maximal_capacity:
                 return Response({'error': 'Not allowed qunatity, not enough in storage or not enough space in target'},
                                 status=status.HTTP_400_BAD_REQUEST)
             else:
-                if unit == "output":
-                    add_output_unit = True
-                elif unit == "input":
-                    add_output_unit = False
-
                 time_of_transaction = date.today()
 
                 from_transaction = (
