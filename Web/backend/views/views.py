@@ -197,7 +197,6 @@ class NearbyStorages(APIView):
                 return JsonResponse(serializer.data, status=200, safe=False)
             return HttpResponseBadRequest
 
-
 class Compartments(APIView):
     '''Compartment view.'''
     #authentication_classes = (TokenAuthentication,)
@@ -250,6 +249,29 @@ class Compartments(APIView):
         if serializer.is_valid:
             return JsonResponse(serializer.data, status=200)
         return Response({'Serialization failed'}, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, qr_code):
+        '''Edit compartment by QR code.'''
+
+        current_compartment = (
+            self.storage_management_service.get_compartment_by_qr(qr_code))
+
+        if current_compartment is not None:
+
+            #Get values from payload
+            new_placement = request.data.get("placement")
+            new_storage_id = request.data.get("storageId") 
+            new_amount = request.data.get('quantity')
+            new_standard_order_amount = request.data.get('normalOrderQuantity')
+            new_order_point = request.data.get('orderQuantityLevel')
+
+            self.storage_management_service.update_compartment_by_qr(current_compartment, new_placement, new_storage_id, new_amount, new_standard_order_amount, new_order_point)
+
+            return JsonResponse(ApiCompartmentSerializer(current_compartment).data, status=200)
+
+        else:
+            return Response({'error': 'Could not find compartment'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
 
 class Order(APIView):
