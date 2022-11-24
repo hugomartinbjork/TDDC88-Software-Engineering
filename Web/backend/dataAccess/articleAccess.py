@@ -63,3 +63,10 @@ class ArticleAccess():
             return articles
         except:
             return None
+    
+    def get_all_articles(self):
+        try:
+            all_articles = Article.objects.all().values()
+            return all_articles
+        except Exception:
+            return None

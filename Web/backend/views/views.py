@@ -1095,9 +1095,10 @@ class GetArticles(APIView):
             if query_param_lio_nr is not None:
                 articles_in_chosen_storage = self.article_management_service.get_articles_by_search_lio(query_param_lio_nr)
 
-            else:
+            elif query_param_name is not None:
                 articles_in_chosen_storage = self.article_management_service.get_articles_by_search_name(query_param_name)
-
+            else:
+                articles_in_chosen_storage = self.article_management_service.get_articles()
             if query_param_storage_id is not None:
                 #Get a list of all compartments in storage 
                 serialized_articles = []
