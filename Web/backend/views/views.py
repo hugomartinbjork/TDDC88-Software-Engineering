@@ -728,7 +728,7 @@ class TransactionsById(APIView):
 
 class GetStorageValue(View):
     '''Get storage value view.'''
-    authentication_classes = (TokenAuthentication,)
+   # authentication_classes = (TokenAuthentication,)
 
     @si.inject
     def __init__(self, _deps):
@@ -990,7 +990,7 @@ class getEconomy(APIView):
 class MoveArticle(APIView):
     '''Move an amount of a specific article from one compartment to another one.
         This will create two transactions, one for the withdrawal and one for the deposit.'''
-    authentication_classes = (TokenAuthentication,)
+   # authentication_classes = (TokenAuthentication,)
 
     @si.inject
     def __init__(self, _deps, *args):
