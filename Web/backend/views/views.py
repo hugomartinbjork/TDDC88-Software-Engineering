@@ -79,6 +79,8 @@ class Article(APIView):
             if (storage_id is not None):
                 storage = self.storage_management_service.get_storage_by_id(
                     storage_id)
+                if storage is None:
+                    return Response({'Storage {} does not exist'.format(storage_id)}, status=status.HTTP_400_BAD_REQUEST)
                 serialized_article['compartments'] = (
                     ArticleCompartmentProximitySerializer(
                         article=article, storage=storage)).data
@@ -1101,6 +1103,8 @@ class GetArticles(APIView):
                 serialized_articles = []
                 current_storage = self.storage_management_service.get_storage_by_id(
                     query_param_storage_id)
+                if current_storage is None:
+                    return Response({'Storage does not exist'}, status=status.HTTP_400_BAD_REQUEST)
                 for article in articles_in_chosen_storage:
                     compartments = ArticleCompartmentProximitySerializer(article, current_storage).data
                     serialized_article = ApiArticleSerializer(article).data
