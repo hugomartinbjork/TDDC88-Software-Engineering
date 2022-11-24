@@ -1,6 +1,6 @@
 from ..serializers import AlternativeNameSerializer, StorageSerializer, ApiCompartmentSerializer, UserInfoSerializer, ApiArticleSerializer
 from ..serializers import ArticleSerializer, OrderSerializer, OrderedArticleSerializer, ArticleCompartmentProximitySerializer
-from ..serializers import CompartmentSerializer, TransactionSerializer
+from ..serializers import CompartmentSerializer, TransactionSerializer, CompartmentSerializer
 from ..serializers import GroupSerializer, NearbyStoragesSerializer
 
 from backend.services.articleManagementService import ArticleManagementService
@@ -158,7 +158,7 @@ class Storage(View):
             serialized_compartments = []
             for compartment in compartments:
                 serialized_compartments.append(
-                    CompartmentSerializer(compartment).data)
+                    ApiCompartmentSerializer(compartment).data)
             data['compartments'] = serialized_compartments
             if storage is None:
                 raise Http404("Could not find storage")
@@ -220,7 +220,7 @@ class Compartments(APIView):
             if compartment is None:
                 return Http404("Could not find compartment")
             else:
-                serializer = CompartmentSerializer(compartment)
+                serializer = ApiCompartmentSerializer(compartment)
                 if serializer.is_valid:
                     return JsonResponse(serializer.data, status=200)
                 return HttpResponseBadRequest
@@ -245,7 +245,7 @@ class Compartments(APIView):
         if compartment is None:
             return Response({'Compartment could not be created'}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = CompartmentSerializer(compartment)
+        serializer = ApiCompartmentSerializer(compartment)
         if serializer.is_valid:
             return JsonResponse(serializer.data, status=200)
         return Response({'Serialization failed'}, status=status.HTTP_400_BAD_REQUEST)
@@ -504,7 +504,7 @@ class SeeAllStorages(View):
                     serialized_compartments = []
                     for compartment in compartments:
                         serialized_compartments.append(
-                            CompartmentSerializer(compartment).data)
+                            ApiCompartmentSerializer(compartment).data)
                     data['compartments'] = serialized_compartments
                     serialized_storages.append(data)
 
