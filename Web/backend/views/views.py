@@ -990,8 +990,8 @@ class getEconomy(APIView):
         if storage is None:
             raise Http404("Could not find storage")
         else:
-            start_date = "2000-01-07"
-            end_date = "2020-01-07"
+            start_date = datetime.date(datetime.datetime.today().year-1,datetime.datetime.today().month,datetime.datetime.today().day)
+            end_date = datetime.datetime.today()
             '''Below is not an average value, but the current value right now since 
             get_storage_value doesn't take transactions into account'''
             value = self.storage_management_service.get_storage_value(
@@ -1001,7 +1001,7 @@ class getEconomy(APIView):
             data = {}
             data["totalValue"] = value
             data["cost"] = cost
-            #data["averageTurnoverRate"] = int((value/cost)*365)
+            #data["averageTurnoverRate"] = int((cost/max)
             return JsonResponse(data, safe=False, status=200)
 
 

@@ -108,19 +108,17 @@ class StorageManagementService():
     def get_storage_cost(self, storage_id: str, start_date: str,
                          end_date: str) -> int:
         '''Get storage cost.'''
+        attribute_cost_to = self.storage_access.get_storage(storage_id).cost_center
         sum_value = 0
-        transactions = self.storage_access.get_transaction_by_storage_date(
-            storage_id=storage_id, start=start_date, end=end_date)
+        transactions = self.storage_access.get_transaction_by_cost_date(
+            attribute_cost_to=attribute_cost_to, start=start_date, end=end_date)
         takeout_value = 0
         return_value = 0
         for transaction in transactions:
-            user_cost_center = self.user_access.get_user_cost_center(
-                transaction.by_user)
-            if (user_cost_center == transaction.storage.cost_center):
-                if transaction.operation == 1:
-                    takeout_value = transaction.get_value() + takeout_value
-                if transaction.operation == 2:
-                    return_value = transaction.get_value() + return_value
+            if transaction.operation == "takeout":
+                takeout_value = transaction.get_value() + takeout_value
+            if transaction.operation == "return":
+                return_value = transaction.get_value() + return_value
         sum_value = takeout_value - return_value
         return sum_value
 

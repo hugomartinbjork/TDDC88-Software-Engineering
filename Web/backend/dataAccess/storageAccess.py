@@ -134,10 +134,10 @@ class StorageAccess():
         except Exception:
             return None
 
-    def get_transaction_by_storage_date(self, storage_id: str, start: str, end: str) -> dict:
+    def get_transaction_by_cost_date(self, attribute_cost_to: str, start: str, end: str) -> dict:
         '''Return transaction from storage id.'''
         try:
-            return Transaction.objects.filter(storage=storage_id, time_of_transaction__range=(start, end))
+            return Transaction.objects.filter(attribute_cost_to=attribute_cost_to, time_of_transaction__range=(start, end))
 
         except Exception:
             return None
