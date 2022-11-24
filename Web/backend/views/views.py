@@ -74,34 +74,16 @@ class Article(APIView):
                     name)
             if article is None:
                 raise Http404("Could not find article")
-            storage_id = request.GET.get('storage_id', None)
+            serialized_article = ApiArticleSerializer(article).data
+            storage_id = request.GET.get('storageId', None)
+            if (storage_id is not None):
+                storage = self.storage_management_service.get_storage_by_id(
+                    storage_id)
+                serialized_article['compartments'] = (
+                    ArticleCompartmentProximitySerializer(
+                        article=article, storage=storage)).data
+            return JsonResponse(serialized_article, status=200)
 
-            storage = self.storage_management_service.get_storage_by_id(
-                storage_id)
-            compartments = self.storage_management_service.get_compartment_by_storage_id(
-                storage_id)
-
-            data = {}
-
-            # Serialize every article in the compartments in the storage
-
-            for compartment in compartments:
-
-                data['compartments'] = ArticleCompartmentProximitySerializer(
-                    getattr(compartment, "article"), storage).data
-
-            serializer = ApiArticleSerializer(article)
-            if serializer.is_valid:
-                data.update(serializer.data)
-                return JsonResponse(data, safe=False, status=200)
-            return HttpResponseBadRequest
-
-            serializer = ApiArticleSerializer(article)
-            new_dict = {}
-            new_dict.update(compartment_serializer.data[0].items())
-            new_dict.update(serializer.data)
-            if serializer.is_valid:
-                return JsonResponse(serializer.data, safe=False, status=200)
 
 
 class Group(APIView):
@@ -1106,41 +1088,27 @@ class GetArticles(APIView):
 
             if not request.user.has_perm('backend.view_article'):
                 raise PermissionDenied
-
-            if query_param_lio_nr != None:
+            if query_param_lio_nr is not None:
                 articles_in_chosen_storage = self.article_management_service.get_articles_by_search_lio(query_param_lio_nr)
-                serializer = ApiArticleSerializer(articles_in_chosen_storage, many=True)
-               # print(serializer.data)
-                #return JsonResponse(serializer.data, safe=False, status=200)
 
             else:
                 articles_in_chosen_storage = self.article_management_service.get_articles_by_search_name(query_param_name)
-                serializer = ApiArticleSerializer(articles_in_chosen_storage, many=True)
-                #return JsonResponse(serializer.data, safe=False, status=200)
 
-            if query_param_storage_id != None:
+            if query_param_storage_id is not None:
                 #Get a list of all compartments in storage 
-                list_of_compartments = self.storage_management_service.get_compartment_by_storage_id(
-                    query_param_storage_id)
-
+                serialized_articles = []
                 current_storage = self.storage_management_service.get_storage_by_id(
                     query_param_storage_id)
-
-                data_article = {}
-
-                ###Start One Article###
-                
-                data = {}
-                for compartment in list_of_compartments:
-
-                    data['compartments'] =ArticleCompartmentProximitySerializer(getattr(compartment, "article"), current_storage).data
-                    
-
-                if serializer.is_valid:
-                    
-                    return JsonResponse(serializer.data, safe=False, status=200)
+                for article in articles_in_chosen_storage:
+                    compartments = ArticleCompartmentProximitySerializer(article, current_storage).data
+                    serialized_article = ApiArticleSerializer(article).data
+                    serialized_article["compartments"] = compartments
+                    serialized_articles.append(serialized_article)
+                return JsonResponse(serialized_articles, safe=False, status=200)
                 ###End One Article###
-            return JsonResponse(serializer.data, safe=False, status=200)
+            else:
+                serializer = ApiArticleSerializer(articles_in_chosen_storage, many=True)
+                return JsonResponse(serializer.data, safe=False, status=200)
 
 
 

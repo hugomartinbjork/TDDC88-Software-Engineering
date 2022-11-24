@@ -264,8 +264,8 @@ class ArticleCompartmentProximitySerializer():
         self.storage = storage
         self.valid = True
         self.data = []
-        same_floor = Q(storage__floor__iexact="1")
-        same_building = Q(storage__building__iexact="1")
+        same_floor = Q(storage__floor__iexact=storage.floor)
+        same_building = Q(storage__building__iexact=storage.building)
 
         if (storage.floor is None):
             self.valid = False
