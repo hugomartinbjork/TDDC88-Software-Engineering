@@ -209,11 +209,8 @@ class StorageAccess():
         '''Sets order_point in compartment.'''
         current_compartment.order_point = new_order_point
         current_compartment.save()
-<<<<<<< HEAD
 
     def set_placement(self, current_compartment: Compartment, new_placement: int):
         '''Sets placement in compartment.'''
         current_compartment.placement = new_placement
         current_compartment.save()
-=======
->>>>>>> 6d331891f6bc66fc99f5bf2f1be8b054ef18f8c0
