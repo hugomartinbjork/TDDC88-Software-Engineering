@@ -14,7 +14,7 @@ class User(APIView):
     '''View for getting all users and posting a user to the DB. 
     Should only be accessable by admins'''
 
-    authentication_classes = (TokenAuthentication,)
+#    authentication_classes = (TokenAuthentication,)
     @si.inject
     def __init__(self, _deps, *args):
         self.userService: UserService = _deps['UserService']()
@@ -60,7 +60,7 @@ class User(APIView):
 class UserId(APIView):
     '''User'''
 
-    authentication_classes = (TokenAuthentication,)
+ #   authentication_classes = (TokenAuthentication,)
     @si.inject
     def __init__(self, _deps, *args):
         self.userService: UserService = _deps['UserService']()
