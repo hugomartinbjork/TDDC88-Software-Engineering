@@ -2,18 +2,17 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
-class TransactionOperator(models.IntegerChoices):
+class TransactionOperator(models.TextChoices):
     '''Transation operator.'''
-    TAKEOUT = 1
-    RETURN = 2
-    REPLENISH = 3
-    ADJUST = 4
+    TAKEOUT = "takeout",
+    RETURN = "return",
+    REPLENISH = "replenish",
+    ADJUST = "adjust",
 
 
 class OrderOperator(models.TextChoices):
     '''Order operator that keeps track of our current state'''
     ORDER_PLACED = "order placed",
-    PARTIALLY_DELIVERED = "partially delivered"
     DELIVERED = "delivered",
 
 

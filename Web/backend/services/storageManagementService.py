@@ -11,6 +11,7 @@ from backend.coremodels.compartment import Compartment
 from backend.coremodels.transaction import Transaction
 from backend.coremodels.inputOutput import InputOutput
 from django.contrib.auth.models import User
+from django.http import Http404, JsonResponse, HttpResponseBadRequest
 # from datetime import datetime, timezone
 from django.utils.dateparse import parse_date
 from backend.__init__ import serviceInjector as si
@@ -66,9 +67,9 @@ class StorageManagementService():
             value += compartment.article.price * compartment.amount
         return value
 
-    def get_all_transactions(self) -> dict:
-        '''Returns every transaction.'''
-        return self.storage_access.get_all_transactions()
+    def get_all_transactions(self, fromDate=None, toDate=None, limit=None) -> dict:
+        '''Returns every transaction. Takes fromDate, toDate and limit as optimal parameters for limiting the return.'''
+        return self.storage_access.get_all_transactions(fromDate, toDate, limit)
 
     def get_transaction_by_id(self, transaction_id: str) -> Transaction:
         '''Returns a transaction by id'''
@@ -78,18 +79,27 @@ class StorageManagementService():
         '''Edit time of a transaction'''
         return self.storage_access.edit_transaction_by_id(transaction_id, new_time_of_transaction)
 
-    def set_compartment_amount(self, compartment_id: int, amount: int, username: str, add_output_unit: bool, time_of_transaction: str) -> Transaction:
+    def set_compartment_amount(self, compartment_id: int, storage_id: str, amount: int, username: str, add_output_unit: bool, time_of_transaction: str) -> Transaction:
         '''Set a storage to a specified level. Return a transaction.'''
-        compartment = self.storage_access.set_compartment_amount(
-            compartment_id, amount)
-        storage = self.storage_access.get_storage(id=compartment.storage.id)
+
+        storage = self.storage_access.get_storage(id=storage_id)
         article = self.storage_access.get_article_in_compartment(
             compartment_id=compartment_id)
+        converter = article.output_per_input
         user = User.objects.get(username=username)
+        cost_center = storage_id.cost_center
+        if add_output_unit:
+            unit = "output"
+            converter = 1
+        else:
+            unit = "input"
+        compartment = self.storage_access.set_compartment_amount(
+            compartment_id, amount*converter)
         transaction = Transaction.objects.create(
-            storage=storage, article=article, operation=4,
+            storage=Compartment.objects.get(
+                id=compartment_id).storage, article=article, attribute_cost_to=cost_center, operation="adjust",
             by_user=user, amount=amount,
-            time_of_transaction=time_of_transaction)
+            time_of_transaction=time_of_transaction, unit=unit)
         return transaction
 
     # Storage is not connected to a costcenter atm
@@ -98,18 +108,15 @@ class StorageManagementService():
     def get_storage_cost(self, storage_id: str, start_date: str,
                          end_date: str) -> int:
         '''Get storage cost.'''
-        start_date_date = parse_date(start_date)
-        end_date_date = parse_date(end_date)
-        transactions = self.storage_access.get_transaction_by_storage(
-            storage_id=storage_id)
         sum_value = 0
+        transactions = self.storage_access.get_transaction_by_storage_date(
+            storage_id=storage_id, start=start_date, end=end_date)
         takeout_value = 0
         return_value = 0
         for transaction in transactions:
-            transaction_date = transaction.time_of_transaction
-            transaction_date_date = transaction_date  # .date()
-            if (start_date_date <= transaction_date_date
-                    and end_date_date >= transaction_date_date):
+            user_cost_center = self.user_access.get_user_cost_center(
+                transaction.by_user)
+            if (user_cost_center == transaction.storage.cost_center):
                 if transaction.operation == 1:
                     takeout_value = transaction.get_value() + takeout_value
                 if transaction.operation == 2:
@@ -127,32 +134,34 @@ class StorageManagementService():
 # methods work. Leaving this
 # TODO to the original author
 
-    def add_to_storage(self, id: str, amount: int, username: str,
+    def add_to_storage(self, id: str, storage_id: str, amount: int, username: str,
                        add_output_unit: bool, time_of_transaction: str) -> Transaction:
         '''Add to storage.'''
         compartment = self.storage_access.get_compartment_by_qr(id)
-        storage_id = compartment.storage
+        storage_id = storage_id
+        cost_center = storage_id.cost_center
         article = Article.objects.get(lio_id=compartment.article.lio_id)
-        # inputOutput = InputOutput.objects.get(article=article)
-        converter = 1
+        converter = article.output_per_input
         user = User.objects.get(username=username)
         if (add_output_unit):
             amount_in_storage = Compartment.objects.get(
                 id=id).amount + amount
             new_amount = amount
+            unit = "output"
         else:
             amount_in_storage = Compartment.objects.get(
                 id=id).amount + amount*converter
             new_amount = amount*converter
+            unit = "input"
 
-        if (amount_in_storage < 0):
+        if (amount_in_storage < 0 or Compartment.objects.get(id=id).maximal_capacity < amount_in_storage):
             return None
         else:
             Compartment.objects.update(amount=amount_in_storage)
             new_transaction = Transaction.objects.create(
-                storage=storage_id, article=article, operation=3,
-                by_user=user, amount=new_amount,
-                time_of_transaction=time_of_transaction)
+                storage=compartment.storage, article=article, attribute_cost_to=cost_center, operation="replenish",
+                by_user=user, amount=amount,
+                time_of_transaction=time_of_transaction, unit=unit)
             new_transaction.save()
             return new_transaction
             # except:
@@ -162,81 +171,74 @@ class StorageManagementService():
 # Leaving this
 # TODO to the original author
 
-    def add_to_return_storage(self, id: str, amount: int,
+    def add_to_return_storage(self, id: str, storage_id: str, amount: int,
                               username: str, add_output_unit: bool,
                               time_of_transaction) -> Transaction:
         '''Add return to storage.'''
         compartment = Compartment.objects.get(id=id)
-        storage_id = compartment.storage
+        storage_id = storage_id
+        cost_center = storage_id.cost_center
         amount = amount
         article = Article.objects.get(lio_id=compartment.article.lio_id)
         user = User.objects.get(username=username)
         medical_employee = User.objects.get(username=username).groups.filter(
             name='medical employee').exists()
-        input_output_check = InputOutput.objects.filter(
-            article=article).exists()
-        if (input_output_check):
-            input_output = InputOutput.objects.get(article=article)
-            converter = input_output.output_unit_per_input_unit
-            if not converter:
-                converter = 1
-        else:
-            input_output = InputOutput.objects.create(article=article)
-            converter = input_output.output_unit_per_input_unit
 
-        if (medical_employee and article.sanitation_level == 'Z41'):
+        converter = article.output_per_input
+
+        if (medical_employee and article.Z41):
             return None
 
         if (add_output_unit):
             amount_in_storage = Compartment.objects.get(
                 id=id).amount + amount
             new_return_amount = amount
+            unit = "output"
         else:
             amount_in_storage = Compartment.objects.get(
                 id=id).amount + amount*converter
             new_return_amount = amount*converter
-        if (amount_in_storage < 0):
+            unit = "input"
+        if (amount_in_storage < 0 or Compartment.objects.get(id=id).maximal_capacity < amount_in_storage):
             return None
         else:
-            print(amount)
-            print(new_return_amount)
+
             Compartment.objects.filter(id=id).update(amount=amount_in_storage)
             new_transaction = Transaction.objects.create(
-                storage=storage_id, article=article, operation=2,
-                by_user=user, amount=new_return_amount,
-                time_of_transaction=time_of_transaction)
+                storage=compartment.storage, article=article, attribute_cost_to=cost_center, operation="return",
+                by_user=user, amount=amount,
+                time_of_transaction=time_of_transaction, unit=unit)
             new_transaction.save()
             return new_transaction
 
-    def take_from_Compartment(self, id: str, amount: int, username: str,
+    def take_from_Compartment(self, id: str, storage_id: str, amount: int, username: str,
                               add_output_unit: bool, time_of_transaction: str):
         '''Take from compartment. Return transaction.'''
         compartment = self.storage_access.get_compartment_by_qr(id)
         article = Article.objects.get(lio_id=compartment.article.lio_id)
 # inputOutput = InputOutput.objects.get(article=article)
-        converter = 2
+        converter = article.output_per_input
         user = User.objects.get(username=username)
+
+        cost_center = storage_id.cost_center
         if (add_output_unit):
             amount_in_storage = Compartment.objects.get(
                 id=id).amount - amount
             new_amount = amount
+            unit = "output"
         else:
-            # eftersom det inte verkar finnas funktionalitet för
-            # input/output-amounts så har jag satt denna till 2 bara för
-            # testningens skull.
-            if not converter:
-                converter = 2
             amount_in_storage = Compartment.objects.get(
                 id=id).amount - amount*converter
             new_amount = amount*converter
-        if (amount_in_storage < 0):
+            unit = "input"
+        if (amount_in_storage < 0 or Compartment.objects.get(id=id).maximal_capacity < amount_in_storage):
             return None
         else:
             Compartment.objects.filter(id=id).update(amount=amount_in_storage)
             new_transaction = Transaction.objects.create(
-                storage=compartment.storage, article=article,
-                operation=1, by_user=user, amount=new_amount,
-                time_of_transaction=time_of_transaction)
+                storage=compartment.storage, article=article, attribute_cost_to=cost_center,
+                operation="takeout", by_user=user, amount=amount,
+                time_of_transaction=time_of_transaction, unit=unit)
             new_transaction.save()
             return new_transaction
 
@@ -358,5 +360,7 @@ class StorageManagementService():
 
         self.storage_access.set_article(current_compartment, new_article)
         self.storage_access.set_amount(current_compartment, new_amount)
-        self.storage_access.set_standard_order_amount(current_compartment, new_std_order_amount)
-        self.storage_access.set_order_point(current_compartment, new_order_point)
+        self.storage_access.set_standard_order_amount(
+            current_compartment, new_std_order_amount)
+        self.storage_access.set_order_point(
+            current_compartment, new_order_point)

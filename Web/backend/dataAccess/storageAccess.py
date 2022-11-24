@@ -16,6 +16,7 @@ from ..__init__ import dataAccessInjector as di
 @di.register(name="StorageAccess")
 class StorageAccess():
     '''Storage acces.'''
+
     def get_storage(self, id: str) -> Storage:
         '''Returns storage from id.'''
         try:
@@ -23,7 +24,7 @@ class StorageAccess():
             return storage
         except Exception:
             return None
-    
+
     def get_compartments_containing_article(self, lio_id):
         '''Get compartmens containing an article id.'''
         compartments = Compartment.objects.filter(article=lio_id)
@@ -54,8 +55,8 @@ class StorageAccess():
         '''Returns storage stock using storage id.'''
         try:
             return "article: {} amount: {}".format(
-                        Compartment.objects.get(id=storage_id).article,
-                        Compartment.objects.get(id=storage_id).amount)
+                Compartment.objects.get(id=storage_id).article,
+                Compartment.objects.get(id=storage_id).amount)
         except Exception:
             return None
 
@@ -84,7 +85,7 @@ class StorageAccess():
             storage = Storage.objects.get(id=storage_id)
             article = Article.objects.get(lio_id=article_id)
             compartment = Compartment.objects.get(storage=storage,
-                                                     article=article)
+                                                  article=article)
             return compartment.amount
         except Exception:
             return None
@@ -96,10 +97,14 @@ class StorageAccess():
         except Exception:
             return None
 
-    def get_all_transactions(self) -> dict:
-        '''Return every transaction.'''
+    def get_all_transactions(self, fromDate, toDate, limit) -> dict:
+        '''Return every transaction. If optional querying parameters are passed, filter by these'''
         try:
-            all_transactions = Transaction.objects.all().values()
+            if fromDate and toDate and limit:
+                all_transactions = Transaction.objects.filter(time_of_transaction__range=(
+                    fromDate, toDate)).order_by('-time_of_transaction')[:int(limit)]
+            else:
+                all_transactions = Transaction.objects.all()
             return all_transactions
         except Exception:
             return None
@@ -115,7 +120,8 @@ class StorageAccess():
     def edit_transaction_by_id(self, transaction_id: str, new_time_of_transaction: str) -> Transaction:
         '''Changes a date of a transaction.'''
         try:
-            Transaction.objects.filter(id=transaction_id).update(time_of_transaction=new_time_of_transaction)
+            Transaction.objects.filter(id=transaction_id).update(
+                time_of_transaction=new_time_of_transaction)
             transaction = Transaction.objects.get(id=transaction_id)
             return transaction
         except Exception:
@@ -125,6 +131,14 @@ class StorageAccess():
         '''Return transaction from storage id.'''
         try:
             return Transaction.objects.filter(storage=storage_id)
+        except Exception:
+            return None
+
+    def get_transaction_by_storage_date(self, storage_id: str, start: str, end: str) -> dict:
+        '''Return transaction from storage id.'''
+        try:
+            return Transaction.objects.filter(storage=storage_id, time_of_transaction__range=(start, end))
+
         except Exception:
             return None
 
@@ -185,18 +199,21 @@ class StorageAccess():
         '''Sets amount in compartment.'''
         current_compartment.amount = new_amount
         current_compartment.save()
-    
+
     def set_standard_order_amount(self, current_compartment: Compartment, new_std_order_amount: int):
         '''Sets standard_order_amount in compartment.'''
         current_compartment.standard_order_amount = new_std_order_amount
         current_compartment.save()
-    
+
     def set_order_point(self, current_compartment: Compartment, new_order_point: int):
         '''Sets order_point in compartment.'''
         current_compartment.order_point = new_order_point
         current_compartment.save()
+<<<<<<< HEAD
 
     def set_placement(self, current_compartment: Compartment, new_placement: int):
         '''Sets placement in compartment.'''
         current_compartment.placement = new_placement
         current_compartment.save()
+=======
+>>>>>>> 6d331891f6bc66fc99f5bf2f1be8b054ef18f8c0

@@ -3,6 +3,7 @@
 from django.db import models
 from backend.coremodels.group import GroupInfo
 from backend.operations.enumerator import UnitOperator
+from backend.coremodels.supplier import Supplier
 # from backend.coremodels.storageComponent import storageComponent
 
 
@@ -24,6 +25,8 @@ class Article(models.Model):
                               choices=UnitOperator.choices, default=UnitOperator.MILLILITRES)
 
     output_per_input = models.IntegerField(null=True, default=1)
+    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, null=True)
+    supplier_article_nr = models.CharField(max_length=15, null=True)
 
 
     class Meta:

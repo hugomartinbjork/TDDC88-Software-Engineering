@@ -5,7 +5,6 @@ from django.db.models import Q, Case, When, Value, IntegerField
 
 from django.contrib.auth.models import User
 from backend.coremodels.alternative_article_name import AlternativeArticleName
-from backend.coremodels.article_has_supplier import ArticleHasSupplier
 from backend.coremodels.cost_center import CostCenter
 from backend.coremodels.article import Article
 from backend.coremodels.article import GroupInfo
@@ -30,12 +29,14 @@ class CostCenterSerializer(serializers.ModelSerializer):
         model = CostCenter
         fields = ('id', 'name')
 
+
 class UserInfoSerializer(serializers.ModelSerializer):
     userId = serializers.CharField(source='user_id')
     username = serializers.CharField(source='user')
     role = serializers.CharField(source='group')
     # For some reason this works.
     costCenters = cost_center = CostCenterSerializer(many=True)
+
     class Meta:
         model = UserInfo
         fields = ('userId', 'username', 'cost_center', 'costCenters', 'role')
@@ -70,10 +71,20 @@ class GroupSerializer(serializers.ModelSerializer):
 
 
 class TransactionSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
+    userId = serializers.CharField(source='by_user.id', read_only=True)
+    timeStamp = serializers.CharField(
+        source='time_of_transaction', read_only=True)
+    lioNr = serializers.PrimaryKeyRelatedField(
+        source='article.lio_id', read_only=True)
+    storageId = serializers.PrimaryKeyRelatedField(
+        source='storage.id', read_only=True)
+    quantity = serializers.IntegerField(source='amount', read_only=True)
+
     class Meta:
         model = Transaction
-        fields = ('id', 'storage', 'by_user', 'article',
-                  'amount', 'time_of_transaction', 'operation')
+        fields = ('id', 'userId', 'timeStamp', 'lioNr',
+                  'storageId', 'quantity', 'unit', 'operation')
 
 
 class AlternativeNameSerializer(serializers.ModelSerializer):
@@ -95,15 +106,15 @@ class UnitsSerializer(serializers.ModelSerializer):
         fields = ('output', 'input', 'outputPerInput')
 
 
-class ArticleSupplierSerializer(serializers.ModelSerializer):
-    supplierName = serializers.CharField(
-        source='article_supplier.name', read_only=True)
-    supplierArticleNr = serializers.CharField(
-        source='supplier_article_nr', read_only=True)
+# class SupplierSerializer(serializers.ModelSerializer):
+#     supplierName = serializers.CharField(
+#         source='article_supplier.name', read_only=True)
+#     supplierArticleNr = serializers.CharField(
+#         source='supplier_article_nr', read_only=True)
 
-    class Meta:
-        model = ArticleHasSupplier
-        fields = ('supplierName', 'supplierArticleNr')
+#     class Meta:
+#         model = ArticleHasSupplier
+#         fields = ('supplierName', 'supplierArticleNr')
 
 
 class NoArticleCompartmentSerializer(serializers.ModelSerializer):
@@ -131,32 +142,61 @@ class ApiArticleSerializer(serializers.ModelSerializer):
         source='output', read_only=True)
     outputPerInputUnit = serializers.IntegerField(
         source='output_per_input', read_only=True)
-    alternativeNames = AlternativeNameSerializer(
-        source='alternativearticlename_set', read_only=True, many=True)
-    suppliers = ArticleSupplierSerializer(
-        source='articlehassupplier_set', read_only=True, many=True)
+    #The SlugRelatedField references a specific field in a reverse foreign key mapping without creating a nested dictionary
+    alternativeNames = serializers.SlugRelatedField(read_only=True, many=True, slug_field='name', source='alternativearticlename_set')
+    #Here you get the primary key from a foreign key relation
     alternativeProducts = serializers.PrimaryKeyRelatedField(
         source='alternative_articles', read_only=True, many=True)
+    #Here we get a nested dictianary with data from a reverse foreign key relation
     compartments = NoArticleCompartmentSerializer(
         source='compartment_set', read_only=True, many=True
     )
-
+    #The name supplier_article_nr is renamed to supplierArticleNr so that it is the same as the API
+    supplierArticleNr = serializers.CharField(
+        source='supplier_article_nr', read_only=True)
+    supplierName = serializers.CharField(
+        source='supplier.name', read_only=True)
+    
     class Meta:
         model = Article
-        fields = (
-            'compartments', 'inputUnit', 'outputUnit',
-            'outputPerInputUnit', 'price', 'suppliers', 'name',
-            'alternativeNames', 'lioNr', 'alternativeProducts', 'Z41')
+        fields = ('compartments', 'inputUnit', 'outputUnit', 'outputPerInputUnit', 'price', 'supplierName', 'supplierArticleNr', 'name', 'alternativeNames', 'lioNr', 'alternativeProducts', 
+        'Z41')
+
+
+class ApiArticleSerializerNoCompartment(serializers.ModelSerializer):
+    lioNr = serializers.CharField(
+        source='lio_id', read_only=True)
+    inputUnit = serializers.CharField(
+        source='input', read_only=True)
+    outputUnit = serializers.CharField(
+        source='output', read_only=True)
+    outputPerInputUnit = serializers.IntegerField(
+        source='output_per_input', read_only=True)
+    #The SlugRelatedField references a specific field in a reverse foreign key mapping without creating a nested dictionary
+    alternativeNames = serializers.SlugRelatedField(read_only=True, many=True, slug_field='name', source='alternativearticlename_set')
+    #Here you get the primary key from a foreign key relation
+    alternativeProducts = serializers.PrimaryKeyRelatedField(
+        source='alternative_articles', read_only=True, many=True)
+    #The name supplier_article_nr is renamed to supplierArticleNr so that it is the same as the API
+    supplierArticleNr = serializers.CharField(
+        source='supplier_article_nr', read_only=True)
+    supplierName = serializers.CharField(
+        source='supplier.name', read_only=True)
+    
+    class Meta:
+        model = Article
+        fields = ('inputUnit', 'outputUnit', 'outputPerInputUnit', 'price', 'supplierName', 'supplierArticleNr', 'name', 'alternativeNames', 'lioNr', 'alternativeProducts', 
+        'Z41')
 
 
 class OrderedArticleSerializer(serializers.ModelSerializer):
-    orderedQuantity = serializers.CharField(source= 'quantity')
-    articleInfo = ApiArticleSerializer(source='article', read_only=True, many=False)
-    
+    orderedQuantity = serializers.CharField(source='quantity')
+    articleInfo = ApiArticleSerializer(
+        source='article', read_only=True, many=False)
+
     class Meta:
         model = OrderedArticle
         fields = ('articleInfo', 'orderedQuantity', 'unit')
-
 
 class OrderSerializer(serializers.ModelSerializer):
     articles = OrderedArticleSerializer(
@@ -165,12 +205,14 @@ class OrderSerializer(serializers.ModelSerializer):
     orderDate = serializers.CharField(source='order_date')
     estimatedDeliveryDate = serializers.CharField(
         source='estimated_delivery_date')
+    DeliveryDate = serializers.CharField(
+        source='delivery_date')
     state = serializers.CharField(source='order_state')
-    
+
     class Meta:
         model = Order
         fields = ['id', 'storageId', 'orderDate',
-                  'estimatedDeliveryDate', 'state', 'articles']
+                  'estimatedDeliveryDate', 'DeliveryDate', 'state', 'articles']
 
 
 class LocationSerializer(serializers.ModelSerializer):
@@ -180,8 +222,8 @@ class LocationSerializer(serializers.ModelSerializer):
 
 
 class ApiCompartmentSerializer(serializers.ModelSerializer):
-    article = ApiArticleSerializer(read_only=True)
-    quantity = serializers.CharField(source='amount', read_only=True)
+    article = ApiArticleSerializerNoCompartment(read_only=True)
+    quantity = serializers.IntegerField(source='amount', read_only=True)
     qrCode = serializers.CharField(source='id', read_only=True)
     normalOrderQuantity = serializers.IntegerField(
         source='standard_order_amount')
@@ -200,12 +242,14 @@ class NearbyStoragesSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(
         source='storage.id', read_only=True)
     location = LocationSerializer(source='storage', read_only=True)
+    #Calls the later defined function get_self_reference below
     compartment = serializers.SerializerMethodField('get_self_reference')
 
     class Meta:
         model = Compartment
         fields = ('id', 'location', 'compartment')
 
+    #A function to get a nested dictionary with data from the current object that is being serialized
     def get_self_reference(self, object):
         return ApiCompartmentSerializer(object).data
 
@@ -214,6 +258,7 @@ class ArticleCompartmentProximitySerializer():
     '''Self made serializer, contains properties 
         article: Article, storage: Storage, is_valid(): Bool
         and data: [ApiCompartmentModel]'''
+
     def __init__(self, article: Article, storage: Storage):
         self.article = article
         self.storage = storage
@@ -240,10 +285,18 @@ class ArticleCompartmentProximitySerializer():
         ).order_by('-proximity_ordering')
         if (not nearest_comps):
             self.valid = False
-        
+
         self.data = NoArticleCompartmentSerializer(
             nearest_comps, many=True, read_only=True).data
 
     def is_valid(self):
         return self.valid
 
+
+class StorageSerializer(serializers.ModelSerializer):
+    orderedQuantity = serializers.CharField(source= 'quantity')
+    articleInfo = ApiArticleSerializer(source='article', read_only=True, many=False)
+    
+    class Meta:
+        model = Storage
+        fields = ('articleInfo', 'orderedQuantity', 'unit')

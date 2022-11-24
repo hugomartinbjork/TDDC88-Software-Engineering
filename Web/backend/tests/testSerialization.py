@@ -11,8 +11,8 @@ class serializeStorageWithCompartment(TestCase):
 
     def test_serializer_one_compartment(self):
         serializer = NearbyStoragesSerializer(self.compartment, read_only=True)
-        # jsonData = json.dumps(serializer.data, indent=4)
-        # print(jsonData)
+        jsonData = json.dumps(serializer.data, indent=4)
+        print(jsonData)
         self.assertEqual(
             serializer.data["compartment"]["article"]["name"], 'testarticle')
     
