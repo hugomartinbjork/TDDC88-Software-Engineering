@@ -11,6 +11,7 @@ from backend.coremodels.order import Order
 from backend.coremodels.ordered_article import OrderedArticle
 from backend.services.articleManagementService import ArticleManagementService
 from backend.services.storageManagementService import StorageManagementService
+from backend.coremodels.supplier import Supplier
 from backend.services.userService import UserService
 from backend.services.orderManagementService import OrderManagementService
 from backend.services.orderServices import OrderService
@@ -72,18 +73,46 @@ class SupportDifferentUsers(TestCase):
 # Note: This test is dependent on that functions in the service layer and data access layer work as they should. So this is not a unit test
 # Run this test individually with the command: python manage.py test backend.tests.test_FR.ArticleIdentificationTest
 
-
+#test also test we can get compartment and supplier of a certain article as well as alternative articles
 class ArticleIdentificationTest(TestCase):
     def setUp(self):
-        # Database is populated and the object is stored so that we don't have to retrieve it again
-        self.article_to_search_for = Article.objects.create(lio_id="1")
-        # An instance of the class to be tested is created and stored as a class variable for the test class. The "articleManagementService :" part specifies that the stored variable must be of type articlemanagementservice, this is not necessary, but makes the code more understandable
-        self.article_management_service: ArticleManagementService = ArticleManagementService()
+        
+        
+        self.supplier_for_article = Supplier.objects.create(name="Supplier 1", supplier_number = "123")# populate the supplier for our article
+
+        self.article_management_service : ArticleManagementService = ArticleManagementService() #An instance of the class to be tested is created and stored as a class variable for the test class. The "articleManagementService :" part specifies that the stored variable must be of type articlemanagementservice, this is not necessary, but makes the code more understandable
+        self.storage_management_service : StorageManagementService = StorageManagementService()
+       
+        self.article_to_suggest_as_alternative = Article.objects.create(lio_id ="45")#Database populated with alternative articles
+
+        self.article_to_search_for = Article.objects.create(lio_id ="1", input ="20m", output = "cm", output_per_input = 2000
+        , price = 9.95, supplier = self.supplier_for_article, supplier_article_nr = "583", 
+        name = "Plasthandskar") #Database is populated and the object is stored so that we don't have to retrieve it again
+        self.article_to_search_for.alternative_articles.add(self.article_to_suggest_as_alternative)
+
+        self.alt_article1 = Article.objects.create(lio_id ="33", name="mask")
+        self.alt_article2 = Article.objects.create(lio_id ="35", name="handsprit")  #Database is populated and the object is stored so that we don't have to retrieve it again
+
+        #add alternative articles
+        self.article_to_search_for.alternative_articles.add(self.alt_article1)
+        self.article_to_search_for.alternative_articles.add(self.alt_article2)
+
+
+        self.storage_in_compartment = Storage.objects.create(id="1")
+        self.compartment = Compartment.objects.create(id="1", storage = Storage.objects.get(id="1"), article = Article.objects.get(lio_id="1"))
 
     def test_get_article_by_lio_id(self):
-        test_search = self.article_management_service.get_article_by_lio_id(
-            "1")
+        test_search = self.article_management_service.get_article_by_lio_id("1")
+        test_search_alternative_articles = self.article_management_service.get_alternative_articles(lio_id="1")
         self.assertEqual(test_search, self.article_to_search_for)
+        self.assertEqual(test_search_alternative_articles[0], self.alt_article1)
+        self.assertEqual(test_search_alternative_articles[1], self.alt_article2)
+        self.assertEqual(self.compartment.article, self.article_to_search_for)
+        
+        #can not get supplier atm
+        #self.assertEqual(self.supplier_for_article, self.article_management_service.get_supplier(self.article_to_search_for))
+
+
 
 # === Previously written like this, use for reference when rewriting other tests === #
 # class ArticleIdentificationTest(TestCase):
