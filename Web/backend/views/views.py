@@ -37,6 +37,7 @@ from datetime import date
 from datetime import datetime
 import datetime
 from django.utils.timezone import now
+import json
 
 
 # from Web.backend import serializers
@@ -44,7 +45,7 @@ from django.utils.timezone import now
 
 class Article(APIView):
     '''Article view.'''
-    authentication_classes = (TokenAuthentication,)
+    #authentication_classes = (TokenAuthentication,)
     # Dependencies are injected, I hope that we will be able to mock
     # (i.e. make stubs of) these for testing
 
@@ -73,17 +74,39 @@ class Article(APIView):
                     name)
             if article is None:
                 raise Http404("Could not find article")
-        
+            storage_id = request.GET.get('storage_id', None)
+
+            storage = self.storage_management_service.get_storage_by_id(
+                storage_id)
+            compartments = self.storage_management_service.get_compartment_by_storage_id(
+                storage_id)
+
+            data = {}
+
+            # Serialize every article in the compartments in the storage
+
+            for compartment in compartments:
+
+                data['compartments'] = ArticleCompartmentProximitySerializer(
+                    getattr(compartment, "article"), storage).data
+
             serializer = ApiArticleSerializer(article)
-        
+            if serializer.is_valid:
+                data.update(serializer.data)
+                return JsonResponse(data, safe=False, status=200)
+            return HttpResponseBadRequest
+
+            serializer = ApiArticleSerializer(article)
+            new_dict = {}
+            new_dict.update(compartment_serializer.data[0].items())
+            new_dict.update(serializer.data)
             if serializer.is_valid:
                 return JsonResponse(serializer.data, safe=False, status=200)
-            return HttpResponseBadRequest
 
 
 class Group(APIView):
     '''Group.'''
-    authentication_classes = (TokenAuthentication,)
+    #authentication_classes = (TokenAuthentication,)
     # Dependencies are injected, I hope that we will be able to mock
     # (i.e. make stubs of) these for testing
 
@@ -107,7 +130,7 @@ class Group(APIView):
 
 class Storage(View):
     '''Storage view.'''
-    authentication_classes = (TokenAuthentication,)
+    #authentication_classes = (TokenAuthentication,)
     # Dependencies are injected, I hope that we will be able to mock
     # (i.e. make stubs of) these for testing
 
@@ -147,7 +170,7 @@ class Storage(View):
 
 class NearbyStorages(APIView):
     '''Get nearby storages.'''
-    authentication_classes = (TokenAuthentication,)
+    #authentication_classes = (TokenAuthentication,)
 
     @si.inject
     def __init__(self, _deps, *args):
@@ -177,7 +200,7 @@ class NearbyStorages(APIView):
 
 class Compartments(APIView):
     '''Compartment view.'''
-    authentication_classes = (TokenAuthentication,)
+    #authentication_classes = (TokenAuthentication,)
     # Dependencies are injected, I hope that we will be able to mock
     # (i.e. make stubs of) these for testing
 
@@ -231,7 +254,7 @@ class Compartments(APIView):
 
 class Order(APIView):
     '''Order endpoint handling all request from /orders'''
-    authentication_classes = (TokenAuthentication, )
+    #authentication_classes = (TokenAuthentication, )
 
     @si.inject
     def __init__(self, _deps, *args):
@@ -298,7 +321,7 @@ class Order(APIView):
 
 class OrderId(APIView):
     '''Order Endpoint which handles all request coming from /orders/id'''
-    authentication_classes = (TokenAuthentication,)
+    #authentication_classes = (TokenAuthentication,)
 
     @si.inject
     def __init__(self, _deps, *args):
@@ -381,8 +404,8 @@ class LoginWithCredentials(APIView):
         user = self.user_service.get_user_info(request.user)
         serialized_user = UserInfoSerializer(user)
         data = {
-            "user:": serialized_user.data,
-            "token:": AuthToken.objects.create(auth)[1]
+            "user": serialized_user.data,
+            "token": AuthToken.objects.create(auth)[1]
         }
         return JsonResponse(data, status=status.HTTP_200_OK)
 
@@ -421,15 +444,15 @@ class LoginWithBarcodeOrNfc(APIView):
         login(request, auth)
         serialized_user = UserInfoSerializer(user)
         data = {
-            "user:": serialized_user.data,
-            "token:": AuthToken.objects.create(auth)[1]
+            "user": serialized_user.data,
+            "token": AuthToken.objects.create(auth)[1]
         }
         return JsonResponse(data, status=status.HTTP_200_OK)
 
 
 class SeeAllStorages(View):
     '''See all storages view.'''
-    authentication_classes = (TokenAuthentication,)
+    #authentication_classes = (TokenAuthentication,)
 
     @si.inject
     def __init__(self, _deps, *args):
@@ -471,7 +494,7 @@ class SeeAllStorages(View):
 
 class AddInputUnit(View):
     '''Add input unit view.'''
-    authentication_classes = (TokenAuthentication,)
+    #authentication_classes = (TokenAuthentication,)
 
     @si.inject
     def __init__(self, _deps):
@@ -507,7 +530,7 @@ class AddInputUnit(View):
 
 class GetUserTransactions(View):
     '''Get user transactions view.'''
-    authentication_classes = (TokenAuthentication,)
+    #authentication_classes = (TokenAuthentication,)
 
     @si.inject
     def __init__(self, _deps):
@@ -538,7 +561,7 @@ class GetUserTransactions(View):
 
 class ReturnUnit(View):
     '''Return unit view.'''
-    authentication_classes = (TokenAuthentication,)
+    #authentication_classes = (TokenAuthentication,)
 
     @si.inject
     def __init__(self, _deps):
@@ -569,7 +592,7 @@ class ReturnUnit(View):
 
 class Transactions(APIView):
     '''Transactions API view.'''
-    authentication_classes = (TokenAuthentication,)
+    #authentication_classes = (TokenAuthentication,)
 
     @si.inject
     def __init__(self, _deps):
@@ -583,12 +606,17 @@ class Transactions(APIView):
             # Custom permission to be able to see all transactions. Can be found in the coremodel transaction.py
             if not request.user.has_perm('backend.get_all_transaction'):
                 raise PermissionDenied
+            fromDate = request.query_params.get('fromDate', None)
+            toDate = request.query_params.get('toDate', None)
+            limit = request.query_params.get('limit', None)
             all_transactions = (
-                self.storage_management_service.get_all_transactions())
+                self.storage_management_service.get_all_transactions(fromDate=fromDate, toDate=toDate, limit=limit))
         if all_transactions is None:
             raise Http404("Could not find any transactions")
         else:
-            return JsonResponse(list(all_transactions), safe=False, status=200)
+            serializer = TransactionSerializer(all_transactions, many=True)
+
+            return JsonResponse(serializer.data, safe=False, status=200)
 
     def post(self, request):
         '''Description needed.'''
@@ -600,9 +628,6 @@ class Transactions(APIView):
             request.data.get('storageId'))
         if compartment is None:
             return Response({'error': 'Could not find compartment'},
-                            status=status.HTTP_400_BAD_REQUEST)
-        if compartment.storage.id != storage.id:
-            return Response({'error': 'Could not find compartment in storage'},
                             status=status.HTTP_400_BAD_REQUEST)
         else:
 
@@ -621,8 +646,10 @@ class Transactions(APIView):
                 add_output_unit = True
 
             if operation == "replenish":
+                if not request.user.has_perm('backend.replenish'):
+                    raise PermissionDenied
                 transaction = self.storage_management_service.add_to_storage(
-                    id=compartment.id, amount=amount,
+                    id=compartment.id, storage_id=storage, amount=amount,
                     username=user.username, add_output_unit=add_output_unit,
                     time_of_transaction=time_of_transaction)
                 return JsonResponse(TransactionSerializer(transaction).data,
@@ -630,7 +657,7 @@ class Transactions(APIView):
             elif operation == "return":
                 transaction = (
                     self.storage_management_service.add_to_return_storage(
-                        id=compartment.id, amount=amount,
+                        id=compartment.id, storage_id=storage, amount=amount,
                         username=user.username,
                         add_output_unit=add_output_unit,
                         time_of_transaction=time_of_transaction))
@@ -639,7 +666,7 @@ class Transactions(APIView):
             elif operation == "takeout":
                 transaction = (
                     self.storage_management_service.take_from_Compartment(
-                        id=compartment.id, amount=amount,
+                        id=compartment.id, storage_id=storage, amount=amount,
                         username=user.username,
                         add_output_unit=add_output_unit,
                         time_of_transaction=time_of_transaction))
@@ -648,7 +675,7 @@ class Transactions(APIView):
             elif operation == "adjust":
                 transaction = (
                     self.storage_management_service.set_compartment_amount(
-                        compartment_id=compartment.id, amount=amount,
+                        compartment_id=compartment.id, storage_id=storage, amount=amount,
                         username=user.username,
                         add_output_unit=add_output_unit,
                         time_of_transaction=time_of_transaction))
@@ -658,7 +685,7 @@ class Transactions(APIView):
 
 class TransactionsById(APIView):
     '''Get transaction by ID view.'''
-    authentication_classes = (TokenAuthentication,)
+    #authentication_classes = (TokenAuthentication,)
 
     @si.inject
     def __init__(self, _deps):
@@ -685,7 +712,7 @@ class TransactionsById(APIView):
             # Can only change a transaction if they have the permission
             if not request.user.has_perm('backend.change_transaction'):
                 raise PermissionDenied
-            new_time_of_transaction = request.data.get("time_of_transaction")
+            new_time_of_transaction = request.data.get("timeStamp")
             transaction = (
                 self.storage_management_service.edit_transaction_by_id(transaction_id, new_time_of_transaction))
 
@@ -723,7 +750,7 @@ class GetStorageValue(View):
 
 class GetStorageCost(APIView):
     '''Get storage cost API view.'''
-    authentication_classes = (TokenAuthentication,)
+    #authentication_classes = (TokenAuthentication,)
 
     @si.inject
     def __init__(self, _deps, *args):
@@ -733,8 +760,8 @@ class GetStorageCost(APIView):
 
     def get(self, request, storage_id):
         '''Get storage cost.'''
-        start_date = request.data.get('start_date')
-        end_date = request.data.get('end_date')
+        start_date = "2010-11-16T15:09:57.028Z"
+        end_date = "2023-11-16T15:09:57.028Z"
         if request.method == 'GET':
             # Custom permission to be able to see storage cost. Can be found in the coremodel storage.py
             if not request.user.has_perm('backend.get_storage_cost'):
@@ -762,7 +789,7 @@ class GetArticleAlternatives(View):
        their attributes. If an article id and a storage id is entered, the
        method returns the id for alternative articles and the amount of
        the alternative articles in that storage'''
-    authentication_classes = (TokenAuthentication,)
+    #authentication_classes = (TokenAuthentication,)
 
     @si.inject
     def __init__(self, _deps):
@@ -808,7 +835,7 @@ class GetArticleAlternatives(View):
 # FR 8.1 start #
 class SearchForArticleInStorages(View):
     '''Search for article in storages view.'''
-    authentication_classes = (TokenAuthentication,)
+    #authentication_classes = (TokenAuthentication,)
 
     @si.inject
     def __init__(self, _deps):
@@ -881,7 +908,7 @@ class SearchForArticleInStorages(View):
 
 class ArticleToCompartmentByQRcode(APIView):
     '''Change Article linked to Compartment by using QR code.'''
-    authentication_classes = (TokenAuthentication,)
+    #authentication_classes = (TokenAuthentication,)
 
     @si.inject
     def __init__(self, _deps):
@@ -926,7 +953,7 @@ class ArticleToCompartmentByQRcode(APIView):
 
 class getEconomy(APIView):
     '''Returns the total value in storage, and the average turnover rate'''
-    authentication_classes = (TokenAuthentication,)
+   # authentication_classes = (TokenAuthentication,)
 
     @si.inject
     def __init__(self, _deps, *args):
@@ -941,8 +968,8 @@ class getEconomy(APIView):
         if storage is None:
             raise Http404("Could not find storage")
         else:
-            start_date = '2022-01-01'
-            end_date = '2022-12-31'
+            start_date = "2000-01-07"
+            end_date = "2020-01-07"
             '''Below is not an average value, but the current value right now since 
             get_storage_value doesn't take transactions into account'''
             value = self.storage_management_service.get_storage_value(
@@ -951,7 +978,8 @@ class getEconomy(APIView):
                 storage_id, start_date, end_date)
             data = {}
             data["totalValue"] = value
-            data["averageTurnoverRate"] = int((value/cost)*365)
+            data["cost"] = cost
+            #data["averageTurnoverRate"] = int((value/cost)*365)
             return JsonResponse(data, safe=False, status=200)
 
 
@@ -976,6 +1004,8 @@ class MoveArticle(APIView):
         user = request.user
 
         if request.method == 'POST':
+            if not request.user.has_perm('backend.move_article'):
+                raise PermissionDenied
 
             from_compartment = self.storage_management_service.get_compartment_by_qr(
                 from_compartment_qr_code)
@@ -1007,21 +1037,21 @@ class MoveArticle(APIView):
 
                 from_transaction = (
                     self.storage_management_service.take_from_Compartment(
-                        id=from_compartment_qr_code, amount=quantity,
+                        id=from_compartment_qr_code, storage_id=from_compartment.storage, amount=quantity,
                         username=user.username,
                         add_output_unit=add_output_unit,
                         time_of_transaction=time_of_transaction))
 
                 to_transaction = (
                     self.storage_management_service.add_to_return_storage(
-                        id=to_compartment_qr_code, amount=quantity,
+                        id=to_compartment_qr_code, storage_id=to_compartment.storage, amount=quantity,
                         username=user.username,
                         add_output_unit=add_output_unit,
                         time_of_transaction=time_of_transaction))
                 '''Prints JsonResponse directly instead of using Serializer'''
                 data = {}
                 data['userId'] = str(user.id)
-                data['timeStamp'] = time_of_transaction
+                data['timeStamp'] = to_transaction.time_of_transaction
                 data['fromCompartmentQrCode'] = from_compartment_qr_code
                 data['toCompartmentQrCode'] = to_compartment_qr_code
                 data['lioNr'] = from_compartment.article.lio_id
