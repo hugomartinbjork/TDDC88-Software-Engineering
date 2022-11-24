@@ -90,7 +90,7 @@ class Article(APIView):
 
 class Group(APIView):
     '''Group.'''
-    #authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication,)
     # Dependencies are injected, I hope that we will be able to mock
     # (i.e. make stubs of) these for testing
 
@@ -114,7 +114,7 @@ class Group(APIView):
 
 class Storage(View):
     '''Storage view.'''
-    #authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication,)
     # Dependencies are injected, I hope that we will be able to mock
     # (i.e. make stubs of) these for testing
 
@@ -154,7 +154,7 @@ class Storage(View):
 
 class NearbyStorages(APIView):
     '''Get nearby storages.'''
-    #authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication,)
 
     @si.inject
     def __init__(self, _deps, *args):
@@ -183,7 +183,7 @@ class NearbyStorages(APIView):
 
 class Compartments(APIView):
     '''Compartment view.'''
-    #authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication,)
     # Dependencies are injected, I hope that we will be able to mock
     # (i.e. make stubs of) these for testing
 
@@ -260,7 +260,7 @@ class Compartments(APIView):
 
 class Order(APIView):
     '''Order endpoint handling all request from /orders'''
-    #authentication_classes = (TokenAuthentication, )
+    authentication_classes = (TokenAuthentication, )
 
     @si.inject
     def __init__(self, _deps, *args):
@@ -327,7 +327,7 @@ class Order(APIView):
 
 class OrderId(APIView):
     '''Order Endpoint which handles all request coming from /orders/id'''
-    #authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication,)
 
     @si.inject
     def __init__(self, _deps, *args):
@@ -458,7 +458,7 @@ class LoginWithBarcodeOrNfc(APIView):
 
 class SeeAllStorages(View):
     '''See all storages view.'''
-    #authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication,)
 
     @si.inject
     def __init__(self, _deps, *args):
@@ -500,7 +500,7 @@ class SeeAllStorages(View):
 
 class AddInputUnit(View):
     '''Add input unit view.'''
-    #authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication,)
 
     @si.inject
     def __init__(self, _deps):
@@ -536,7 +536,7 @@ class AddInputUnit(View):
 
 class GetUserTransactions(View):
     '''Get user transactions view.'''
-    #authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication,)
 
     @si.inject
     def __init__(self, _deps):
@@ -567,7 +567,7 @@ class GetUserTransactions(View):
 
 class ReturnUnit(View):
     '''Return unit view.'''
-    #authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication,)
 
     @si.inject
     def __init__(self, _deps):
@@ -598,7 +598,7 @@ class ReturnUnit(View):
 
 class Transactions(APIView):
     '''Transactions API view.'''
-    #authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication,)
 
     @si.inject
     def __init__(self, _deps):
@@ -691,7 +691,7 @@ class Transactions(APIView):
 
 class TransactionsById(APIView):
     '''Get transaction by ID view.'''
-    #authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication,)
 
     @si.inject
     def __init__(self, _deps):
@@ -730,7 +730,7 @@ class TransactionsById(APIView):
 
 class GetStorageValue(View):
     '''Get storage value view.'''
-   # authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication,)
 
     @si.inject
     def __init__(self, _deps):
@@ -756,7 +756,7 @@ class GetStorageValue(View):
 
 class GetStorageCost(APIView):
     '''Get storage cost API view.'''
-    #authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication,)
 
     @si.inject
     def __init__(self, _deps, *args):
@@ -795,7 +795,7 @@ class GetArticleAlternatives(View):
        their attributes. If an article id and a storage id is entered, the
        method returns the id for alternative articles and the amount of
        the alternative articles in that storage'''
-    #authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication,)
 
     @si.inject
     def __init__(self, _deps):
@@ -841,7 +841,7 @@ class GetArticleAlternatives(View):
 # FR 8.1 start #
 class SearchForArticleInStorages(View):
     '''Search for article in storages view.'''
-    #authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication,)
 
     @si.inject
     def __init__(self, _deps):
@@ -914,7 +914,7 @@ class SearchForArticleInStorages(View):
 
 class ArticleToCompartmentByQRcode(APIView):
     '''Change Article linked to Compartment by using QR code.'''
-    #authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication,)
 
     @si.inject
     def __init__(self, _deps):
@@ -959,7 +959,7 @@ class ArticleToCompartmentByQRcode(APIView):
 
 class getEconomy(APIView):
     '''Returns the total value in storage, and the average turnover rate'''
-   # authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication,)
 
     @si.inject
     def __init__(self, _deps, *args):
@@ -992,7 +992,7 @@ class getEconomy(APIView):
 class MoveArticle(APIView):
     '''Move an amount of a specific article from one compartment to another one.
         This will create two transactions, one for the withdrawal and one for the deposit.'''
-   # authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication,)
 
     @si.inject
     def __init__(self, _deps, *args):
@@ -1071,7 +1071,7 @@ class MoveArticle(APIView):
     
 class GetArticles(APIView):
     '''Get articles according to lioNr, name or storageId.'''
-    #authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication,)
 
     @si.inject
     def __init__(self, _deps, *args):
