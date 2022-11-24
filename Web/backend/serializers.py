@@ -163,6 +163,32 @@ class ApiArticleSerializer(serializers.ModelSerializer):
         'Z41')
 
 
+class ApiArticleSerializerNoCompartment(serializers.ModelSerializer):
+    lioNr = serializers.CharField(
+        source='lio_id', read_only=True)
+    inputUnit = serializers.CharField(
+        source='input', read_only=True)
+    outputUnit = serializers.CharField(
+        source='output', read_only=True)
+    outputPerInputUnit = serializers.IntegerField(
+        source='output_per_input', read_only=True)
+    #The SlugRelatedField references a specific field in a reverse foreign key mapping without creating a nested dictionary
+    alternativeNames = serializers.SlugRelatedField(read_only=True, many=True, slug_field='name', source='alternativearticlename_set')
+    #Here you get the primary key from a foreign key relation
+    alternativeProducts = serializers.PrimaryKeyRelatedField(
+        source='alternative_articles', read_only=True, many=True)
+    #The name supplier_article_nr is renamed to supplierArticleNr so that it is the same as the API
+    supplierArticleNr = serializers.CharField(
+        source='supplier_article_nr', read_only=True)
+    supplierName = serializers.CharField(
+        source='supplier.name', read_only=True)
+    
+    class Meta:
+        model = Article
+        fields = ('inputUnit', 'outputUnit', 'outputPerInputUnit', 'price', 'supplierName', 'supplierArticleNr', 'name', 'alternativeNames', 'lioNr', 'alternativeProducts', 
+        'Z41')
+
+
 class OrderedArticleSerializer(serializers.ModelSerializer):
     orderedQuantity = serializers.CharField(source='quantity')
     articleInfo = ApiArticleSerializer(
@@ -196,8 +222,8 @@ class LocationSerializer(serializers.ModelSerializer):
 
 
 class ApiCompartmentSerializer(serializers.ModelSerializer):
-    article = ApiArticleSerializer(read_only=True)
-    quantity = serializers.CharField(source='amount', read_only=True)
+    article = ApiArticleSerializerNoCompartment(read_only=True)
+    quantity = serializers.IntegerField(source='amount', read_only=True)
     qrCode = serializers.CharField(source='id', read_only=True)
     normalOrderQuantity = serializers.IntegerField(
         source='standard_order_amount')

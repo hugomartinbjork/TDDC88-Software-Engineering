@@ -917,7 +917,7 @@ class ArticleToCompartmentByQRcode(APIView):
         self.article_management_service: ArticleManagementService = (
             _deps['ArticleManagementService']())
 
-    def post(self, request, qr_code):
+    def put(self, request, qr_code):
         '''Sets new article in payload to compartment matching qr_code.'''
 
         current_compartment = (
