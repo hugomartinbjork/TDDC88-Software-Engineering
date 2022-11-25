@@ -62,9 +62,9 @@ REST_FRAMEWORK = {
         #'rest_framework.authentication.SessionAuthentication', # Front end can't handle sessionauth atm.
         'knox.auth.TokenAuthentication'
     ),
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated'
-    ],
+    # 'DEFAULT_PERMISSION_CLASSES': [
+    #     'rest_framework.permissions.IsAuthenticated'
+    # ],
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
     ],
