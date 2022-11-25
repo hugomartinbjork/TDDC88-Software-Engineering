@@ -651,6 +651,9 @@ class Transactions(APIView):
         if compartment is None:
             return Response({'error': 'Could not find compartment'},
                             status=status.HTTP_400_BAD_REQUEST)
+        elif storage is None:
+            return Response({'error': 'Could not find storage'},
+                            status=status.HTTP_400_BAD_REQUEST)
         else:
 
             amount = request.data.get("quantity")
@@ -992,16 +995,14 @@ class getEconomy(APIView):
         else:
             start_date = datetime.date(datetime.datetime.today().year-1,datetime.datetime.today().month,datetime.datetime.today().day)
             end_date = datetime.datetime.today()
-            '''Below is not an average value, but the current value right now since 
-            get_storage_value doesn't take transactions into account'''
+
             value = self.storage_management_service.get_storage_value(
                 storage_id)
-            cost = self.storage_management_service.get_storage_cost(
+            turnover_rate = self.storage_management_service.get_storage_turnover_rate(
                 storage_id, start_date, end_date)
             data = {}
             data["totalValue"] = value
-            data["cost"] = cost
-            #data["averageTurnoverRate"] = int((cost/max)
+            data["averageTurnoverRate"] = turnover_rate
             return JsonResponse(data, safe=False, status=200)
 
 

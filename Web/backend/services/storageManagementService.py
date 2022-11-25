@@ -126,6 +126,30 @@ class StorageManagementService():
         '''Get storage using cost-center.'''
         return self.storage_access.get_storage_by_costcenter(cost_center)
 
+    def get_storage_turnover_rate(self, storage_id: str, start_date: str, end_date: str) -> int:
+        '''Get storage turnover rate. (total cost / average storage value)'''
+        cost = self.get_storage_cost(storage_id, start_date, end_date)
+        '''Estimation of average value: order point + standard order value / 2'''
+        compartments = self.storage_access.get_compartments_by_storage(
+            storage_id=storage_id)
+        '''average_value is the sum of all average compartment values in a storage'''
+        average_values = 0
+        n_compartments = 0
+        for compartment in compartments:
+            article_value = compartment.article.price
+            compartment_value = (compartment.order_point + compartment.standard_order_amount/2)*article_value
+            if compartment_value == 0:
+                compartment_value = (compartment.maximal_capacity/2)*article_value
+            average_values += compartment_value
+            n_compartments += 1
+        if average_values == 0:
+            return None
+        else:
+            '''Average turnover rate over all compartments'''
+            return (cost/average_values) / n_compartments
+        
+      
+
 # FR 10.1.3 #
 # alltid takeout/takein
 # TODO: This is a lot of work to refactor since barely any of the
