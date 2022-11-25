@@ -14,7 +14,7 @@ class UserInfo(models.Model):
         User, on_delete=models.CASCADE, primary_key=True)
     barcode_id = models.CharField(max_length=255, null=True, unique=True)
     nfc_id = models.CharField(max_length=256, null=True, unique=True)
-    cost_center = models.ManyToManyField(CostCenter)
+    cost_center = models.ManyToManyField(CostCenter, null=False)
     # group points to the built-in django class Group,
     # which works as the intended "role" in the database schema
     group = models.ForeignKey(Group, on_delete=models.CASCADE, null=False)
