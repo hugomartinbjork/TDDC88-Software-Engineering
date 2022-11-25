@@ -108,25 +108,47 @@ class StorageManagementService():
     def get_storage_cost(self, storage_id: str, start_date: str,
                          end_date: str) -> int:
         '''Get storage cost.'''
+        attribute_cost_to = self.storage_access.get_storage(storage_id).cost_center
         sum_value = 0
-        transactions = self.storage_access.get_transaction_by_storage_date(
-            storage_id=storage_id, start=start_date, end=end_date)
+        transactions = self.storage_access.get_transaction_by_cost_date(
+            attribute_cost_to=attribute_cost_to, start=start_date, end=end_date)
         takeout_value = 0
         return_value = 0
         for transaction in transactions:
-            user_cost_center = self.user_access.get_user_cost_center(
-                transaction.by_user)
-            if (user_cost_center == transaction.storage.cost_center):
-                if transaction.operation == 1:
-                    takeout_value = transaction.get_value() + takeout_value
-                if transaction.operation == 2:
-                    return_value = transaction.get_value() + return_value
+            if transaction.operation == "takeout":
+                takeout_value = transaction.get_value() + takeout_value
+            if transaction.operation == "return":
+                return_value = transaction.get_value() + return_value
         sum_value = takeout_value - return_value
         return sum_value
 
     def get_storage_by_costcenter(self, cost_center: str) -> Storage:
         '''Get storage using cost-center.'''
         return self.storage_access.get_storage_by_costcenter(cost_center)
+
+    def get_storage_turnover_rate(self, storage_id: str, start_date: str, end_date: str) -> int:
+        '''Get storage turnover rate. (total cost / average storage value)'''
+        cost = self.get_storage_cost(storage_id, start_date, end_date)
+        '''Estimation of average value: order point + standard order value / 2'''
+        compartments = self.storage_access.get_compartments_by_storage(
+            storage_id=storage_id)
+        '''average_value is the sum of all average compartment values in a storage'''
+        average_values = 0
+        n_compartments = 0
+        for compartment in compartments:
+            article_value = compartment.article.price
+            compartment_value = (compartment.order_point + compartment.standard_order_amount/2)*article_value
+            if compartment_value == 0:
+                compartment_value = (compartment.maximal_capacity/2)*article_value
+            average_values += compartment_value
+            n_compartments += 1
+        if average_values == 0:
+            return None
+        else:
+            '''Average turnover rate over all compartments'''
+            return (cost/average_values) / n_compartments
+        
+      
 
 # FR 10.1.3 #
 # alltid takeout/takein

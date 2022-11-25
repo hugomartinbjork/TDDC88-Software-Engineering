@@ -635,6 +635,9 @@ class Transactions(APIView):
         if compartment is None:
             return Response({'error': 'Could not find compartment'},
                             status=status.HTTP_400_BAD_REQUEST)
+        elif storage is None:
+            return Response({'error': 'Could not find storage'},
+                            status=status.HTTP_400_BAD_REQUEST)
         else:
 
             amount = request.data.get("quantity")
@@ -974,18 +977,16 @@ class getEconomy(APIView):
         if storage is None:
             raise Http404("Could not find storage")
         else:
-            start_date = "2000-01-07"
-            end_date = "2020-01-07"
-            '''Below is not an average value, but the current value right now since 
-            get_storage_value doesn't take transactions into account'''
+            start_date = datetime.date(datetime.datetime.today().year-1,datetime.datetime.today().month,datetime.datetime.today().day)
+            end_date = datetime.datetime.today()
+
             value = self.storage_management_service.get_storage_value(
                 storage_id)
-            cost = self.storage_management_service.get_storage_cost(
+            turnover_rate = self.storage_management_service.get_storage_turnover_rate(
                 storage_id, start_date, end_date)
             data = {}
             data["totalValue"] = value
-            data["cost"] = cost
-            #data["averageTurnoverRate"] = int((value/cost)*365)
+            data["averageTurnoverRate"] = turnover_rate
             return JsonResponse(data, safe=False, status=200)
 
 
@@ -1038,7 +1039,7 @@ class MoveArticle(APIView):
                                 status=status.HTTP_400_BAD_REQUEST)
 
             if (from_compartment.amount - quantity*converter) < 0 or (to_compartment.amount + quantity*converter) > to_compartment.maximal_capacity:
-                return Response({'error': 'Not allowed qunatity, not enough in storage or not enough space in target'},
+                return Response({'error': 'Not allowed quantity, not enough in storage or not enough space in target'},
                                 status=status.HTTP_400_BAD_REQUEST)
             else:
                 time_of_transaction = date.today()
@@ -1064,7 +1065,7 @@ class MoveArticle(APIView):
                 data['toCompartmentQrCode'] = to_compartment_qr_code
                 data['lioNr'] = from_compartment.article.lio_id
                 data['unit'] = unit
-                data['qunatity'] = quantity
+                data['quantity'] = quantity
 
                 return JsonResponse(data, safe=False, status=200)
 
