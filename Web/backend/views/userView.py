@@ -5,6 +5,7 @@ from ..serializers import UserInfoSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAdminUser
 
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
@@ -13,6 +14,8 @@ from django.http import Http404
 class User(APIView):
     '''View for getting all users and posting a user to the DB. 
     Should only be accessable by admins'''
+
+    permission_classes = [IsAdminUser]
 
     @si.inject
     def __init__(self, _deps, *args):
@@ -53,7 +56,9 @@ class User(APIView):
 
 
 class UserId(APIView):
-    '''User'''
+    '''User view. Can only be accessed by admins'''
+
+    permission_classes = [IsAdminUser]
 
     @si.inject
     def __init__(self, _deps, *args):

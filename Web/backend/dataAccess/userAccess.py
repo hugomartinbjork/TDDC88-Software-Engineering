@@ -19,17 +19,14 @@ class UserAccess():
     def create_user(username, password, barcode_id, nfc_id, cost_centers, group_id):
         try:
             # Have to add an mock email since this is required in the User auth model.
-            new_user = User.objects.create_user(
-                username=username, email='email@email.com', password=password)
-            new_user.save()
-
             group = Group.objects.get(id=group_id)
 
             centers = CostCenter.objects.filter(id__in=cost_centers)
 
             new_user_info = UserInfo.objects.create(
-                user=new_user, barcode_id=barcode_id, nfc_id=nfc_id, group=group)
-            new_user_info.save()
+                user=User.objects.create_user(
+                    username=username, email='email@email.com', password=password),
+                barcode_id=barcode_id, nfc_id=nfc_id, group=group)
 
             new_user_info.cost_center.add(*centers)
             return new_user_info
