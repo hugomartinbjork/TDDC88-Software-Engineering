@@ -31,13 +31,10 @@ from django.http import HttpResponse
 from itertools import chain
 from operator import itemgetter
 from backend.coremodels.compartment import Compartment
-from backend.coremodels.article import Article
-from django.http import HttpResponse
 from datetime import date
 from datetime import datetime
 import datetime
 from django.utils.timezone import now
-import json
 
 
 # from Web.backend import serializers

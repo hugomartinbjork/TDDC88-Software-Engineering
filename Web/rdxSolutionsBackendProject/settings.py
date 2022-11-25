@@ -51,7 +51,6 @@ INSTALLED_APPS = [
     'backend',
     'django_probes',
     'corsheaders',
-
 ]
 
 SALT = 'k7*rsf2B*QFOc+!#nJZGPKs@6z02+h'
@@ -81,6 +80,14 @@ REST_KNOX = {
     'AUTO_REFRESH': False,
     'AUTH_HEADER_PREFIX': 'Bearer',
 }
+
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.Argon2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+    'django.contrib.auth.hashers.ScryptPasswordHasher',
+]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
