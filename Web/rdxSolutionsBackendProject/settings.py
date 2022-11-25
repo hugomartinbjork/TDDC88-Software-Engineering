@@ -58,9 +58,9 @@ SALT = 'k7*rsf2B*QFOc+!#nJZGPKs@6z02+h'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.BasicAuthentication',
+        #'rest_framework.authentication.BasicAuthentication',
         #'rest_framework.authentication.SessionAuthentication', # Front end can't handle sessionauth atm.
-        'knox.auth.TokenAuthentication'
+        #'knox.auth.TokenAuthentication'
     ),
     # 'DEFAULT_PERMISSION_CLASSES': [
     #     'rest_framework.permissions.IsAuthenticated'
