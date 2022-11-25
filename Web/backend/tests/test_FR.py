@@ -588,3 +588,43 @@ class ConnectArticleToCompartmentQrCode(TestCase):
         self.assertEqual(current_compartment2.amount, 10)
         self.assertEqual(current_compartment2.standard_order_amount, 8)
         self.assertEqual(current_compartment2.order_point, 0)
+
+
+
+#Test for API endpoint requirement: Create orders. (FR 5.1 through 5.8) (Task 19.2.3 & 19.2.2)
+class API_CreateOrder(TestCase):
+
+    def setUp(self):
+        self.order_management_service: OrderManagementService = OrderManagementService()
+        self.storage_management_service: StorageManagementService = StorageManagementService()
+        self.order_services: OrderService = OrderService()
+
+        # create instances of article to order
+        self.article1 = Article.objects.create(
+            lio_id="1", name="Plasthandskar", input="ml", output="ml", output_per_input=1)
+        self.article2 = Article.objects.create(
+            lio_id="2", name="Mask", input="pieces", output="pieces", output_per_input=1)
+        # create a storage
+        self.storage_in_compartment = Storage.objects.create(id="Forrad 1")
+        
+        # create an order1
+        self.order1 = Order.objects.create(id="77", to_storage=self.storage_management_service.get_storage_by_id(id="Forrad 1"), estimated_delivery_date="2022-11-19 23:16:31.285209+00:00", order_date="2022-11-17 23:16:31.286527+00:00", order_state="delivered")
+        # create an order2
+        self.order2 = Order.objects.create(id="88", to_storage=self.storage_management_service.get_storage_by_id(id="Forrad 1"), estimated_delivery_date="2022-11-19 23:16:31.285209+00:00", order_date="2022-08-17 23:16:31.286527+00:00", order_state="delivered")
+        # create a ordered article for "plasthanskar" connected to our "order1"
+        self.ordered_article1 = OrderedArticle.objects.create(id="25", quantity=3, article=self.article1, order=self.order1, unit="input")
+        # create a ordered article for "plasthanskar" connected to our "order2"
+        self.ordered_article1 = OrderedArticle.objects.create(id="26", quantity=3, article=self.article1, order=self.order2, unit="input")
+
+    def test_order_creation(self):
+        #Verify the order is in the system by gettinng a created order
+        self.assertEqual(
+            self.order1, self.order_management_service.get_order_by_id("77"))
+        self.assertEqual(self.order1.to_storage, self.storage_in_compartment)
+
+        #Check so orders are correctly put in through their lio_id
+        self.assertNotEqual(
+            self.order1, self.order_management_service.get_order_by_id("88")
+        )
+
+
