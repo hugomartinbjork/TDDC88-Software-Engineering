@@ -13,6 +13,9 @@ class ArticleManagementService():
     def __init__(self, _deps, *args):
         self.article_operations: ArticleAccess = _deps["ArticleAccess"]()
 
+    def get_articles(self):
+        return self.article_operations.get_all_articles()
+
     def get_article_by_lio_id(self, lio_id: str) -> Article:
         '''Returns article using lio-id.'''
         return self.article_operations.get_article_by_lio_id(lio_id)

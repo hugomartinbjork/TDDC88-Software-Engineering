@@ -25,10 +25,17 @@ class ArticleSerializer(serializers.ModelSerializer):
 
 
 class CostCenterSerializer(serializers.ModelSerializer):
+    '''returns a storage id and not a costcenter'''
     class Meta:
-        model = CostCenter
-        fields = ('id', 'name')
+        model = Storage
+        fields = ('id',)
 
+
+class StorageSerializer(serializers.ModelSerializer):
+    ''' compartments = storageManagemetnServisce(storage.id)'''
+    class Meta:
+        model = Storage
+        fields = ('id', 'building', 'floor')
 
 class UserInfoSerializer(serializers.ModelSerializer):
     userId = serializers.CharField(source='user_id')
@@ -55,13 +62,6 @@ class CompartmentSerializer(serializers.ModelSerializer):
         fields = ('placement', 'storageId',
                   'qrCode', 'quantity', 'normalOrderQuantity',
                   'orderQuantityLevel', 'article')
-
-
-class StorageSerializer(serializers.ModelSerializer):
-    ''' compartments = storageManagemetnServisce(storage.id)'''
-    class Meta:
-        model = Storage
-        fields = ('id', 'building', 'floor')
 
 
 class GroupSerializer(serializers.ModelSerializer):
@@ -142,25 +142,26 @@ class ApiArticleSerializer(serializers.ModelSerializer):
         source='output', read_only=True)
     outputPerInputUnit = serializers.IntegerField(
         source='output_per_input', read_only=True)
-    #The SlugRelatedField references a specific field in a reverse foreign key mapping without creating a nested dictionary
-    alternativeNames = serializers.SlugRelatedField(read_only=True, many=True, slug_field='name', source='alternativearticlename_set')
-    #Here you get the primary key from a foreign key relation
+    # The SlugRelatedField references a specific field in a reverse foreign key mapping without creating a nested dictionary
+    alternativeNames = serializers.SlugRelatedField(
+        read_only=True, many=True, slug_field='name', source='alternativearticlename_set')
+    # Here you get the primary key from a foreign key relation
     alternativeProducts = serializers.PrimaryKeyRelatedField(
         source='alternative_articles', read_only=True, many=True)
-    #Here we get a nested dictianary with data from a reverse foreign key relation
+    # Here we get a nested dictianary with data from a reverse foreign key relation
     compartments = NoArticleCompartmentSerializer(
         source='compartment_set', read_only=True, many=True
     )
-    #The name supplier_article_nr is renamed to supplierArticleNr so that it is the same as the API
+    # The name supplier_article_nr is renamed to supplierArticleNr so that it is the same as the API
     supplierArticleNr = serializers.CharField(
         source='supplier_article_nr', read_only=True)
     supplierName = serializers.CharField(
         source='supplier.name', read_only=True)
-    
+
     class Meta:
         model = Article
-        fields = ('compartments', 'inputUnit', 'outputUnit', 'outputPerInputUnit', 'price', 'supplierName', 'supplierArticleNr', 'name', 'alternativeNames', 'lioNr', 'alternativeProducts', 
-        'Z41')
+        fields = ('compartments', 'inputUnit', 'outputUnit', 'outputPerInputUnit', 'price', 'supplierName', 'supplierArticleNr', 'name', 'alternativeNames', 'lioNr', 'alternativeProducts',
+                  'Z41')
 
 
 class ApiArticleSerializerNoCompartment(serializers.ModelSerializer):
@@ -172,21 +173,22 @@ class ApiArticleSerializerNoCompartment(serializers.ModelSerializer):
         source='output', read_only=True)
     outputPerInputUnit = serializers.IntegerField(
         source='output_per_input', read_only=True)
-    #The SlugRelatedField references a specific field in a reverse foreign key mapping without creating a nested dictionary
-    alternativeNames = serializers.SlugRelatedField(read_only=True, many=True, slug_field='name', source='alternativearticlename_set')
-    #Here you get the primary key from a foreign key relation
+    # The SlugRelatedField references a specific field in a reverse foreign key mapping without creating a nested dictionary
+    alternativeNames = serializers.SlugRelatedField(
+        read_only=True, many=True, slug_field='name', source='alternativearticlename_set')
+    # Here you get the primary key from a foreign key relation
     alternativeProducts = serializers.PrimaryKeyRelatedField(
         source='alternative_articles', read_only=True, many=True)
-    #The name supplier_article_nr is renamed to supplierArticleNr so that it is the same as the API
+    # The name supplier_article_nr is renamed to supplierArticleNr so that it is the same as the API
     supplierArticleNr = serializers.CharField(
         source='supplier_article_nr', read_only=True)
     supplierName = serializers.CharField(
         source='supplier.name', read_only=True)
-    
+
     class Meta:
         model = Article
-        fields = ('inputUnit', 'outputUnit', 'outputPerInputUnit', 'price', 'supplierName', 'supplierArticleNr', 'name', 'alternativeNames', 'lioNr', 'alternativeProducts', 
-        'Z41')
+        fields = ('inputUnit', 'outputUnit', 'outputPerInputUnit', 'price', 'supplierName', 'supplierArticleNr', 'name', 'alternativeNames', 'lioNr', 'alternativeProducts',
+                  'Z41')
 
 
 class OrderedArticleSerializer(serializers.ModelSerializer):
@@ -197,6 +199,7 @@ class OrderedArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderedArticle
         fields = ('articleInfo', 'orderedQuantity', 'unit')
+
 
 class OrderSerializer(serializers.ModelSerializer):
     articles = OrderedArticleSerializer(
@@ -242,14 +245,14 @@ class NearbyStoragesSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(
         source='storage.id', read_only=True)
     location = LocationSerializer(source='storage', read_only=True)
-    #Calls the later defined function get_self_reference below
+    # Calls the later defined function get_self_reference below
     compartment = serializers.SerializerMethodField('get_self_reference')
 
     class Meta:
         model = Compartment
         fields = ('id', 'location', 'compartment')
 
-    #A function to get a nested dictionary with data from the current object that is being serialized
+    # A function to get a nested dictionary with data from the current object that is being serialized
     def get_self_reference(self, object):
         return ApiCompartmentSerializer(object).data
 
@@ -264,8 +267,8 @@ class ArticleCompartmentProximitySerializer():
         self.storage = storage
         self.valid = True
         self.data = []
-        same_floor = Q(storage__floor__iexact="1")
-        same_building = Q(storage__building__iexact="1")
+        same_floor = Q(storage__floor__iexact=storage.floor)
+        same_building = Q(storage__building__iexact=storage.building)
 
         if (storage.floor is None):
             self.valid = False
@@ -294,9 +297,10 @@ class ArticleCompartmentProximitySerializer():
 
 
 class StorageSerializer(serializers.ModelSerializer):
-    orderedQuantity = serializers.CharField(source= 'quantity')
-    articleInfo = ApiArticleSerializer(source='article', read_only=True, many=False)
-    
+    orderedQuantity = serializers.CharField(source='quantity')
+    articleInfo = ApiArticleSerializer(
+        source='article', read_only=True, many=False)
+
     class Meta:
         model = Storage
         fields = ('articleInfo', 'orderedQuantity', 'unit')
