@@ -1054,7 +1054,7 @@ class MoveArticle(APIView):
                                 status=status.HTTP_400_BAD_REQUEST)
 
             if (from_compartment.amount - quantity*converter) < 0 or (to_compartment.amount + quantity*converter) > to_compartment.maximal_capacity:
-                return Response({'error': 'Not allowed qunatity, not enough in storage or not enough space in target'},
+                return Response({'error': 'Not allowed quantity, not enough in storage or not enough space in target'},
                                 status=status.HTTP_400_BAD_REQUEST)
             else:
                 time_of_transaction = date.today()
@@ -1080,7 +1080,7 @@ class MoveArticle(APIView):
                 data['toCompartmentQrCode'] = to_compartment_qr_code
                 data['lioNr'] = from_compartment.article.lio_id
                 data['unit'] = unit
-                data['qunatity'] = quantity
+                data['quantity'] = quantity
 
                 return JsonResponse(data, safe=False, status=200)
 
