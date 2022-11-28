@@ -40,7 +40,7 @@ class StorageSerializer(serializers.ModelSerializer):
 class UserInfoSerializer(serializers.ModelSerializer):
     userId = serializers.CharField(source='user_id')
     username = serializers.CharField(source='user')
-    role = serializers.CharField(source='group')
+    role = serializers.IntegerField(source='group_id')
     # For some reason this works.
     costCenters = cost_center = CostCenterSerializer(many=True)
 
