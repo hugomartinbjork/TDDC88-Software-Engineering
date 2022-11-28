@@ -83,7 +83,6 @@ class Article(APIView):
             return JsonResponse(serialized_article, status=200)
 
 
-
 class Group(APIView):
     '''Group.'''
     # Dependencies are injected, I hope that we will be able to mock
@@ -173,6 +172,7 @@ class NearbyStorages(APIView):
             if serializer.is_valid:
                 return JsonResponse(serializer.data, status=200, safe=False)
             return HttpResponseBadRequest
+
 
 class Compartments(APIView):
     '''Compartment view.'''
@@ -934,12 +934,18 @@ class ArticleToCompartmentByQRcode(APIView):
                     ("normalOrderQuantity"))
                 new_order_point = request.data.get("orderQuantityLevel")
 
-                # Updates attributes in compartment
-                self.storage_management_service.update_compartment(
-                    current_compartment, new_article, new_amount, new_standard_order_amount, new_order_point)
+                is_compartment_large_enough = self.storage_management_service.is_compartment_large_enough(current_compartment, new_amount)
 
-                return JsonResponse(ApiCompartmentSerializer
-                                    (current_compartment).data)
+                if is_compartment_large_enough:
+                    # Updates attributes in compartment
+                    self.storage_management_service.update_compartment(
+                        current_compartment, new_article, new_amount, new_standard_order_amount, new_order_point)
+
+                    return JsonResponse(ApiCompartmentSerializer
+                                        (current_compartment).data)
+                else:  # Exception
+                    return Response({'error': 'Quantity more than maximal capacity'},
+                                status=status.HTTP_400_BAD_REQUEST)
             else:  # Exception
                 return Response({'error': 'Could not find article'},
                                 status=status.HTTP_400_BAD_REQUEST)
@@ -1057,7 +1063,7 @@ class MoveArticle(APIView):
 
                 return JsonResponse(data, safe=False, status=200)
 
-    
+
 class GetArticles(APIView):
     '''Get articles according to lioNr, name or storageId.'''
 
@@ -1073,13 +1079,12 @@ class GetArticles(APIView):
     def get(self, request):
         '''Get articles according to lioNr, name or storageId.'''
         if request.method == 'GET':
-            #A user can see articles if they have permission
+            #Gets parameter(s) from query in URL
             query_param_lio_nr = request.GET.get('lioNr', None)
             query_param_name = request.GET.get('name', None)
             query_param_storage_id = request.GET.get('storageId', None)
 
-            # if not request.user.has_perm('backend.view_article'):
-            #     raise PermissionDenied
+            #Checks if query parameter is used and then get articles with that lio nr or name. Can also be a storage id, then gets all articles in that storage.  
             if query_param_lio_nr is not None:
                 articles_in_chosen_storage = self.article_management_service.get_articles_by_search_lio(query_param_lio_nr)
 
@@ -1087,34 +1092,22 @@ class GetArticles(APIView):
                 articles_in_chosen_storage = self.article_management_service.get_articles_by_search_name(query_param_name)
             else:
                 articles_in_chosen_storage = self.article_management_service.get_articles()
+
             if query_param_storage_id is not None:
-                #Get a list of all compartments in storage 
+                #Get a list of all compartments in chosen storage 
                 serialized_articles = []
                 current_storage = self.storage_management_service.get_storage_by_id(
                     query_param_storage_id)
                 if current_storage is None:
                     return Response({'Storage does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+                
+                #Serializes every article and then appends it to a list to print all articles serilized
                 for article in articles_in_chosen_storage:
                     compartments = ArticleCompartmentProximitySerializer(article, current_storage).data
                     serialized_article = ApiArticleSerializer(article).data
                     serialized_article["compartments"] = compartments
                     serialized_articles.append(serialized_article)
                 return JsonResponse(serialized_articles, safe=False, status=200)
-                ###End One Article###
             else:
                 serializer = ApiArticleSerializer(articles_in_chosen_storage, many=True)
                 return JsonResponse(serializer.data, safe=False, status=200)
-
-
-
-               #data = {}
-                #serialized_compartments = []
-                #erializer_all = []
-                #Serialize every article in the compartments in the storage
-                #for compartment in list_of_compartments:
-                #   serialized_compartments.append(
-                #        ArticleCompartmentProximitySerializer(getattr(compartment, "article"), current_storage).data)
-                
-                #data['compartments'] = serialized_compartments
-                #data.update(serializer.data)
-                #return JsonResponse(data, safe=False, status=200) 

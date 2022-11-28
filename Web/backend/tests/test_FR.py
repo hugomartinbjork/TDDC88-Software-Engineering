@@ -628,3 +628,64 @@ class API_CreateOrder(TestCase):
         )
 
 
+#test Connect Article to compartment by qrCode
+
+class ConnectArticleToCompartmentQrCode(TestCase):
+    def setUp(self):
+        self.article_service : ArticleManagementService = ArticleManagementService()
+        self.storage_management_service : StorageManagementService = StorageManagementService()
+
+        self.qr_code = "XY15"
+        self.qr_code2 = "XY16"
+
+        self.article_first = Article.objects.create(lio_id ="1", name="plasthadskar")
+        self.article_second = Article.objects.create(lio_id ="2",name = "gummihandskar")
+
+        self.storage_in_compartment = Storage.objects.create(id="1")
+
+        #populate a compartment with article 1
+        self.compartment = Compartment.objects.create(id= self.qr_code, storage = self.storage_in_compartment, article = self.article_first, amount = 24,
+        standard_order_amount = 5, order_point = 2)
+
+        #populate empty compartment
+        self.compartment = Compartment.objects.create(id= self.qr_code2, storage = self.storage_in_compartment, amount = 24,
+        standard_order_amount = 5, order_point = 2)
+
+    def test_connect_compartment_by_qrcode(self):
+        #get compartment by qr code same as in views so we replicate that
+        current_compartment = (
+            self.storage_management_service.get_compartment_by_qr(
+                self.qr_code))
+
+        #test we can change article and variables associated with compartment that need to change with the new update
+        self.assertEqual(current_compartment.article, self.article_first)
+        self.assertEqual(current_compartment.amount, 24)
+        self.assertEqual(current_compartment.standard_order_amount, 5)
+        self.assertEqual(current_compartment.order_point, 2)
+
+        self.storage_management_service.update_compartment(current_compartment=current_compartment, new_article = self.article_second, 
+        new_amount = 10, new_std_order_amount = 8, new_order_point= 0)
+
+        self.assertEqual(current_compartment.article, self.article_second)
+        self.assertNotEqual(current_compartment.article, self.article_first)
+        self.assertEqual(current_compartment.amount, 10)
+        self.assertEqual(current_compartment.standard_order_amount, 8)
+        self.assertEqual(current_compartment.order_point, 0)
+
+        #test we can update a compartment that is empty
+        current_compartment2 = (
+            self.storage_management_service.get_compartment_by_qr(
+                self.qr_code2))
+
+        self.assertEqual(current_compartment2.article, None)
+        self.assertEqual(current_compartment2.amount, 24)
+        self.assertEqual(current_compartment2.standard_order_amount, 5)
+        self.assertEqual(current_compartment2.order_point, 2)
+
+        self.storage_management_service.update_compartment(current_compartment=current_compartment2, new_article = self.article_second, 
+        new_amount = 10, new_std_order_amount = 8, new_order_point= 0)
+
+        self.assertEqual(current_compartment2.article, self.article_second)
+        self.assertEqual(current_compartment2.amount, 10)
+        self.assertEqual(current_compartment2.standard_order_amount, 8)
+        self.assertEqual(current_compartment2.order_point, 0)

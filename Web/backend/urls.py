@@ -24,14 +24,11 @@ urlPatterns = [
 
     # Articles
     path('articles/', views.GetArticles.as_view()),
-    #     path('articles/qr/<str:qr_code>') part of API, not yet implemented
-    #     path('articles/name/<str:name>') part of API, not yet implemented
-    #     path('articles/name/<str:name>') part of API, not yet implemented
     path('articles/lio/<str:article_id>', views.Article.as_view()),
     path('articles/qr/<str:qr_code>', views.Article.as_view()),
     path('articles/name/<str:name>', views.Article.as_view()),
-    # article URLs below not part of API
 
+    # article URLs below not part of API
     path('alternativearticles/<str:article_id>',
          views.GetArticleAlternatives.as_view()),
     path('alternativearticles/<str:article_id>/<str:storage_id>',
@@ -72,7 +69,6 @@ urlPatterns = [
 
     # Economy (no URLS implemented yet)
     path('economy/<storage_id>', views.getEconomy.as_view()),
-
 
     # grup is not part if API? Delete?
     path('group/<str:groupId>', views.Group.as_view()),
