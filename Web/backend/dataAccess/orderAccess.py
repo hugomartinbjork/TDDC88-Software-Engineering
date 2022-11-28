@@ -14,7 +14,7 @@ class OrderAccess():
 
     def get_orders(self) -> Order:
         try:
-            return Order.objects.all()
+            return Order.objects.get()
         except Exception:
             return None
 
