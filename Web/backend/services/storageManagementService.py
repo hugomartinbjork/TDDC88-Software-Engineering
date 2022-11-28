@@ -64,7 +64,8 @@ class StorageManagementService():
             storage_id=id)
         value = 0
         for compartment in compartments:
-            value += compartment.article.price * compartment.amount
+            if compartment.article is not None:
+                value += compartment.article.price * compartment.amount
         return value
 
     def get_all_transactions(self, fromDate=None, toDate=None, limit=None) -> dict:
@@ -136,12 +137,13 @@ class StorageManagementService():
         average_values = 0
         n_compartments = 0
         for compartment in compartments:
-            article_value = compartment.article.price
-            compartment_value = (compartment.order_point + compartment.standard_order_amount/2)*article_value
-            if compartment_value == 0:
-                compartment_value = (compartment.maximal_capacity/2)*article_value
-            average_values += compartment_value
-            n_compartments += 1
+            if compartment.article is not None:
+                article_value = compartment.article.price
+                compartment_value = (compartment.order_point + compartment.standard_order_amount/2)*article_value
+                if compartment_value == 0:
+                    compartment_value = (compartment.maximal_capacity/2)*article_value
+                average_values += compartment_value
+                n_compartments += 1
         if average_values == 0:
             return None
         else:
