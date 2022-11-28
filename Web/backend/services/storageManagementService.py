@@ -385,3 +385,11 @@ class StorageManagementService():
             current_compartment, new_std_order_amount)
         self.storage_access.set_order_point(
             current_compartment, new_order_point)
+
+    def is_compartment_large_enough(self, current_compartment: Compartment, new_amount: int) -> bool:
+        '''Return boolean if new amount can fit compartment or not.'''
+        max_capacity = self.storage_access.get_max_capacity(current_compartment)
+
+        if new_amount <= max_capacity:
+            return True
+        return False
