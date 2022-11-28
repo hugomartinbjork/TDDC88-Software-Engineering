@@ -943,12 +943,18 @@ class ArticleToCompartmentByQRcode(APIView):
                     ("normalOrderQuantity"))
                 new_order_point = request.data.get("orderQuantityLevel")
 
-                # Updates attributes in compartment
-                self.storage_management_service.update_compartment(
-                    current_compartment, new_article, new_amount, new_standard_order_amount, new_order_point)
+                is_compartment_large_enough = self.storage_management_service.is_compartment_large_enough(current_compartment, new_amount)
 
-                return JsonResponse(ApiCompartmentSerializer
-                                    (current_compartment).data)
+                if is_compartment_large_enough:
+                    # Updates attributes in compartment
+                    self.storage_management_service.update_compartment(
+                        current_compartment, new_article, new_amount, new_standard_order_amount, new_order_point)
+
+                    return JsonResponse(ApiCompartmentSerializer
+                                        (current_compartment).data)
+                else:  # Exception
+                    return Response({'error': 'Quantity more than maximal capacity'},
+                                status=status.HTTP_400_BAD_REQUEST)
             else:  # Exception
                 return Response({'error': 'Could not find article'},
                                 status=status.HTTP_400_BAD_REQUEST)

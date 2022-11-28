@@ -1,5 +1,4 @@
 # from requests import request
-# from Web.backend.views.views import Compartment
 from math import floor
 from backend.dataAccess.orderAccess import OrderAccess
 from backend.dataAccess.storageAccess import StorageAccess
@@ -12,7 +11,6 @@ from backend.coremodels.transaction import Transaction
 from backend.coremodels.inputOutput import InputOutput
 from django.contrib.auth.models import User
 from django.http import Http404, JsonResponse, HttpResponseBadRequest
-# from datetime import datetime, timezone
 from django.utils.dateparse import parse_date
 from backend.__init__ import serviceInjector as si
 from ..__init__ import dataAccessInjector as di
@@ -33,7 +31,6 @@ class StorageManagementService():
 
     def get_compartment_by_qr(self, id: str) -> Compartment:
         '''Returns storage space using id.'''
-        print(id)
         return self.storage_access.get_compartment_by_qr(id)
 
     def get_compartment_by_article(self, article: Article) -> Compartment:
@@ -388,3 +385,11 @@ class StorageManagementService():
             current_compartment, new_std_order_amount)
         self.storage_access.set_order_point(
             current_compartment, new_order_point)
+
+    def is_compartment_large_enough(self, current_compartment: Compartment, new_amount: int) -> bool:
+        '''Return boolean if new amount can fit compartment or not.'''
+        max_capacity = self.storage_access.get_max_capacity(current_compartment)
+
+        if new_amount <= max_capacity:
+            return True
+        return False

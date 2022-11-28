@@ -43,7 +43,7 @@ class StorageAccess():
     # TODO: This does not seem to do what it is supposed to do. Please review
     def get_compartment_stock(self,
                               compartment_id: str, article_id: str) -> int:
-        '''Returns stock of campartmend using article id.'''
+        '''Returns stock of compartment using article id.'''
         try:
             stock = int(Compartment.objects.get(
                 id=compartment_id, article=article_id).amount)
@@ -171,6 +171,13 @@ class StorageAccess():
         try:
             compartment = Compartment.objects.get(id=qr_code)
             return compartment
+        except Exception:
+            return None
+
+    def get_max_capacity(self, current_compartment: Compartment) -> int:
+        '''Get maximal_capacity.'''
+        try:
+            return current_compartment.maximal_capacity
         except Exception:
             return None
 
