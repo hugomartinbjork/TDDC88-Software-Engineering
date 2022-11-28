@@ -149,6 +149,7 @@ class OrderService():
             return None
 
     def create_ordered_article(lio_id, quantity, unit, order):
+        CentralStorageAccess.update_central_storage_quantity(article_id=lio_id, quantity=quantity)
         '''Creates an ordered_article model'''
         return OrderAccess.create_ordered_article(lio_id, quantity, unit, order)
 

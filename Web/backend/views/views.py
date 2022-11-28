@@ -313,9 +313,10 @@ class Order(APIView):
                 return Response({'Order could not be placed'}, status=status.HTTP_400_BAD_REQUEST)
 
             for ordered_article in ordered_articles:
-                OrderService.create_ordered_article(
+                ord_art = OrderService.create_ordered_article(
                     ordered_article['lioNr'], ordered_article['quantity'], ordered_article['unit'], order)
-
+                if ord_art is None:
+                    return Response({'Article does not exist'},status=status.HTTP_404_NOT_FOUND )
             serialized_order = OrderSerializer(order)
             if serialized_order.is_valid:
                 return Response(serialized_order.data, status=200)

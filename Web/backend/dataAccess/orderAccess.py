@@ -3,6 +3,7 @@ import string
 
 from backend.coremodels.article import Article
 from backend.coremodels.storage import Storage
+from ..dataAccess.centralStorageAccess import CentralStorageAccess
 from backend.coremodels.ordered_article import OrderedArticle
 from ..coremodels.order import Order
 from ..__init__ import dataAccessInjector as di
@@ -90,8 +91,8 @@ class OrderAccess():
 
     def create_ordered_article(lio_id, quantity, unit, order):
         '''Creates an ordered_article model'''
-        article = Article.objects.get(lio_id=lio_id)
         try:
+            article = Article.objects.get(lio_id=lio_id)
             ordered_article = OrderedArticle(
                 quantity=quantity, article=article, order=order, unit=unit)
             ordered_article.save()
