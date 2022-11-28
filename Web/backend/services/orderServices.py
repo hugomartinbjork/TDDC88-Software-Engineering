@@ -29,8 +29,8 @@ class OrderService():
     def get_orders(self) -> Order:
         return self.order_access.get_orders()
 
-    def delete_order(self, id):
-        return self.order_access.delete_order(id=id)
+    def delete_order(self, id, order_state):
+        return self.order_access.delete_order(id=id, order_state=order_state)
 
 # Returns None if the order does not exist. Otherwise returns the order.
     def has_order(self, storage_id, article_id) -> Order:

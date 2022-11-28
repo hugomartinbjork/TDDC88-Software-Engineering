@@ -371,11 +371,11 @@ class OrderId(APIView):
 
     def delete(self, request, id):
         '''Delete order func'''
-        orders = self.order_service.get_orders()
-        if orders is None:
+        order = self.order_service.get_order_by_id(id)
+        if order is None:
             return Response({'Order does not exist. Cannot be deleted'}, status=status.HTTP_404_NOT_FOUND)
 
-        deleted_order = self.order_service.delete_order(id)
+        deleted_order = self.order_service.delete_order(id, order.order_state)
         if deleted_order is None:
             return Response({'Order deletion failed'}, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_204_NO_CONTENT)

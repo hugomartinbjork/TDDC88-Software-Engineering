@@ -15,13 +15,17 @@ class OrderAccess():
 
     def get_orders(self) -> Order:
         try:
-            return Order.objects.get()
+            return Order.objects.all()
         except Exception:
             return None
 
-    def delete_order(self, id):
-        '''Does not work'''
+    def delete_order(self, id, order_state):
+        '''Does work'''
         try:
+            if order_state != 'delivered':
+                ordered_articles = OrderedArticle.objects.filter(order_id=id)
+                for ordered_article in ordered_articles:
+                    CentralStorageAccess.update_central_storage_quantity(article_id=ordered_article.article.lio_id, quantity= -ordered_article.quantity)
             return Order.objects.filter(id=id).delete()
         except Exception:
             return None
