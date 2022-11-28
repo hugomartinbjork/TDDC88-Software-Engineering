@@ -24,3 +24,11 @@ class UserInfo(models.Model):
         self.barcode_id = make_password(self.barcode_id, SALT)
         self.nfc_id = make_password(self.nfc_id, SALT)
         super().save(**kwargs)
+
+    def save_barcode(self, **kwargs):
+        self.barcode_id = make_password(self.barcode_id, SALT)
+        super().save(**kwargs)
+
+    def save_nfc(self, **kwargs):
+        self.nfc_id = make_password(self.nfc_id, SALT)
+        super().save(**kwargs)

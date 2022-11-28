@@ -2,6 +2,7 @@ from dataclasses import field
 from unittest import mock
 from rest_framework import serializers
 from django.db.models import Q, Case, When, Value, IntegerField
+from django.core.serializers import serialize
 
 from django.contrib.auth.models import User
 from backend.coremodels.alternative_article_name import AlternativeArticleName
@@ -24,30 +25,39 @@ class ArticleSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class CostCenterSerializer(serializers.ModelSerializer):
-    '''returns a storage id and not a costcenter'''
+class StorageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Storage
         fields = ('id',)
 
 
-class StorageSerializer(serializers.ModelSerializer):
-    ''' compartments = storageManagemetnServisce(storage.id)'''
-    class Meta:
-        model = Storage
-        fields = ('id', 'building', 'floor')
+# class CostCenterField(serializers.RelatedField):
+#     '''returns a storage id and not a costcenter'''
+#     # id = serializers.SlugRelatedField(
+#     #     read_only=True, many=True, slug_field='id', source='storage_set')
+#     #id = serializers.SerializerMethodField('get_self_reference')
+
 
 class UserInfoSerializer(serializers.ModelSerializer):
+    costCenters = serializers.SerializerMethodField('get_storages')
+    # costCenters = serializers.SlugRelatedField(
+    #     read_only=True, many=True, slug_field='id', source='cost_center')
     userId = serializers.CharField(source='user_id')
     username = serializers.CharField(source='user')
     role = serializers.IntegerField(source='group_id')
-    # For some reason this works.
-    costCenters = cost_center = CostCenterSerializer(many=True)
 
     class Meta:
         model = UserInfo
-        fields = ('userId', 'username', 'cost_center', 'costCenters', 'role')
+        fields = ('userId', 'username', 'costCenters', 'role')
 
+    def get_storages(self, obj):
+        centers = obj.cost_center.all()
+        storages = Storage.objects.filter(
+            cost_center__in=centers).values('id')
+        final = []
+        for i in range(len(storages)):
+            final.append((storages[i]['id']))
+        return final
 
 class CompartmentSerializer(serializers.ModelSerializer):
     article = ArticleSerializer(many=False, read_only=True)
@@ -258,7 +268,7 @@ class NearbyStoragesSerializer(serializers.ModelSerializer):
 
 
 class ArticleCompartmentProximitySerializer():
-    '''Self made serializer, contains properties 
+    '''Self made serializer, contains properties
         article: Article, storage: Storage, is_valid(): Bool
         and data: [ApiCompartmentModel]'''
 

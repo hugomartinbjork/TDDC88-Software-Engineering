@@ -84,13 +84,12 @@ class UserId(APIView):
         if user is None:
             return Response({'User does not exist'}, status=status.HTTP_400_BAD_REQUEST)
 
-        barcode_id = request.data.get('barcodeId', user.barcode_id)
-        nfc_id = request.data.get('nfcId', user.nfc_id)
-        username = request.data.get('username', user.user.username)
-        password = request.data.get('password', user.user.password)
-        cost_center = request.data.get('costCenters', user.cost_center)
-        cost_center = request.data.get('costCenters', user.cost_center)
-        group = request.data.get('role', user.group)
+        barcode_id = request.data.get('barcodeId', None)
+        nfc_id = request.data.get('nfcId', None)
+        username = request.data.get('username', None)
+        password = request.data.get('password', None)
+        cost_center = request.data.get('costCenters', None)
+        group = request.data.get('role', None)
 
         updated_user = self.userService.update_user(user_id=user_id, barcode_id=barcode_id, nfc_id=nfc_id, username=username,
                                                     password=password, cost_center=cost_center, group=group)
