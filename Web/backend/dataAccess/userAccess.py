@@ -78,32 +78,27 @@ class UserAccess():
         try:
             updated_user = self.get_user_info(user_id=user_id)
             django_user_model = User.objects.get(username=updated_user.user)
-            if username is not None:
-                django_user_model.username = username
+
+            django_user_model.username = username
             if password is not None:
                 django_user_model.password = make_password(password)
-            django_user_model.save()
+
             updated_user = self.get_user_info(user_id=user_id)
-            if barcode_id is not None:
-                updated_user.barcode_id = barcode_id
-            if nfc_id is not None:
-                updated_user.nfc_id = nfc_id
             if cost_center is not None:
-                try:
-                    new_cost_center = []
-                    for cost_c in cost_center:
-                        new_cost_center.append(
-                            CostCenter.objects.filter(id=cost_c).first())
-                    updated_user.cost_center.set(new_cost_center)
-                except:
-                    Exception
+                updated_user.cost_center.set(cost_center)
             if group is not None:
                 try:
                     new_group = Group.objects.filter(id=group).first()
                     updated_user.group = new_group
-                except:
-                    Exception
-            updated_user.save()
+                except Exception:
+                    return None
+            if barcode_id is not None:
+                updated_user.barcode_id = barcode_id
+                updated_user.save_barcode()
+            if nfc_id is not None:
+                updated_user.nfc_id = nfc_id
+                updated_user.save_nfc()
+            django_user_model.save()
             return updated_user
         except Exception:
             return None

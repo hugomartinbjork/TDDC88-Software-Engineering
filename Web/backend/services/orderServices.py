@@ -29,8 +29,8 @@ class OrderService():
     def get_orders(self) -> Order:
         return self.order_access.get_orders()
 
-    def delete_order(self, id):
-        return self.order_access.delete_order(id=id)
+    def delete_order(self, id, order_state):
+        return self.order_access.delete_order(id=id, order_state=order_state)
 
 # Returns None if the order does not exist. Otherwise returns the order.
     def has_order(self, storage_id, article_id) -> Order:
@@ -149,6 +149,7 @@ class OrderService():
             return None
 
     def create_ordered_article(lio_id, quantity, unit, order):
+        CentralStorageAccess.update_central_storage_quantity(article_id=lio_id, quantity=quantity)
         '''Creates an ordered_article model'''
         return OrderAccess.create_ordered_article(lio_id, quantity, unit, order)
 

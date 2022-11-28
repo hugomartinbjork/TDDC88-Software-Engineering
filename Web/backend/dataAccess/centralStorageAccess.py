@@ -14,3 +14,14 @@ class CentralStorageAccess():
             return central_storage_space.amount
         except Exception:
             return None
+
+    def update_central_storage_quantity(article_id, quantity):
+        '''Update central storage amount'''
+        try:
+            central_storage_space = CentralStorageSpace.objects.filter(
+                id=article_id).first()
+            central_storage_space.amount -= quantity
+            central_storage_space.save()
+            return central_storage_space.amount
+        except Exception:
+            return None
