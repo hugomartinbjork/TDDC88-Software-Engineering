@@ -18,6 +18,7 @@ class Compartment(models.Model):
 
     class Meta:
         permissions = ()
+        unique_together = ['storage', 'article']
 
     def __str__(self):
         return str(self.storage) + " " + str(self.article)
