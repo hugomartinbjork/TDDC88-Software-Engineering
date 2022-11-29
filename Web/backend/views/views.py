@@ -1,7 +1,4 @@
-from ..serializers import AlternativeNameSerializer, StorageSerializer, ApiCompartmentSerializer, UserInfoSerializer, ApiArticleSerializer
-from ..serializers import ArticleSerializer, OrderSerializer, OrderedArticleSerializer, ArticleCompartmentProximitySerializer
-from ..serializers import CompartmentSerializer, TransactionSerializer, CompartmentSerializer
-from ..serializers import GroupSerializer, NearbyStoragesSerializer
+from ..serializers import *
 
 from backend.services.articleManagementService import ArticleManagementService
 from backend.services.userService import UserService
@@ -10,7 +7,6 @@ from backend.services.storageManagementService import StorageManagementService
 from backend.services.orderServices import OrderService
 
 from backend.__init__ import serviceInjector as si
-from django.views import View
 from django.http import Http404, JsonResponse, HttpResponseBadRequest
 from django.core.exceptions import PermissionDenied
 
@@ -21,7 +17,6 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import AllowAny
 
 from knox.models import AuthToken
-from knox.auth import TokenAuthentication
 from rdxSolutionsBackendProject.settings import SALT
 
 from django.contrib.auth import authenticate, login
@@ -106,7 +101,7 @@ class Group(APIView):
     # TODO: I assume that there is supposed to be some type of return here.
 
 
-class Storage(View):
+class Storage(APIView):
     '''Storage view.'''
     # Dependencies are injected, I hope that we will be able to mock
     # (i.e. make stubs of) these for testing
@@ -455,7 +450,7 @@ class LoginWithBarcodeOrNfc(APIView):
         return JsonResponse(data, status=status.HTTP_200_OK)
 
 
-class SeeAllStorages(View):
+class SeeAllStorages(APIView):
     '''See all storages view.'''
 
     @si.inject
@@ -496,7 +491,7 @@ class SeeAllStorages(View):
             # return JsonResponse(list(all_storages), safe=False, status=200)
 
 
-class AddInputUnit(View):
+class AddInputUnit(APIView):
     '''Add input unit view.'''
 
     @si.inject
@@ -531,7 +526,7 @@ class AddInputUnit(View):
 # Creates a transaction
 
 
-class GetUserTransactions(View):
+class GetUserTransactions(APIView):
     '''Get user transactions view.'''
 
     @si.inject
@@ -561,7 +556,7 @@ class GetUserTransactions(View):
                             status=status.HTTP_404_NOT_FOUND)
 
 
-class ReturnUnit(View):
+class ReturnUnit(APIView):
     '''Return unit view.'''
 
     @si.inject
@@ -752,7 +747,7 @@ class TransactionsById(APIView):
             return JsonResponse(TransactionSerializer(transaction).data, safe=False, status=200)
 
 
-class GetStorageValue(View):
+class GetStorageValue(APIView):
     '''Get storage value view.'''
    # authentication_classes = (TokenAuthentication,)
 
@@ -811,7 +806,7 @@ class GetStorageCost(APIView):
 # the alternative articles in that storage
 
 
-class GetArticleAlternatives(View):
+class GetArticleAlternatives(APIView):
     '''Get alternative article view. Gets alternative articles for a
        given article. If only article id
        is entered, the method returns a list of alternative articles and all
@@ -861,7 +856,7 @@ class GetArticleAlternatives(View):
 
 
 # FR 8.1 start #
-class SearchForArticleInStorages(View):
+class SearchForArticleInStorages(APIView):
     '''Search for article in storages view.'''
 
     @si.inject
