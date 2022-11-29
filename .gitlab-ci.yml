@@ -2,7 +2,7 @@
 ---
 stages:
   - lint
-  - test
+ # - test
   - build
   - deploy
 
@@ -93,7 +93,7 @@ deploy-rdx-backend:
     - deploy-k8s-regcred
     - image-rdx-backend
     - yamllint
-    - test-backend
+    # - test-backend
   script:
     - kubectl apply -f k8/backend.yaml
     - kubectl rollout restart deployment rdx-backend-app-deployment
@@ -111,7 +111,7 @@ deploy-postgres:
     - deploy-k8s-regcred
     - image-rdx-backend
     - yamllint
-    - test-backend
+ #   - test-backend
   script:
    - kubectl get all
    - kubectl apply -f k8/postgres.yaml
