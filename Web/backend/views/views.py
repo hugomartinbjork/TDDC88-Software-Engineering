@@ -1,7 +1,4 @@
-from ..serializers import AlternativeNameSerializer, StorageSerializer, ApiCompartmentSerializer, UserInfoSerializer, ApiArticleSerializer
-from ..serializers import ArticleSerializer, OrderSerializer, OrderedArticleSerializer, ArticleCompartmentProximitySerializer
-from ..serializers import CompartmentSerializer, TransactionSerializer, CompartmentSerializer
-from ..serializers import GroupSerializer, NearbyStoragesSerializer
+from ..serializers import *
 
 from backend.services.articleManagementService import ArticleManagementService
 from backend.services.userService import UserService
@@ -10,7 +7,6 @@ from backend.services.storageManagementService import StorageManagementService
 from backend.services.orderServices import OrderService
 
 from backend.__init__ import serviceInjector as si
-from django.views import View
 from django.http import Http404, JsonResponse, HttpResponseBadRequest
 from django.core.exceptions import PermissionDenied
 
@@ -21,7 +17,6 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import AllowAny
 
 from knox.models import AuthToken
-from knox.auth import TokenAuthentication
 from rdxSolutionsBackendProject.settings import SALT
 
 from django.contrib.auth import authenticate, login
@@ -106,7 +101,7 @@ class Group(APIView):
     # TODO: I assume that there is supposed to be some type of return here.
 
 
-class Storage(View):
+class Storage(APIView):
     '''Storage view.'''
     # Dependencies are injected, I hope that we will be able to mock
     # (i.e. make stubs of) these for testing
@@ -455,7 +450,7 @@ class LoginWithBarcodeOrNfc(APIView):
         return JsonResponse(data, status=status.HTTP_200_OK)
 
 
-class SeeAllStorages(View):
+class SeeAllStorages(APIView):
     '''See all storages view.'''
 
     @si.inject
@@ -496,7 +491,7 @@ class SeeAllStorages(View):
             # return JsonResponse(list(all_storages), safe=False, status=200)
 
 
-class AddInputUnit(View):
+class AddInputUnit(APIView):
     '''Add input unit view.'''
 
     @si.inject
@@ -531,7 +526,7 @@ class AddInputUnit(View):
 # Creates a transaction
 
 
-class GetUserTransactions(View):
+class GetUserTransactions(APIView):
     '''Get user transactions view.'''
 
     @si.inject
@@ -561,7 +556,7 @@ class GetUserTransactions(View):
                             status=status.HTTP_404_NOT_FOUND)
 
 
-class ReturnUnit(View):
+class ReturnUnit(APIView):
     '''Return unit view.'''
 
     @si.inject
@@ -619,7 +614,7 @@ class Transactions(APIView):
             return JsonResponse(serializer.data, safe=False, status=200)
 
     def post(self, request):
-        '''Description needed.'''
+        '''Create new Transaction.'''
         if not request.user.has_perm('backend.add_transaction_perm'):
             raise PermissionDenied
         compartment = self.storage_management_service.get_compartment_by_qr(
@@ -651,39 +646,67 @@ class Transactions(APIView):
             if operation == "replenish":
                 if not request.user.has_perm('backend.replenish'):
                     raise PermissionDenied
-                transaction = self.storage_management_service.add_to_storage(
-                    id=compartment.id, storage_id=storage, amount=amount,
-                    username=user.username, add_output_unit=add_output_unit,
-                    time_of_transaction=time_of_transaction)
-                return JsonResponse(TransactionSerializer(transaction).data,
-                                    status=200)
+                if (compartment.maximal_capacity - compartment.amount - amount) < 0 and add_output_unit:
+                    return Response({'error': 'Not enough space in the compartment.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+                elif (compartment.maximal_capacity - amount*compartment.article.output_per_input - compartment.amount) < 0 and add_output_unit == False:
+                    return Response({'error': 'Not enough space in the compartment.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    transaction = self.storage_management_service.add_to_storage(
+                        id=compartment.id, storage_id=storage, amount=amount,
+                        username=user.username, add_output_unit=add_output_unit,
+                        time_of_transaction=time_of_transaction)
+                    return JsonResponse(TransactionSerializer(transaction).data,
+                                        status=200)
             elif operation == "return":
-                transaction = (
-                    self.storage_management_service.add_to_return_storage(
-                        id=compartment.id, storage_id=storage, amount=amount,
-                        username=user.username,
-                        add_output_unit=add_output_unit,
-                        time_of_transaction=time_of_transaction))
-                return JsonResponse(TransactionSerializer(transaction).data,
-                                    status=200)
+                if (compartment.maximal_capacity - compartment.amount - amount) < 0 and add_output_unit:
+                    return Response({'error': 'Not enough space in the compartment.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+                elif (compartment.maximal_capacity - amount*compartment.article.output_per_input - compartment.amount) < 0 and add_output_unit == False:
+                    return Response({'error': 'Not enough space in the compartment.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    transaction = (
+                        self.storage_management_service.add_to_return_storage(
+                            id=compartment.id, storage_id=storage, amount=amount,
+                            username=user.username,
+                            add_output_unit=add_output_unit,
+                            time_of_transaction=time_of_transaction))
+                    return JsonResponse(TransactionSerializer(transaction).data,
+                                        status=200)
             elif operation == "takeout":
-                transaction = (
-                    self.storage_management_service.take_from_Compartment(
-                        id=compartment.id, storage_id=storage, amount=amount,
-                        username=user.username,
-                        add_output_unit=add_output_unit,
-                        time_of_transaction=time_of_transaction))
-                return JsonResponse(TransactionSerializer(transaction).data,
-                                    status=200)
+                if (compartment.amount - amount) < 0 and add_output_unit:
+                    return Response({'error': 'Not enough articles in the compartment.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+                elif (compartment.amount - amount*compartment.article.output_per_input) < 0 and add_output_unit == False:
+                    return Response({'error': 'Not enough articles in the compartment.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    transaction = (
+                        self.storage_management_service.take_from_Compartment(
+                            id=compartment.id, storage_id=storage, amount=amount,
+                            username=user.username,
+                            add_output_unit=add_output_unit,
+                            time_of_transaction=time_of_transaction))
+                    return JsonResponse(TransactionSerializer(transaction).data,
+                                        status=200)
             elif operation == "adjust":
-                transaction = (
-                    self.storage_management_service.set_compartment_amount(
-                        compartment_id=compartment.id, storage_id=storage, amount=amount,
-                        username=user.username,
-                        add_output_unit=add_output_unit,
-                        time_of_transaction=time_of_transaction))
-                return JsonResponse(TransactionSerializer(transaction).data,
-                                    status=200)
+                if (compartment.maximal_capacity - amount) < 0 and add_output_unit:
+                    return Response({'error': 'Not enough space in the compartment.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+                elif (compartment.maximal_capacity - amount*compartment.article.output_per_input) < 0 and add_output_unit == False:
+                    return Response({'error': 'Not enough space in the compartment.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    transaction = (
+                        self.storage_management_service.set_compartment_amount(
+                            compartment_id=compartment.id, storage_id=storage, amount=amount,
+                            username=user.username,
+                            add_output_unit=add_output_unit,
+                            time_of_transaction=time_of_transaction))
+                    return JsonResponse(TransactionSerializer(transaction).data,
+                                        status=200)
 
 
 class TransactionsById(APIView):
@@ -724,7 +747,7 @@ class TransactionsById(APIView):
             return JsonResponse(TransactionSerializer(transaction).data, safe=False, status=200)
 
 
-class GetStorageValue(View):
+class GetStorageValue(APIView):
     '''Get storage value view.'''
    # authentication_classes = (TokenAuthentication,)
 
@@ -783,7 +806,7 @@ class GetStorageCost(APIView):
 # the alternative articles in that storage
 
 
-class GetArticleAlternatives(View):
+class GetArticleAlternatives(APIView):
     '''Get alternative article view. Gets alternative articles for a
        given article. If only article id
        is entered, the method returns a list of alternative articles and all
@@ -833,7 +856,7 @@ class GetArticleAlternatives(View):
 
 
 # FR 8.1 start #
-class SearchForArticleInStorages(View):
+class SearchForArticleInStorages(APIView):
     '''Search for article in storages view.'''
 
     @si.inject
