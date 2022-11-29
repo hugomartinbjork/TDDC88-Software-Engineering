@@ -3,12 +3,12 @@ from sqlalchemy import create_engine
 import psycopg2
 
 
-# '''Engine with deployed postgreSQL-database'''
-# engine = create_engine(
-# "postgresql://admin:rdxsolutions@postgres-service:5432/postgresdb")
+'''Engine with deployed postgreSQL-database'''
+engine = create_engine(
+"postgresql://admin:rdxsolutions@postgres-service:5432/postgresdb")
 
-'''Engine with local SQLite-database'''
-engine = create_engine("sqlite:///mydatabase1")
+# '''Engine with local SQLite-database'''
+# engine = create_engine("sqlite:///mydatabase1")
 
 
 with pd.ExcelFile('db_data/groupinfo.xlsx') as xls:
