@@ -20,15 +20,15 @@ yamllint:
   script:
     - yamllint ./k8
 
-test-backend:
-   stage: test
-   needs: 
-     - yamllint
-   image: python:3.8.10
-   script:
-     - pip install -r Web/requirements.txt
-     - cd Web
-     - python manage.py test backend.tests
+# test-backend:
+#    stage: test
+#    needs: 
+#      - yamllint
+#    image: python:3.8.10
+#    script:
+#      - pip install -r Web/requirements.txt
+#      - cd Web
+#      - python manage.py test backend.tests
 
 
 image-rdx-backend:
@@ -38,8 +38,9 @@ image-rdx-backend:
   only:
      - main
      - dev
+     - populatedb
   needs:
-     - test-backend
+    #  - test-backend
      - yamllint
 
 
@@ -62,6 +63,7 @@ deploy-test-k8s-connection:
   only:
     - main
     - dev
+    - populatedb
   script:
     - kubectl get all
 deploy-k8s-regcred:
@@ -71,6 +73,7 @@ deploy-k8s-regcred:
   only:
     - main
     - dev
+    - populatedb
   script:
     - kubectl get secrets | grep liu-gitlab-regcred && exit 0
     - kubectl create secret docker-registry liu-gitlab-regcred --docker-server=https://gitlab.liu.se:5000 --docker-username=k8s --docker-password=${REGISTRY_PASSWORD}
@@ -83,6 +86,7 @@ deploy-rdx-backend:
   only:
     - main
     - dev
+    - populatedb
 
   needs:
     - deploy-test-k8s-connection
@@ -101,6 +105,7 @@ deploy-postgres:
   only:
   - main
   - dev
+  - populatedb
   needs:
     - deploy-test-k8s-connection
     - deploy-k8s-regcred
