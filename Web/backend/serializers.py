@@ -1,22 +1,15 @@
-from dataclasses import field
-from unittest import mock
 from rest_framework import serializers
 from django.db.models import Q, Case, When, Value, IntegerField
-from django.core.serializers import serialize
 
-from django.contrib.auth.models import User
 from backend.coremodels.alternative_article_name import AlternativeArticleName
-from backend.coremodels.cost_center import CostCenter
 from backend.coremodels.article import Article
 from backend.coremodels.article import GroupInfo
 from backend.coremodels.storage import Storage
-from backend.coremodels.cost_center import CostCenter
 from backend.coremodels.user_info import UserInfo
 from backend.coremodels.compartment import Compartment
 from backend.coremodels.order import Order
 from backend.coremodels.transaction import Transaction
 from backend.coremodels.ordered_article import OrderedArticle
-from backend.coremodels.inputOutput import InputOutput
 
 
 class ArticleSerializer(serializers.ModelSerializer):
@@ -25,23 +18,8 @@ class ArticleSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class StorageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Storage
-        fields = ('id',)
-
-
-# class CostCenterField(serializers.RelatedField):
-#     '''returns a storage id and not a costcenter'''
-#     # id = serializers.SlugRelatedField(
-#     #     read_only=True, many=True, slug_field='id', source='storage_set')
-#     #id = serializers.SerializerMethodField('get_self_reference')
-
-
 class UserInfoSerializer(serializers.ModelSerializer):
     costCenters = serializers.SerializerMethodField('get_storages')
-    # costCenters = serializers.SlugRelatedField(
-    #     read_only=True, many=True, slug_field='id', source='cost_center')
     userId = serializers.CharField(source='user_id')
     username = serializers.CharField(source='user')
     role = serializers.IntegerField(source='group_id')
@@ -50,6 +28,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
         model = UserInfo
         fields = ('userId', 'username', 'costCenters', 'role')
 
+    # returns storages instead of costcenters
     def get_storages(self, obj):
         centers = obj.cost_center.all()
         storages = Storage.objects.filter(
@@ -58,6 +37,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
         for i in range(len(storages)):
             final.append((storages[i]['id']))
         return final
+
 
 class CompartmentSerializer(serializers.ModelSerializer):
     article = ArticleSerializer(many=False, read_only=True)
@@ -214,7 +194,8 @@ class OrderedArticleSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     articles = OrderedArticleSerializer(
         source='orderedarticle_set', read_only=True, many=True)
-    storageId = serializers.CharField(source='to_storage.id')
+    storageId = serializers.PrimaryKeyRelatedField(
+        source='to_storage', read_only=True)
     orderDate = serializers.CharField(source='order_date')
     estimatedDeliveryDate = serializers.CharField(
         source='estimated_delivery_date')
@@ -231,7 +212,7 @@ class OrderSerializer(serializers.ModelSerializer):
 class LocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Storage
-        fields = ('floor', 'building')
+        fields = ('building', 'floor')
 
 
 class ApiCompartmentSerializer(serializers.ModelSerializer):
@@ -249,6 +230,16 @@ class ApiCompartmentSerializer(serializers.ModelSerializer):
         model = Compartment
         fields = ('placement', 'storageId', 'qrCode', 'quantity',
                   'normalOrderQuantity', 'orderQuantityLevel', 'article')
+
+
+class StorageSerializer(serializers.ModelSerializer):
+    location = LocationSerializer(source='*')
+    compartments = ApiCompartmentSerializer(
+        source='compartment_set', many=True, read_only=True)
+
+    class Meta:
+        model = Storage
+        fields = ('id', 'location', 'compartments')
 
 
 class NearbyStoragesSerializer(serializers.ModelSerializer):
@@ -304,13 +295,3 @@ class ArticleCompartmentProximitySerializer():
 
     def is_valid(self):
         return self.valid
-
-
-class StorageSerializer(serializers.ModelSerializer):
-    orderedQuantity = serializers.CharField(source='quantity')
-    articleInfo = ApiArticleSerializer(
-        source='article', read_only=True, many=False)
-
-    class Meta:
-        model = Storage
-        fields = ('articleInfo', 'orderedQuantity', 'unit')
