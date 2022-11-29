@@ -666,6 +666,7 @@ class API_CreateOrder(TestCase):
 #         self.storage_management_service.update_compartment(current_compartment=current_compartment, new_article = self.article_second, 
 #         new_amount = 10, new_std_order_amount = 8, new_order_point= 0)
 
+
 #         self.assertEqual(current_compartment.article, self.article_second)
 #         self.assertNotEqual(current_compartment.article, self.article_first)
 #         self.assertEqual(current_compartment.amount, 10)
