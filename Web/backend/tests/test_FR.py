@@ -43,15 +43,20 @@ class SupportDifferentUsers(TestCase):
         # create 3 mock users and info about them
         self.user_service: UserService = UserService()
         cost_center1 = CostCenter.objects.create(id="123")
-        self.user1 = User.objects.create(
-            username="MIV-Employee", password="TDDC88")
+
+        # self.role1 = Group.objects.create(name = "1")
+        # self.role2 = Group.objects.create(name = "Medical Employee")
+        # self.role3 = Group.objects.create(name = "Inventory Employee")
+
+        self.user1 = User.objects.create(username="MIV-Employee", password="TDDC88", group = self.role1)
         self.user_info1 = UserInfo.objects.create(user=self.user1)
-        self.user2 = User.objects.create(
-            username="Medical Employee", password="TDDC88")
+
+        self.user2 = User.objects.create(username="Medical Employee", password="TDDC88")
         self.user_info2 = UserInfo.objects.create(user=self.user2)
-        self.user3 = User.objects.create(
-            username="Inventory Employee", password="TDDC88")
+
+        self.user3 = User.objects.create(username="Inventory Employee", password="TDDC88")
         self.user_info3 = UserInfo.objects.create(user=self.user3)
+
         self.user_info1.cost_center.add(cost_center1)
         self.user_info2.cost_center.add(cost_center1)
         self.user_info3.cost_center.add(cost_center1)
@@ -146,35 +151,37 @@ class CompartmentCreationTest(TestCase):
         self.assertEqual(self.compartment.storage, test_search_storage)
 
 
-# Testing FR4.3
+# Testing FR4.3 // This FR has been modified from when it was first created, 
+# it is not NOT allowed to have several compartments containing the same type of article
 class FR4_3_Test(TestCase):
     def setUp(self):
-        # create 2 storage spaces in the same storage units containing the same article
-        self.article_in_compartment = Article.objects.create(lio_id="1")
-        self.storage_in_compartment = Storage.objects.create(id="1")
         self.article_management_service: ArticleManagementService = ArticleManagementService()
         self.storage_management_service: StorageManagementService = StorageManagementService()
-        self.compartment = Compartment.objects.create(id="1", storage=self.storage_management_service.get_storage_by_id(
-            id="1"), article=self.article_management_service.get_article_by_lio_id(lio_id="1"))
-        self.compartment = Compartment.objects.create(id="2", storage=self.storage_management_service.get_storage_by_id(
-            id="1"), article=self.article_management_service.get_article_by_lio_id(lio_id="1"))
+        
+        # create 2 storage spaces in the same storage units containing the same article
+        self.article1 = Article.objects.create(lio_id="1")
+        self.article2 = Article.objects.create(lio_id="2")
+        self.article3 = Article.objects.create(lio_id="3")
 
-        # create a second article in third storage space but in same storage unit
-        self.article_in_compartment = Article.objects.create(lio_id="2")
-        self.compartment = Compartment.objects.create(id="3", storage=self.storage_management_service.get_storage_by_id(
-            id="1"), article=self.article_management_service.get_article_by_lio_id(lio_id="2"))
+        self.storage1 = Storage.objects.create(id="1")
+
+        self.compartment1 = Compartment.objects.create(id="1", storage=self.storage1, article=self.article1)
+        self.compartment2 = Compartment.objects.create(id="2", storage=self.storage2, article=self.article2)
+        self.compartment3 = Compartment.objects.create(id="3", storage=self.storage1, article=self.article3)
 
     def test_FR4_3(self):
 
-        # Test that we can find/have the same article in different storage spaces in the same unit
-        storage = self.storage_management_service.get_storage_by_id(id="1")
-        compartment1 = self.storage_management_service.get_compartment_by_qr(
-            "1")
-        compartment2 = self.storage_management_service.get_compartment_by_qr(
-            "2")
-        article1 = self.article_management_service.get_article_by_lio_id("1")
+        # Test that we **_cannot_** have the same article in different compartments in the same unit
+
+        test_storage = self.storage_management_service.get_storage_by_id(id="1")
+
+        test_compartment1 = self.storage_management_service.get_compartment_by_qr("1")
+        test_compartment2 = self.storage_management_service.get_compartment_by_qr("2")
+
+        test_article1 = self.article_management_service.get_article_by_lio_id("1")
+        
         self.assertEqual(compartment1.article, article1)
-        self.assertEqual(compartment2.article, article1)
+        self.assertEqual(compartment2.article, article2)
         self.assertEqual(compartment1.storage, storage)
         self.assertEqual(compartment2.storage, storage)
 
@@ -682,10 +689,10 @@ class ConnectArticleToCompartmentQrCode(TestCase):
         self.assertEqual(current_compartment2.standard_order_amount, 5)
         self.assertEqual(current_compartment2.order_point, 2)
 
-        self.storage_management_service.update_compartment(current_compartment=current_compartment2, new_article = self.article_second, 
+        self.storage_management_service.update_compartment(current_compartment=current_compartment2, new_article = self.article_first, 
         new_amount = 10, new_std_order_amount = 8, new_order_point= 0)
 
-        self.assertEqual(current_compartment2.article, self.article_second)
+        self.assertEqual(current_compartment2.article, self.article_first)
         self.assertEqual(current_compartment2.amount, 10)
         self.assertEqual(current_compartment2.standard_order_amount, 8)
         self.assertEqual(current_compartment2.order_point, 0)
