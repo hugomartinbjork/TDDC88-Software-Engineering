@@ -17,7 +17,7 @@ class Compartment(models.Model):
     placement = models.CharField(max_length=30, null=True)
 
     class Meta:
-        permissions = ()
+        permissions = (("view_compartment_perm", "Can view all compartments"),)
         unique_together = ['storage', 'article']
 
     def __str__(self):

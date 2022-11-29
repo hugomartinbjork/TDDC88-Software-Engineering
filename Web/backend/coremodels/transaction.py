@@ -29,7 +29,9 @@ class Transaction(models.Model):
                        ("get_transaction_by_id", "Can get a transaction by id"),
                        ("get_user_transactions", "Can get a users transactions"),
                        ("replenish", "Can replenish articles to compartment"),
-                       ("move_article", "Can move articles between compartments"),)
+                       ("move_article", "Can move articles between compartments"),
+                       ("add_transaction_perm", "Can create transactions"),
+                       ("change_transaction_perm", "Can create transactions"),)
 
     def __str__(self):
         return str(self.id)
