@@ -16,7 +16,8 @@ class Storage(models.Model):
         permissions = (("get_storage_cost", "Can see storage cost"),
                        ("get_storage_value", "Can see storage value"),
                        ("return_to_storage", "Can return article to storage"),
-                       ("add_input_unit", "Can ad an input unit to storage"),)
+                       ("add_input_unit", "Can ad an input unit to storage"),
+                       ("view_storage_perm", "Can see storage"),)
 
     def __str__(self):
         return self.name

@@ -8,3 +8,6 @@ class GroupInfo(models.Model):
 
     def __str__(self):
         return self.group_name
+
+    class Meta:
+        permissions = (("view_group_perm", "Can view all groups"),)
