@@ -32,10 +32,10 @@ with pd.ExcelFile('db_data/groupinfo.xlsx') as xls:
 #     df.to_sql(name='backend_article', con=engine,
 #               if_exists='append', index=False)
 
-with pd.ExcelFile('db_data/storages.xlsx') as xls:
-    df = pd.read_excel(xls)
-    df.to_sql(name='backend_storage', con=engine,
-              if_exists='append', index=False)
+# with pd.ExcelFile('db_data/storages.xlsx') as xls:
+#     df = pd.read_excel(xls)
+#     df.to_sql(name='backend_storage', con=engine,
+#               if_exists='append', index=False)
 
 with pd.ExcelFile('db_data/compartments.xlsx') as xls:
     df = pd.read_excel(xls)
