@@ -29,6 +29,7 @@ with pd.ExcelFile('db_data/groupinfo.xlsx') as xls:
 
 with pd.ExcelFile('db_data/testarticles.xlsx') as xls:
     df = pd.read_excel(xls)
+    df.ilic[6] = df.iloc[6].astype(bool)
     df.to_sql(name='backend_article', con=engine,
               if_exists='append', index=False)
 
