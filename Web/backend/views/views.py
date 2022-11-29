@@ -493,7 +493,7 @@ class SeeAllStorages(APIView):
             # return JsonResponse(list(all_storages), safe=False, status=200)
 
 
-class AddInputUnit(View):
+class AddInputUnit(APIView):
     '''Add input unit view.'''
 
     @si.inject
@@ -528,7 +528,7 @@ class AddInputUnit(View):
 # Creates a transaction
 
 
-class GetUserTransactions(View):
+class GetUserTransactions(APIView):
     '''Get user transactions view.'''
 
     @si.inject
@@ -558,7 +558,7 @@ class GetUserTransactions(View):
                             status=status.HTTP_404_NOT_FOUND)
 
 
-class ReturnUnit(View):
+class ReturnUnit(APIView):
     '''Return unit view.'''
 
     @si.inject
@@ -749,7 +749,7 @@ class TransactionsById(APIView):
             return JsonResponse(TransactionSerializer(transaction).data, safe=False, status=200)
 
 
-class GetStorageValue(View):
+class GetStorageValue(APIView):
     '''Get storage value view.'''
    # authentication_classes = (TokenAuthentication,)
 
@@ -808,7 +808,7 @@ class GetStorageCost(APIView):
 # the alternative articles in that storage
 
 
-class GetArticleAlternatives(View):
+class GetArticleAlternatives(APIView):
     '''Get alternative article view. Gets alternative articles for a
        given article. If only article id
        is entered, the method returns a list of alternative articles and all
@@ -858,7 +858,7 @@ class GetArticleAlternatives(View):
 
 
 # FR 8.1 start #
-class SearchForArticleInStorages(View):
+class SearchForArticleInStorages(APIView):
     '''Search for article in storages view.'''
 
     @si.inject
