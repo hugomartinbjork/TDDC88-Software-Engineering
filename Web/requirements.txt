@@ -55,3 +55,6 @@ validators==0.20.0
 whitenoise==6.2.0
 win32-setctime==1.1.0
 wrapt==1.14.1
+pandas
+openpyxl
+argon2
