@@ -21,10 +21,10 @@ with pd.ExcelFile('db_data/groupinfo.xlsx') as xls:
 #     df.to_sql(name='backend_costcenter', con=engine,
 #               if_exists='append', index=False)
 
-with pd.ExcelFile('db_data/supplier.xlsx') as xls:
-    df = pd.read_excel(xls)
-    df.to_sql(name='backend_supplier', con=engine,
-              if_exists='append', index=False)
+# with pd.ExcelFile('db_data/supplier.xlsx') as xls:
+#     df = pd.read_excel(xls)
+#     df.to_sql(name='backend_supplier', con=engine,
+#               if_exists='append', index=False)
 
 
 with pd.ExcelFile('db_data/testarticles.xlsx') as xls:
