@@ -7,7 +7,6 @@ from backend.services.storageManagementService import StorageManagementService
 from backend.services.orderServices import OrderService
 
 from backend.__init__ import serviceInjector as si
-from django.views import View
 from django.http import Http404, JsonResponse, HttpResponseBadRequest
 from django.core.exceptions import PermissionDenied
 
@@ -18,7 +17,6 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import AllowAny
 
 from knox.models import AuthToken
-from knox.auth import TokenAuthentication
 from rdxSolutionsBackendProject.settings import SALT
 
 from django.contrib.auth import authenticate, login
@@ -103,7 +101,7 @@ class Group(APIView):
     # TODO: I assume that there is supposed to be some type of return here.
 
 
-class Storage(View):
+class Storage(APIView):
     '''Storage view.'''
     # Dependencies are injected, I hope that we will be able to mock
     # (i.e. make stubs of) these for testing
