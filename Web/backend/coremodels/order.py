@@ -15,10 +15,9 @@ class Order(models.Model):
                                    choices=OrderOperator.choices, default=OrderOperator.ORDER_PLACED)
 
     class Meta:
-        permissions = (("get_order", "Can get orders from database"),)
-        
-        
-        
+        permissions = (("get_order", "Can get orders from database"),
+                       ("view_order_perm", "Can get all orders"),
+                       ("add_order_perm", "Can add orders"),)
 
     def __str__(self):
         return (str(self.id)
