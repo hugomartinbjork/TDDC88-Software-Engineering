@@ -57,4 +57,4 @@ win32-setctime==1.1.0
 wrapt==1.14.1
 pandas
 openpyxl
-argon2
+argon2-cffi
