@@ -28,13 +28,12 @@ class Article(models.Model):
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, null=True)
     supplier_article_nr = models.CharField(max_length=15, null=True)
 
-
     class Meta:
         permissions = (
-        ("post_article", "Can create an article"),
-        ("put_article", "Can edit an article"),
-        ("delete_article_new", "Can delete an article"),)
-
+            ("post_article", "Can create an article"),
+            ("put_article", "Can edit an article"),
+            ("delete_article_new", "Can delete an article"),
+            ("view_article_perm", "Can get article(s)"),)
 
     def __str__(self):
         return self.name

@@ -10,7 +10,7 @@ class CentralStorageAccess():
         '''Retrieve stock of and article with a specific id.'''
         try:
             central_storage_space = CentralStorageSpace.objects.filter(
-                id=article_id).first()
+                article_id=article_id).first()
             return central_storage_space.amount
         except Exception:
             return None
@@ -19,7 +19,7 @@ class CentralStorageAccess():
         '''Update central storage amount'''
         try:
             central_storage_space = CentralStorageSpace.objects.filter(
-                id=article_id).first()
+                article_id=article_id).first()
             central_storage_space.amount -= quantity
             central_storage_space.save()
             return central_storage_space.amount
