@@ -1,7 +1,4 @@
-from ..serializers import AlternativeNameSerializer, StorageSerializer, ApiCompartmentSerializer, UserInfoSerializer, ApiArticleSerializer
-from ..serializers import ArticleSerializer, OrderSerializer, OrderedArticleSerializer, ArticleCompartmentProximitySerializer
-from ..serializers import CompartmentSerializer, TransactionSerializer, CompartmentSerializer
-from ..serializers import GroupSerializer, NearbyStoragesSerializer
+from ..serializers import *
 
 from backend.services.articleManagementService import ArticleManagementService
 from backend.services.userService import UserService
@@ -455,7 +452,7 @@ class LoginWithBarcodeOrNfc(APIView):
         return JsonResponse(data, status=status.HTTP_200_OK)
 
 
-class SeeAllStorages(View):
+class SeeAllStorages(APIView):
     '''See all storages view.'''
 
     @si.inject
