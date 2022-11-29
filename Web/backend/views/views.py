@@ -619,7 +619,7 @@ class Transactions(APIView):
             return JsonResponse(serializer.data, safe=False, status=200)
 
     def post(self, request):
-        '''Description needed.'''
+        '''Create new Transaction.'''
         if not request.user.has_perm('backend.add_transaction_perm'):
             raise PermissionDenied
         compartment = self.storage_management_service.get_compartment_by_qr(
@@ -651,39 +651,67 @@ class Transactions(APIView):
             if operation == "replenish":
                 if not request.user.has_perm('backend.replenish'):
                     raise PermissionDenied
-                transaction = self.storage_management_service.add_to_storage(
-                    id=compartment.id, storage_id=storage, amount=amount,
-                    username=user.username, add_output_unit=add_output_unit,
-                    time_of_transaction=time_of_transaction)
-                return JsonResponse(TransactionSerializer(transaction).data,
-                                    status=200)
+                if (compartment.maximal_capacity - compartment.amount - amount) < 0 and add_output_unit:
+                    return Response({'error': 'Not enough space in the compartment.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+                elif (compartment.maximal_capacity - amount*compartment.article.output_per_input - compartment.amount) < 0 and add_output_unit == False:
+                    return Response({'error': 'Not enough space in the compartment.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    transaction = self.storage_management_service.add_to_storage(
+                        id=compartment.id, storage_id=storage, amount=amount,
+                        username=user.username, add_output_unit=add_output_unit,
+                        time_of_transaction=time_of_transaction)
+                    return JsonResponse(TransactionSerializer(transaction).data,
+                                        status=200)
             elif operation == "return":
-                transaction = (
-                    self.storage_management_service.add_to_return_storage(
-                        id=compartment.id, storage_id=storage, amount=amount,
-                        username=user.username,
-                        add_output_unit=add_output_unit,
-                        time_of_transaction=time_of_transaction))
-                return JsonResponse(TransactionSerializer(transaction).data,
-                                    status=200)
+                if (compartment.maximal_capacity - compartment.amount - amount) < 0 and add_output_unit:
+                    return Response({'error': 'Not enough space in the compartment.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+                elif (compartment.maximal_capacity - amount*compartment.article.output_per_input - compartment.amount) < 0 and add_output_unit == False:
+                    return Response({'error': 'Not enough space in the compartment.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    transaction = (
+                        self.storage_management_service.add_to_return_storage(
+                            id=compartment.id, storage_id=storage, amount=amount,
+                            username=user.username,
+                            add_output_unit=add_output_unit,
+                            time_of_transaction=time_of_transaction))
+                    return JsonResponse(TransactionSerializer(transaction).data,
+                                        status=200)
             elif operation == "takeout":
-                transaction = (
-                    self.storage_management_service.take_from_Compartment(
-                        id=compartment.id, storage_id=storage, amount=amount,
-                        username=user.username,
-                        add_output_unit=add_output_unit,
-                        time_of_transaction=time_of_transaction))
-                return JsonResponse(TransactionSerializer(transaction).data,
-                                    status=200)
+                if (compartment.amount - amount) < 0 and add_output_unit:
+                    return Response({'error': 'Not enough articles in the compartment.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+                elif (compartment.amount - amount*compartment.article.output_per_input) < 0 and add_output_unit == False:
+                    return Response({'error': 'Not enough articles in the compartment.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    transaction = (
+                        self.storage_management_service.take_from_Compartment(
+                            id=compartment.id, storage_id=storage, amount=amount,
+                            username=user.username,
+                            add_output_unit=add_output_unit,
+                            time_of_transaction=time_of_transaction))
+                    return JsonResponse(TransactionSerializer(transaction).data,
+                                        status=200)
             elif operation == "adjust":
-                transaction = (
-                    self.storage_management_service.set_compartment_amount(
-                        compartment_id=compartment.id, storage_id=storage, amount=amount,
-                        username=user.username,
-                        add_output_unit=add_output_unit,
-                        time_of_transaction=time_of_transaction))
-                return JsonResponse(TransactionSerializer(transaction).data,
-                                    status=200)
+                if (compartment.maximal_capacity - amount) < 0 and add_output_unit:
+                    return Response({'error': 'Not enough space in the compartment.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+                elif (compartment.maximal_capacity - amount*compartment.article.output_per_input) < 0 and add_output_unit == False:
+                    return Response({'error': 'Not enough space in the compartment.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    transaction = (
+                        self.storage_management_service.set_compartment_amount(
+                            compartment_id=compartment.id, storage_id=storage, amount=amount,
+                            username=user.username,
+                            add_output_unit=add_output_unit,
+                            time_of_transaction=time_of_transaction))
+                    return JsonResponse(TransactionSerializer(transaction).data,
+                                        status=200)
 
 
 class TransactionsById(APIView):
