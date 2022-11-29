@@ -214,7 +214,7 @@ class OrderedArticleSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     articles = OrderedArticleSerializer(
         source='orderedarticle_set', read_only=True, many=True)
-    storageId = serializers.CharField(source='to_storage')
+    storageId = serializers.CharField(source='to_storage.id')
     orderDate = serializers.CharField(source='order_date')
     estimatedDeliveryDate = serializers.CharField(
         source='estimated_delivery_date')
