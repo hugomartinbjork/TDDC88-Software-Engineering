@@ -53,7 +53,7 @@ class Article(APIView):
            # A user can get articles if they have permission
             if not request.user.has_perm('backend.view_article_perm'):
                 raise PermissionDenied
-
+            
             if article_id != None:
                 article = self.article_management_service.get_article_by_lio_id(
                     article_id)
@@ -63,6 +63,7 @@ class Article(APIView):
             elif name != None:
                 article = self.article_management_service.get_article_by_name(
                     name)
+            
             if article is None:
                 raise Http404("Could not find article")
             serialized_article = ApiArticleSerializer(article).data
@@ -1094,6 +1095,7 @@ class GetArticles(APIView):
                     query_param_name)
             else:
                 articles_in_chosen_storage = self.article_management_service.get_articles()
+                
 
             if query_param_storage_id is not None:
                 # Get a list of all compartments in chosen storage
