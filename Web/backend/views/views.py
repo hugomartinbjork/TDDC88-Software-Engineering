@@ -454,7 +454,6 @@ class SeeAllStorages(APIView):
             raise PermissionDenied
 
         all_storages = self.storage_management_service.get_all_storages()
-        print(all_storages)
         if all_storages is None:
             raise Http404("Could not find any storage units")
 
