@@ -24,7 +24,7 @@ class Article(models.Model):
     output = models.CharField(max_length=100,
                               choices=UnitOperator.choices, default=UnitOperator.MILLILITRES)
 
-    output_per_input = models.IntegerField(null=True, default=1)
+    output_per_input = models.IntegerField(null=False, default=1)
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, null=True)
     supplier_article_nr = models.CharField(max_length=15, null=True)
 
