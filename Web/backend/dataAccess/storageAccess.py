@@ -63,8 +63,7 @@ class StorageAccess():
     def get_all_storages(self) -> dict:
         '''Returns every storage unit.'''
         try:
-            all_storages = Storage.objects.all().values()
-            return all_storages
+            return Storage.objects.filter().prefetch_related('compartment_set')
         except Exception:
             return None
 

@@ -53,7 +53,7 @@ class Article(APIView):
            # A user can get articles if they have permission
             if not request.user.has_perm('backend.view_article_perm'):
                 raise PermissionDenied
-
+            
             if article_id != None:
                 article = self.article_management_service.get_article_by_lio_id(
                     article_id)
@@ -63,6 +63,7 @@ class Article(APIView):
             elif name != None:
                 article = self.article_management_service.get_article_by_name(
                     name)
+            
             if article is None:
                 raise Http404("Could not find article")
             serialized_article = ApiArticleSerializer(article).data
@@ -113,31 +114,18 @@ class Storage(APIView):
 
     def get(self, request, storage_id):
         '''Return storage unit using id.'''
-        if request.method == 'GET':
             # A user can see a storage if they have permission
-            if not request.user.has_perm('backend.view_storage_perm'):
-                raise PermissionDenied
-            storage = (
-                self.storage_management_service.get_storage_by_id(
-                    storage_id))
+        if not request.user.has_perm('backend.view_storage_perm'):
+            raise PermissionDenied
+        storage = (self.storage_management_service.get_storage_by_id(
+            storage_id))
+        if storage is None:
+            raise Http404("Could not find storage")
 
-            compartments = self.storage_management_service.get_compartment_by_storage_id(
-                storage_id)
-            data = {}
-            data['id'] = storage.id
-            data['location'] = {'building': storage.building,
-                                'floor': storage.floor}
-            serialized_compartments = []
-            for compartment in compartments:
-                serialized_compartments.append(
-                    ApiCompartmentSerializer(compartment).data)
-            data['compartments'] = serialized_compartments
-            if storage is None:
-                raise Http404("Could not find storage")
-            #serializer = StorageSerializer(storage)
-            # if serializer.is_valid:
-            return JsonResponse(data, status=200, safe=False)
-            return HttpResponseBadRequest
+        serializer = StorageSerializer(storage)
+        if serializer.is_valid:
+            return Response(serializer.data, status=200)
+        return Response('serialization failed', status=status.HTTP_400_BAD_REQUEST)
 
 
 class NearbyStorages(APIView):
@@ -462,33 +450,20 @@ class SeeAllStorages(APIView):
 
     def get(self, request):
         '''Returns all storages.'''
-        if request.method == 'GET':
-            # A user can see all storages if they have permission
-            if not request.user.has_perm('backend.view_storage_perm'):
-                raise PermissionDenied
-            all_storages = self.storage_management_service.get_all_storages()
-            if all_storages is None:
-                raise Http404("Could not find any storage units")
-            else:
-                serialized_storages = []
-                for storage in all_storages:
-                    data = {}
-                    data['id'] = storage["id"]
-                    data['location'] = {'building': storage["building"],
-                                        'floor': storage["floor"]}
-                    compartments = self.storage_management_service.get_compartment_by_storage_id(
-                        storage["id"])
-                    serialized_compartments = []
-                    for compartment in compartments:
-                        serialized_compartments.append(
-                            ApiCompartmentSerializer(compartment).data)
-                    data['compartments'] = serialized_compartments
-                    serialized_storages.append(data)
+        # A user can see all storages if they have permission
+        if not request.user.has_perm('backend.view_storage_perm'):
+            raise PermissionDenied
 
-                print(serialized_storages)
-                return JsonResponse(serialized_storages, status=200, safe=False)
+        all_storages = self.storage_management_service.get_all_storages()
+        if all_storages is None:
+            raise Http404("Could not find any storage units")
 
-            # return JsonResponse(list(all_storages), safe=False, status=200)
+        serializer = StorageSerializer(all_storages, many=True)
+        if serializer.is_valid:
+            return Response(serializer.data, status=200)
+        return Response('serialization failed', status=status.HTTP_400_BAD_REQUEST)
+
+        # return JsonResponse(list(all_storages), safe=False, status=200)
 
 
 class AddInputUnit(APIView):
@@ -648,10 +623,10 @@ class Transactions(APIView):
                     raise PermissionDenied
                 if (compartment.maximal_capacity - compartment.amount - amount) < 0 and add_output_unit:
                     return Response({'error': 'Not enough space in the compartment.'},
-                            status=status.HTTP_400_BAD_REQUEST)
+                                    status=status.HTTP_400_BAD_REQUEST)
                 elif (compartment.maximal_capacity - amount*compartment.article.output_per_input - compartment.amount) < 0 and add_output_unit == False:
                     return Response({'error': 'Not enough space in the compartment.'},
-                            status=status.HTTP_400_BAD_REQUEST)
+                                    status=status.HTTP_400_BAD_REQUEST)
                 else:
                     transaction = self.storage_management_service.add_to_storage(
                         id=compartment.id, storage_id=storage, amount=amount,
@@ -662,10 +637,10 @@ class Transactions(APIView):
             elif operation == "return":
                 if (compartment.maximal_capacity - compartment.amount - amount) < 0 and add_output_unit:
                     return Response({'error': 'Not enough space in the compartment.'},
-                            status=status.HTTP_400_BAD_REQUEST)
+                                    status=status.HTTP_400_BAD_REQUEST)
                 elif (compartment.maximal_capacity - amount*compartment.article.output_per_input - compartment.amount) < 0 and add_output_unit == False:
                     return Response({'error': 'Not enough space in the compartment.'},
-                            status=status.HTTP_400_BAD_REQUEST)
+                                    status=status.HTTP_400_BAD_REQUEST)
                 else:
                     transaction = (
                         self.storage_management_service.add_to_return_storage(
@@ -678,10 +653,10 @@ class Transactions(APIView):
             elif operation == "takeout":
                 if (compartment.amount - amount) < 0 and add_output_unit:
                     return Response({'error': 'Not enough articles in the compartment.'},
-                            status=status.HTTP_400_BAD_REQUEST)
+                                    status=status.HTTP_400_BAD_REQUEST)
                 elif (compartment.amount - amount*compartment.article.output_per_input) < 0 and add_output_unit == False:
                     return Response({'error': 'Not enough articles in the compartment.'},
-                            status=status.HTTP_400_BAD_REQUEST)
+                                    status=status.HTTP_400_BAD_REQUEST)
                 else:
                     transaction = (
                         self.storage_management_service.take_from_Compartment(
@@ -694,10 +669,10 @@ class Transactions(APIView):
             elif operation == "adjust":
                 if (compartment.maximal_capacity - amount) < 0 and add_output_unit:
                     return Response({'error': 'Not enough space in the compartment.'},
-                            status=status.HTTP_400_BAD_REQUEST)
+                                    status=status.HTTP_400_BAD_REQUEST)
                 elif (compartment.maximal_capacity - amount*compartment.article.output_per_input) < 0 and add_output_unit == False:
                     return Response({'error': 'Not enough space in the compartment.'},
-                            status=status.HTTP_400_BAD_REQUEST)
+                                    status=status.HTTP_400_BAD_REQUEST)
                 else:
                     transaction = (
                         self.storage_management_service.set_compartment_amount(
@@ -1013,7 +988,6 @@ class getEconomy(APIView):
 class MoveArticle(APIView):
     '''Move an amount of a specific article from one compartment to another one.
         This will create two transactions, one for the withdrawal and one for the deposit.'''
-   # authentication_classes = (TokenAuthentication,)
 
     @si.inject
     def __init__(self, _deps, *args):
@@ -1120,6 +1094,7 @@ class GetArticles(APIView):
                     query_param_name)
             else:
                 articles_in_chosen_storage = self.article_management_service.get_articles()
+                
 
             if query_param_storage_id is not None:
                 # Get a list of all compartments in chosen storage

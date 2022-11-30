@@ -7,7 +7,6 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAdminUser
 
-from django.core.exceptions import PermissionDenied
 from django.http import Http404
 
 
@@ -67,8 +66,6 @@ class UserId(APIView):
     def get(self, request, user_id):
         '''Get.'''
         if request.method == 'GET':
-            if not request.user.has_perm('backend.view_group'):
-                raise PermissionDenied
 
             user = self.userService.get_user_info(user_id)
             if user is None:
