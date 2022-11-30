@@ -295,3 +295,73 @@ class ArticleCompartmentProximitySerializer():
 
     def is_valid(self):
         return self.valid
+
+# Serializers used for input validation (based on views.py)
+# Users
+
+# Article
+class ValidateArticleSerializer(serializers.Serializer):
+    lioNr = serializers.CharField(required=True, max_length=15)
+    quantity = serializers.IntegerField(required=True, max_value=999999999)
+    unit = serializers.CharField(required=True, max_length=100)
+
+
+# Compartments
+class ValidateCompartmentPostSerializer(serializers.Serializer):
+    storageId = serializers.CharField(required=True, max_length=15)
+    placement = serializers.CharField(required=True, max_length=30)
+    qrCode = serializers.CharField(required=True, max_length=15)
+
+
+class ValidateCompartmentPutSerializer(serializers.Serializer):
+    placement = serializers.CharField(required=True, max_length=30)
+    storageId = serializers.CharField(required=True, max_length=15)
+
+    # Max value is chosen so that it doesn't crash the database
+    quantity = serializers.IntegerField(required=True, max_value=999999999)
+    normalOrderQuantity = serializers.IntegerField(required=True, max_value=999999999)
+    orderQuantityLevel = serializers.IntegerField(required=True, max_value=999999999)
+
+
+# Order (needs to be fixed)
+class ValidateOrderPostSerializer(serializers.Serializer):
+    storageId = serializers.CharField(required=True, max_length=15)
+    # Error that child can't be instantiated. Why?
+    #articles = serializers.ListField(child=ValidateArticleSerializer)
+
+
+# OrderId
+class ValidateOrderIdPutSerializer(serializers.Serializer):
+    estimatedDeliveryDate = serializers.CharField(required=True, max_length=20)
+    deliveryDate = serializers.CharField(required=True, max_length=20)
+    state = serializers.CharField(required=True, max_length=100)
+
+
+# Transactions
+class ValidateTransactionsPostSerializer(serializers.Serializer):
+    qrCode = serializers.CharField(required=True, max_length=15)
+    storageId = serializers.CharField(required=True, max_length=15)
+    quantity = serializers.IntegerField(required=True, max_value=999999999)
+    unit = serializers.CharField(required=True, max_length=100)
+    operation = serializers.CharField(required=True, max_length=100)
+
+
+# TransactionsById
+class ValidateTransactionsByIdPutSerializer(serializers.Serializer):
+    timeStamp = serializers.CharField(required=True, max_length=20)
+
+
+# ArticleToCompartmentByQRCode
+class ValidateArticleToCompartmentByQRCodePutSerializer(serializers.Serializer):
+    lioNr = serializers.CharField(required=True, max_length=15)
+    quantity = serializers.IntegerField(required=True, max_value=999999999)
+    normalOrderQuantity = serializers.IntegerField(required=True, max_value=999999999)
+    orderQuantityLevel = serializers.IntegerField(required=True, max_value=999999999)
+
+
+# MoveArticle
+class ValidateMoveArticlePostSerializer(serializers.Serializer):
+    fromCompartmentQrCode = serializers.CharField(required=True, max_length=15)
+    toCompartmentQrCode = serializers.CharField(required=True, max_length=15)
+    unit = serializers.CharField(required=True, max_length=100)
+    quantity = serializers.IntegerField(required=True, max_value=999999999)
