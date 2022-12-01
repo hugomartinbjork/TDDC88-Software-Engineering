@@ -22,8 +22,15 @@ from backend.coremodels.article import GroupInfo
 admin.site.register(CostCenter)
 
 
+class UserForm(forms.ModelForm):
+    barcode_id = ReadOnlyPasswordHashField()
+    nfc_id = ReadOnlyPasswordHashField()
+
 # Displays cost center as an option in the user class
+
+
 class UserInfoInLine(admin.StackedInline):
+    form = UserForm
     model = UserInfo
 
 
@@ -66,9 +73,6 @@ admin.site.register(Supplier)
 
 class CompartmentInline(admin.TabularInline):
     model = Compartment
-
-
-
 
 
 class AlternativeNameInLine(admin.TabularInline):
