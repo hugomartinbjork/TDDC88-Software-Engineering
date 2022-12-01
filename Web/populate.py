@@ -5,10 +5,11 @@ import psycopg2
 
 '''Engine with deployed postgreSQL-database'''
 engine = create_engine(
-"postgresql://admin:rdxsolutions@postgres-service:5432/postgresdb")
+    "postgresql://admin:rdxsolutions@postgres-service:5432/postgresdb")
 
-# '''Engine with local SQLite-database'''
-# engine = create_engine("sqlite:///mydatabase1")
+# my local postgres server for script testing
+# engine = create_engine(
+#    "postgresql://postgres:123456@localhost:5432/postgres")
 
 
 with pd.ExcelFile('db_data/groupinfo.xlsx') as xls:
@@ -42,27 +43,11 @@ with pd.ExcelFile('db_data/compartments.xlsx') as xls:
     df.to_sql(name='backend_compartment', con=engine,
               if_exists='append', index=False)
 
+with pd.ExcelFile('db_data/user.xlsx') as xls:
+    df = pd.read_excel(xls)
+    df.to_sql(name='auth_user', con=engine, if_exists='append', index=False)
+
 with pd.ExcelFile('db_data/transactions.xlsx') as xls:
     df = pd.read_excel(xls)
     df.to_sql(name='backend_transaction', con=engine,
               if_exists='append', index=False)
-
-
-
-# Verkar inte fungera jättebra med att läsa in user.
-
-# with pd.ExcelFile('scripts/user.xlsx') as xls:
-#     df = pd.read_excel(xls)
-#     df.to_sql(name='auth_user', con=engine, if_exists='append', index=False)
-
-# with pd.ExcelFile('user_info.xlsx') as xls:
-#     df = pd.read_excel(xls)
-#     df.to_sql(name='backend_userinfo', con=engine,
-#               if_exists='append', index=False)
-
-
-# with pd.ExcelFile('scripts/transaction.xlsx') as xls:
-#     df = pd.read_excel(xls)
-#     df.to_sql(name='backend_transaction', con=engine,
-#               if_exists='append', index=False)
-
