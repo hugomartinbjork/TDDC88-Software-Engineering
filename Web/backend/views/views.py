@@ -188,7 +188,7 @@ class Compartments(APIView):
         '''Post compartment.'''
         if request.method == 'POST':
             # A user can add a compartment if they have permission
-            if not request.user.has_perm('backend.add_compartment_perm'):
+            if not request.user.has_perm('backend.add_compartment'):
                 raise PermissionDenied
             try:
                 json_body = request.data
