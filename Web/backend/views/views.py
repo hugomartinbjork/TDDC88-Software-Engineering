@@ -186,6 +186,12 @@ class Compartments(APIView):
 
     def post(self, request):
         '''Post compartment.'''
+        # Input validation using a serializer
+        valid_serializer = ValidateCompartmentPostSerializer(data=request.data)
+        if not valid_serializer.is_valid():
+             return Response({'Input validation failed'}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+
         if request.method == 'POST':
             # A user can add a compartment if they have permission
             if not request.user.has_perm('backend.add_compartment_perm'):
@@ -197,11 +203,6 @@ class Compartments(APIView):
                 qr_code = json_body['qrCode']
             except:
                 return Response({'JSON payload not correctly formatted'}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Input validation using a serializer
-        valid_serializer = ValidateCompartmentPostSerializer(data=request.data)
-        if not valid_serializer.is_valid():
-             return Response({'Input validation failed, use correct formatting'}, status=status.HTTP_400_BAD_REQUEST)
 
         compartment = self.storage_management_service.create_compartment(
             storage_id, placement, qr_code)
@@ -216,11 +217,11 @@ class Compartments(APIView):
 
     def put(self, request, qr_code):
         '''Edit compartment by QR code.'''
-
         # Input validation using a serializer
         valid_serializer = ValidateCompartmentPutSerializer(data=request.data)
         if not valid_serializer.is_valid():
-             return Response({'Input validation failed, use correct formatting'}, status=status.HTTP_400_BAD_REQUEST)
+             return Response({'Input validation failed'}, 
+                            status=status.HTTP_400_BAD_REQUEST)
 
         current_compartment = (
             self.storage_management_service.get_compartment_by_qr(qr_code))
@@ -271,12 +272,13 @@ class Order(APIView):
 
     def post(self, request, format=None):
         '''Places an order'''
-        if request.method == 'POST':
-            # Input validation using a serializer
-            valid_serializer = ValidateCompartmentPutSerializer(data=request.data)
-            if not valid_serializer.is_valid():
-                return Response({'Input validation failed, use correct formatting'}, status=status.HTTP_400_BAD_REQUEST)
+        # Input validation using a serializer
+        valid_serializer = ValidateOrderPostSerializer(data=request.data)
+        if not valid_serializer.is_valid():
+            return Response({'Input validation failed'}, 
+                            status=status.HTTP_400_BAD_REQUEST)
 
+        if request.method == 'POST':
             # A user can add an order if they have permission for it
             if not request.user.has_perm('backend.add_order_perm'):
                 raise PermissionDenied
@@ -339,7 +341,8 @@ class OrderId(APIView):
         # Input validation using a serializer
         valid_serializer = ValidateOrderIdPutSerializer(data=request.data)
         if not valid_serializer.is_valid():
-            return Response({'Input validation failed, use correct formatting'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'Input validation failed'}, 
+                            status=status.HTTP_400_BAD_REQUEST)
 
         json_body = request.data
         try:
@@ -612,7 +615,8 @@ class Transactions(APIView):
         # Input validation using a serializer
         valid_serializer = ValidateTransactionsPostSerializer(data=request.data)
         if not valid_serializer.is_valid():
-            return Response({'Input validation failed, use correct formatting'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'Input validation failed'}, 
+                            status=status.HTTP_400_BAD_REQUEST)
 
         if not request.user.has_perm('backend.add_transaction_perm'):
             raise PermissionDenied
@@ -735,7 +739,8 @@ class TransactionsById(APIView):
         # Input validation using a serializer
         valid_serializer = ValidateTransactionsByIdPutSerializer(data=request.data)
         if not valid_serializer.is_valid():
-            return Response({'Input validation failed, use correct formatting'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'Input validation failed'}, 
+                            status=status.HTTP_400_BAD_REQUEST)
 
         if request.method == 'PUT':
             # Can only change a transaction if they have the permission
@@ -947,7 +952,8 @@ class ArticleToCompartmentByQRcode(APIView):
         # Input validation using a serializer
         valid_serializer = ValidateArticleToCompartmentByQRCodePutSerializer(data=request.data)
         if not valid_serializer.is_valid():
-            return Response({'Input validation failed, use correct formatting'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'Input validation failed'}, 
+                            status=status.HTTP_400_BAD_REQUEST)
 
         current_compartment = (
             self.storage_management_service.get_compartment_by_qr(
@@ -1033,7 +1039,8 @@ class MoveArticle(APIView):
         # Input validation using a serializer
         valid_serializer = ValidateMoveArticlePostSerializer(data=request.data)
         if not valid_serializer.is_valid():
-            return Response({'Input validation failed, use correct formatting'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'Input validation failed'}, 
+                            status=status.HTTP_400_BAD_REQUEST)
 
         data = request.data.get
         from_compartment_qr_code = data('fromCompartmentQrCode')

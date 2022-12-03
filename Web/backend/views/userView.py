@@ -2,6 +2,9 @@ from backend.__init__ import serviceInjector as si
 from backend.services.userService import UserService
 from ..serializers import UserInfoSerializer
 
+# Used for input validation
+from ..serializers import ValidateUserSerializer
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -34,6 +37,11 @@ class User(APIView):
 
     def post(self, request):
         '''posts a user to the database. Should Only accessable by Admins'''
+        # Input validation using a serializer
+        valid_serializer = ValidateUserSerializer(data=request.data)
+        if not valid_serializer.is_valid():
+            return Response({'Input validation failed'}, 
+                            status=status.HTTP_400_BAD_REQUEST)
 
         barcode_id = request.data.get('barcodeId', None)
         nfc_id = request.data.get('nfcId', None)
@@ -77,6 +85,12 @@ class UserId(APIView):
 
     def put(self, request, user_id):
         '''Edit user'''
+        # Input validation using a serializer
+        valid_serializer = ValidateUserSerializer(data=request.data)
+        if not valid_serializer.is_valid():
+            return Response({'Input validation failed'}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+
         user = self.userService.get_user_info(user_id)
         if user is None:
             return Response({'User does not exist'}, status=status.HTTP_400_BAD_REQUEST)

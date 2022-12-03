@@ -296,13 +296,30 @@ class ArticleCompartmentProximitySerializer():
     def is_valid(self):
         return self.valid
 
-# Serializers used for input validation (based on views.py)
-# Users
 
-# Article
+# Serializers used for input validation
+# Max value for integers is chosen so that it doesn't crash the database 
+max_integer_value = 999999999
+# userView.py
+# User post and UserId put
+class ValidateUserSerializer(serializers.Serializer):
+    barcodeId = serializers.CharField(required=True, max_length=255)
+    nfcId = serializers.CharField(required=True, max_length=256)
+    username = serializers.CharField(required=True, max_length=100)
+    password = serializers.CharField(required=True, max_length=100)
+    costCenters = serializers.ListField(child=serializers.CharField(max_length=15))
+    role = serializers.IntegerField(required=True, 
+                                    min_value=0,
+                                    max_value=max_integer_value)
+
+
+# views.py
+# Article (used in Order below)
 class ValidateArticleSerializer(serializers.Serializer):
     lioNr = serializers.CharField(required=True, max_length=15)
-    quantity = serializers.IntegerField(required=True, max_value=999999999)
+    quantity = serializers.IntegerField(required=True, 
+                                        min_value=0, 
+                                        max_value=max_integer_value)
     unit = serializers.CharField(required=True, max_length=100)
 
 
@@ -316,24 +333,28 @@ class ValidateCompartmentPostSerializer(serializers.Serializer):
 class ValidateCompartmentPutSerializer(serializers.Serializer):
     placement = serializers.CharField(required=True, max_length=30)
     storageId = serializers.CharField(required=True, max_length=15)
-
-    # Max value is chosen so that it doesn't crash the database
-    quantity = serializers.IntegerField(required=True, max_value=999999999)
-    normalOrderQuantity = serializers.IntegerField(required=True, max_value=999999999)
-    orderQuantityLevel = serializers.IntegerField(required=True, max_value=999999999)
+    quantity = serializers.IntegerField(required=True, 
+                                        min_value=0, 
+                                        max_value=max_integer_value)
+    normalOrderQuantity = serializers.IntegerField(required=True, 
+                                                   min_value=0, 
+                                                   max_value=max_integer_value)
+    orderQuantityLevel = serializers.IntegerField(required=True, 
+                                                  min_value=-1, 
+                                                  max_value=max_integer_value)
 
 
 # Order (needs to be fixed)
 class ValidateOrderPostSerializer(serializers.Serializer):
     storageId = serializers.CharField(required=True, max_length=15)
-    # Error that child can't be instantiated. Why?
-    #articles = serializers.ListField(child=ValidateArticleSerializer)
+    articles = ValidateArticleSerializer(many=True)
 
 
 # OrderId
 class ValidateOrderIdPutSerializer(serializers.Serializer):
-    estimatedDeliveryDate = serializers.CharField(required=True, max_length=20)
-    deliveryDate = serializers.CharField(required=True, max_length=20)
+    estimatedDeliveryDate = serializers.CharField(required=True, 
+                                                  max_length=30)
+    deliveryDate = serializers.CharField(required=True, max_length=30)
     state = serializers.CharField(required=True, max_length=100)
 
 
@@ -341,7 +362,9 @@ class ValidateOrderIdPutSerializer(serializers.Serializer):
 class ValidateTransactionsPostSerializer(serializers.Serializer):
     qrCode = serializers.CharField(required=True, max_length=15)
     storageId = serializers.CharField(required=True, max_length=15)
-    quantity = serializers.IntegerField(required=True, max_value=999999999)
+    quantity = serializers.IntegerField(required=True, 
+                                        min_value=0, 
+                                        max_value=max_integer_value)
     unit = serializers.CharField(required=True, max_length=100)
     operation = serializers.CharField(required=True, max_length=100)
 
@@ -354,14 +377,23 @@ class ValidateTransactionsByIdPutSerializer(serializers.Serializer):
 # ArticleToCompartmentByQRCode
 class ValidateArticleToCompartmentByQRCodePutSerializer(serializers.Serializer):
     lioNr = serializers.CharField(required=True, max_length=15)
-    quantity = serializers.IntegerField(required=True, max_value=999999999)
-    normalOrderQuantity = serializers.IntegerField(required=True, max_value=999999999)
-    orderQuantityLevel = serializers.IntegerField(required=True, max_value=999999999)
+    quantity = serializers.IntegerField(required=True, 
+                                        min_value=0, 
+                                        max_value=max_integer_value)
+    normalOrderQuantity = serializers.IntegerField(required=True, 
+                                                   min_value=0, 
+                                                   max_value=max_integer_value)
+    orderQuantityLevel = serializers.IntegerField(required=True, 
+                                                  min_value=-1, 
+                                                  max_value=max_integer_value)
 
 
 # MoveArticle
 class ValidateMoveArticlePostSerializer(serializers.Serializer):
-    fromCompartmentQrCode = serializers.CharField(required=True, max_length=15)
+    fromCompartmentQrCode = serializers.CharField(required=True, 
+                                                  max_length=15)
     toCompartmentQrCode = serializers.CharField(required=True, max_length=15)
     unit = serializers.CharField(required=True, max_length=100)
-    quantity = serializers.IntegerField(required=True, max_value=999999999)
+    quantity = serializers.IntegerField(required=True, 
+                                        min_value=0, 
+                                        max_value=max_integer_value)
