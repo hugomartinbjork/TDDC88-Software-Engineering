@@ -2,9 +2,8 @@
 ---
 stages:
   - lint
-  - build
-  - image
   - test
+  - build
   - deploy
 
 variables:
@@ -23,7 +22,8 @@ yamllint:
 
 test-backend:
    stage: test
-   needs: []
+   needs: 
+     - yamllint
    image: python:3.8.10
    script:
      - pip install -r Web/requirements.txt
@@ -33,11 +33,14 @@ test-backend:
 
 image-rdx-backend:
 
-  stage: image
+  stage: build
   image: docker.io/buildah/buildah
   only:
      - main
-  needs: []
+    # - dev
+  needs:
+     - test-backend
+     - yamllint
 
 
   script:
@@ -58,15 +61,16 @@ deploy-test-k8s-connection:
   needs: []
   only:
     - main
+    - dev
   script:
     - kubectl get all
 deploy-k8s-regcred:
   stage: deploy
   image: bitnami/kubectl
-  needs:
-    - deploy-test-k8s-connection
+  needs: []
   only:
     - main
+    - dev
   script:
     - kubectl get secrets | grep liu-gitlab-regcred && exit 0
     - kubectl create secret docker-registry liu-gitlab-regcred --docker-server=https://gitlab.liu.se:5000 --docker-username=k8s --docker-password=${REGISTRY_PASSWORD}
@@ -78,12 +82,14 @@ deploy-rdx-backend:
 
   only:
     - main
+  #  - dev
 
   needs:
     - deploy-test-k8s-connection
     - deploy-k8s-regcred
     - image-rdx-backend
     - yamllint
+    - test-backend
   script:
     - kubectl apply -f k8/backend.yaml
     - kubectl rollout restart deployment rdx-backend-app-deployment
@@ -94,6 +100,13 @@ deploy-postgres:
   image: bitnami/kubectl
   only:
   - main
+ # - dev
+  needs:
+    - deploy-test-k8s-connection
+    - deploy-k8s-regcred
+    - image-rdx-backend
+    - yamllint
+    - test-backend
   script:
    - kubectl get all
    - kubectl apply -f k8/postgres.yaml

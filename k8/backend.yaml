@@ -39,22 +39,20 @@ spec:
               protocol: TCP
           resources:
             limits:
-              cpu: 100m
-              memory: 150Mi
+              cpu: 1000m
+              memory: 420Mi
             requests:
-              cpu: 10m
-              memory: 42Mi
+              cpu: 1000m
+              memory: 420Mi
 
-          # readinessProbe:
-          #  httpGet:
-          #   port: web
-          #  path: "/api/ready"
-          # livenessProbe:
-          #  httpGet:
-            #  port: web
-             # path: "/api/health"
-          #  port: web
-          # path: "/api/health"
+      initContainers:
+        - name: wait-for-database
+          image: gitlab.liu.se:5000/tddc88-2022/c4/rdx-solutions-backend-project/rdx-backend:latest
+          envFrom:
+            - secretRef:
+                name: rdx-k8-web-prod-env
+          command: ['/opt/venv/bin/python3', 'manage.py', 'wait_for_database']
+
 ---
 apiVersion: v1
 kind: Service

@@ -16,5 +16,9 @@ class Compartment(models.Model):
     amount = models.PositiveSmallIntegerField(default=0)
     placement = models.CharField(max_length=30, null=True)
 
+    class Meta:
+        permissions = (("view_compartment_perm", "Can view all compartments"),)
+        unique_together = ['storage', 'article']
+
     def __str__(self):
         return str(self.storage) + " " + str(self.article)

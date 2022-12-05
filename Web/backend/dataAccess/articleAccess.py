@@ -1,4 +1,4 @@
-from backend.coremodels.article_has_supplier import ArticleHasSupplier
+
 from backend.coremodels.supplier import Supplier
 from ..coremodels.article import Article
 from ..__init__ import dataAccessInjector as di
@@ -39,5 +39,34 @@ class ArticleAccess():
             supplier_article_nr = ArticleHasSupplier.objects.get(
                                     article=article).supplier_article_nr
             return supplier_article_nr
+        except Exception:
+            return None
+
+    def get_article_by_name(self, name: str) -> Article:
+        '''Returns article based on name'''
+        try:
+            article = Article.objects.get(name=name)
+            return article
+        except:
+            return None
+
+    def get_articles_by_search_name(self, search_string: str) -> Article:
+        try:
+            articles = Article.objects.filter(name__contains=search_string)
+            return articles
+        except:
+            return None
+
+    def get_articles_by_search_lio(self, search_string: str) -> Article:
+        try:
+            articles = Article.objects.filter(lio_id__contains=search_string)
+            return articles
+        except:
+            return None
+    
+    def get_all_articles(self):
+        try:
+            all_articles = Article.objects.all()
+            return all_articles
         except Exception:
             return None

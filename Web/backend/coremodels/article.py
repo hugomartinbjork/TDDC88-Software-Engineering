@@ -3,6 +3,7 @@
 from django.db import models
 from backend.coremodels.group import GroupInfo
 from backend.operations.enumerator import UnitOperator
+from backend.coremodels.supplier import Supplier
 # from backend.coremodels.storageComponent import storageComponent
 
 
@@ -18,6 +19,21 @@ class Article(models.Model):
     article_group = models.ManyToManyField(GroupInfo)  # Look at database
     # schema and requirement
     alternative_articles = models.ManyToManyField('self', blank=True)
+    input = models.CharField(max_length=100,
+                             choices=UnitOperator.choices, default=UnitOperator.MILLILITRES)
+    output = models.CharField(max_length=100,
+                              choices=UnitOperator.choices, default=UnitOperator.MILLILITRES)
+
+    output_per_input = models.IntegerField(null=False, default=1)
+    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, null=True)
+    supplier_article_nr = models.CharField(max_length=15, null=True)
+
+    class Meta:
+        permissions = (
+            ("post_article", "Can create an article"),
+            ("put_article", "Can edit an article"),
+            ("delete_article_new", "Can delete an article"),
+            ("view_article_perm", "Can get article(s)"),)
 
     def __str__(self):
         return self.name
