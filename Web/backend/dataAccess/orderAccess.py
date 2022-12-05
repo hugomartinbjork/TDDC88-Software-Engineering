@@ -3,6 +3,7 @@ import string
 
 from backend.coremodels.article import Article
 from backend.coremodels.storage import Storage
+from ..dataAccess.centralStorageAccess import CentralStorageAccess
 from backend.coremodels.ordered_article import OrderedArticle
 from ..coremodels.order import Order
 from ..__init__ import dataAccessInjector as di
@@ -11,10 +12,28 @@ from ..__init__ import dataAccessInjector as di
 @di.register(name="OrderAccess")
 class OrderAccess():
     '''Order Access.'''
+
+    def get_orders(self) -> Order:
+        try:
+            return Order.objects.all()
+        except Exception:
+            return None
+
+    def delete_order(self, id, order_state):
+        '''Does work'''
+        try:
+            if order_state != 'delivered':
+                ordered_articles = OrderedArticle.objects.filter(order_id=id)
+                for ordered_article in ordered_articles:
+                    CentralStorageAccess.update_central_storage_quantity(article_id=ordered_article.article.lio_id, quantity= -ordered_article.quantity)
+            return Order.objects.filter(id=id).delete()
+        except Exception:
+            return None
+
     def get_order_by_id(self, id: int) -> Order:
         '''Get order by id.'''
         try:
-            order = Order.objects.get(id=id)
+            order = Order.objects.filter(id=id).first()
             return order
         except Exception:
             return None
@@ -26,6 +45,7 @@ class OrderAccess():
             to_storage=storage_id, of_article=article_id).first()
         return order
 
+    # Can probably be deleted.
     def get_ordered_article(self, order_id: int) -> Article:
         '''Retrieve article that has been ordered.'''
         try:
@@ -75,11 +95,25 @@ class OrderAccess():
 
     def create_ordered_article(lio_id, quantity, unit, order):
         '''Creates an ordered_article model'''
-        article = Article.objects.get(lio_id=lio_id)
         try:
+            article = Article.objects.get(lio_id=lio_id)
             ordered_article = OrderedArticle(
-                quantity=quantity, article=article, order=order, output_per_input=unit)
+                quantity=quantity, article=article, order=order, unit=unit)
             ordered_article.save()
             return ordered_article
+        except Exception:
+            return None
+
+    def get_ordered_articles(order_id):
+        try:
+            ordered_articles = OrderedArticle.objects.filter(
+                order_id=order_id)
+            return ordered_articles
+        except Exception:
+            return None
+
+    def get_all_ordered_articles():
+        try:
+            return OrderedArticle.objects.filter()
         except Exception:
             return None

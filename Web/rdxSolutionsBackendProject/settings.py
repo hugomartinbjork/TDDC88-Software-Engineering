@@ -13,6 +13,7 @@ import os
 import sys
 from pathlib import Path
 from datetime import timedelta
+from django.conf import settings
 from rest_framework.settings import api_settings
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -29,10 +30,13 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
 # always set to false when pushing to dev
 DEBUG = str(os.environ.get('DEBUG')) == "1"
+ALLOWED_HOSTS = ['tddc88-c14.kubernetes-public.it.liu.se', 'tddc88-c24.kubernetes-public.it.liu.se', 'rdx.kubernetes-public.it.liu.se', 'tddc88-c4.kubernetes-public.it.liu.se', 'https://rdx.kubernetes-public.it.liu.se',
+                 'https://tddc88-c24.kubernetes-public.it.liu.se', 'https://tddc88-c14.kubernetes-public.it.liu.se', 'http://localhost:8000/', 'http://localhost:3000/', '127.0.0.1', 'localhost', 'localhost:3000', 'localhost:8000']
 
-ALLOWED_HOSTS = ['*']
+CORS_ORIGIN_ALLOW_ALL = True
 
-CSRF_TRUSTED_ORIGINS=['https://tddc88-c24.kubernetes-public.it.liu.se', 'https://tddc88-c14.kubernetes-public.it.liu.se', 'http://localhost:8000/']
+CSRF_TRUSTED_ORIGINS = ['https://rdx.kubernetes-public.it.liu.se', 'https://tddc88-c24.kubernetes-public.it.liu.se',
+                        'https://tddc88-c14.kubernetes-public.it.liu.se', 'http://localhost:8000/', 'http://localhost:3000/']
 
 # Application definition
 
@@ -45,28 +49,46 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'rest_framework.authtoken',
-    'backend',
     'knox',
-
+    'backend',
+    'django_probes',
+    'corsheaders',
 ]
 
+SALT = 'k7*rsf2B*QFOc+!#nJZGPKs@6z02+h'
+
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'knox.auth.TokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication', # Front end can't handle sessionauth atm.
+        'knox.auth.TokenAuthentication'
+    ),
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated'
     ],
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
+    ],
+    'AUTHENTICATION_BACKENDS': [
+        'django.contrib.auth.backends.ModelBackend',
     ]
 }
 
+# PASSWORD_HASHERS = [
+#     'django.contrib.auth.hashers.Argon2PasswordHasher',
+#     'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+#     'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+#     'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+#     'django.contrib.auth.hashers.ScryptPasswordHasher',
+# ]
+
 REST_KNOX = {
-    'TOKEN_TTL': timedelta(minutes=600),
-    'USER_SERIALIZER': 'knox.serializers.UserSerializer',
+    'SECURE_HASH_ALGORITHM': 'cryptography.hazmat.primitives.hashes.SHA512',
+    'AUTH_TOKEN_CHARACTER_LENGTH': 64,
+    'TOKEN_TTL': timedelta(hours=10),
     'TOKEN_LIMIT_PER_USER': None,
     'AUTO_REFRESH': False,
-    'EXPIRY_DATETIME_FORMAT': api_settings.DATETIME_FORMAT,
+    'AUTH_HEADER_PREFIX': 'Bearer',
 }
 
 MIDDLEWARE = [
@@ -78,7 +100,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'rdxSolutionsBackendProject.urls'
@@ -116,11 +138,11 @@ DATABASES = {
 }
 
 if DEBUG == True or 'test' in sys.argv:
-        DATABASES['default'] = {
-            'ENGINE' : 'django.db.backends.sqlite3',
-            'NAME' : 'mydatabase'
-        }
- 
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'mydatabase'
+    }
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',

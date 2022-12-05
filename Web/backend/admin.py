@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django import forms
+from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
@@ -8,7 +10,6 @@ from backend.coremodels.centralStorageSpace import CentralStorageSpace
 from backend.coremodels.storage import Storage
 from backend.coremodels.cost_center import CostCenter
 from backend.coremodels.compartment import Compartment
-from backend.coremodels.article_has_supplier import ArticleHasSupplier
 from backend.coremodels.supplier import Supplier
 from backend.coremodels.transaction import Transaction
 from backend.coremodels.order import Order
@@ -22,6 +23,8 @@ admin.site.register(CostCenter)
 
 
 # Displays cost center as an option in the user class
+
+
 class UserInfoInLine(admin.StackedInline):
     model = UserInfo
 
@@ -59,7 +62,7 @@ admin.site.register(GroupInfo, GroupAdmin)
 
 admin.site.register(Supplier)
 
-# Displays which storage components that the articles are in, 
+# Displays which storage components that the articles are in,
 # the supplier that the article has and its alternative names
 
 
@@ -67,16 +70,12 @@ class CompartmentInline(admin.TabularInline):
     model = Compartment
 
 
-class ArticleHasSupplierInline(admin.TabularInline):
-    model = ArticleHasSupplier
-
-
 class AlternativeNameInLine(admin.TabularInline):
     model = AlternativeArticleName
 
 
 class ArticleAdmin(admin.ModelAdmin):
-    inlines = (CompartmentInline, ArticleHasSupplierInline,
+    inlines = (CompartmentInline,
                AlternativeNameInLine, )
 
 
