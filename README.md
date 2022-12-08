@@ -20,7 +20,7 @@ These instructions will get you a copy of the project up and running on your loc
 ## Installation and Setup:
 **1.Clone the Repository**
 ```sh
-https://gitlab.liu.se/tddc88-2022/c4/rdx-solutions-backend-project.git
+https://gitlab.liu.se/tddc88-2022/c4/rdx-solutions-backend-system.git
 ```
 **2.Navigate to the Project Folder**
 ```sh
